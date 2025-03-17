@@ -5,6 +5,7 @@ import os
 import datetime
 from shutil import copyfile
 
+from TLCS.rl_models.ppo_model import PPOModel
 from training_simulation import Simulation
 from generator import TrafficGenerator
 from memory import Memory
@@ -20,7 +21,6 @@ if __name__ == "__main__":
 
     # Choose the algorithm based on the configuration
     if config.get('algorithm', 'DQN') == 'PPO':
-        from ppo_model import PPOModel
 
         Model = PPOModel(
             input_dim=config['num_states'],

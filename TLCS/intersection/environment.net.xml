@@ -1,30 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 02/26/19 22:21:10 by Eclipse SUMO netconvert Version 1.0.1
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
 
-    <input>
-        <sumo-net-file value="tlcs2.net.xml"/>
-    </input>
-
-    <processing>
-        <offset.disable-normalization value="true"/>
-        <lefthand value="false"/>
-    </processing>
-
-    <junctions>
-        <no-turnarounds value="true"/>
-        <junctions.corner-detail value="5"/>
-        <junctions.limit-turn-speed value="5.5"/>
-        <rectangular-lane-cut value="false"/>
-    </junctions>
-
-    <pedestrian>
-        <walkingareas value="false"/>
-    </pedestrian>
-
-</configuration>
--->
 
 <net version="1.0" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
 
@@ -203,5 +179,11 @@
     <connection from=":TL_16" to="TL2E" fromLane="1" toLane="1" dir="s" state="M"/>
     <connection from=":TL_16" to="TL2E" fromLane="2" toLane="2" dir="s" state="M"/>
     <connection from=":TL_19" to="TL2N" fromLane="0" toLane="3" dir="l" state="M"/>
+
+    <!-- This key lets SUMO handle emergency vehicles automatically -->
+    <param key="emergencyHandling" value="1"/>
+
+    <!-- Optional: how quickly the emergency vehicle decelerates -->
+    <param key="emergencyDecel" value="7.5"/>
 
 </net>

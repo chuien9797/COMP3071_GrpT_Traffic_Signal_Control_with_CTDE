@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+<!-- generated on 2025-03-16 04:56:03 by Eclipse SUMO sumo Version 1.22.0
+-->
+
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
         <net-file value="environment.net.xml"/>
@@ -8,11 +11,16 @@
     </input>
 
     <time>
-      <begin value="0"/>
+        <begin value="0"/>
     </time>
 
     <processing>
         <time-to-teleport value="-1"/>
     </processing>
 
-</configuration>
+    <bluelight_device>
+        <device.bluelight.probability value="1.00"/>
+        <device.bluelight.deterministic value="true"/>
+    </bluelight_device>
+
+</sumoConfiguration>

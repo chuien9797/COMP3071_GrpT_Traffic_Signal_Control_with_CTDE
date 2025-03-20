@@ -1,11 +1,15 @@
 from __future__ import absolute_import
 from __future__ import print_function
 
+import sys
 import os
+# Append the parent directory so that 'TLCS' can be imported
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import datetime
 from shutil import copyfile
 
-from TLCS.rl_models.ppo_model import PPOModel
+from rl_models.ppo_model import PPOModel
 from training_simulation import Simulation
 from generator import TrafficGenerator
 from memory import Memory
@@ -18,6 +22,11 @@ if __name__ == "__main__":
     config = import_train_configuration(config_file='training_settings.ini')
     sumo_cmd = set_sumo(config['gui'], config['sumocfg_file_name'], config['max_steps'])
     path = set_train_path(config['models_path_name'])
+
+    import tensorflow as tf
+
+    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    print("Physical devices:", tf.config.list_physical_devices())
 
     # Choose the algorithm based on the configuration
     if config.get('algorithm', 'DQN') == 'PPO':

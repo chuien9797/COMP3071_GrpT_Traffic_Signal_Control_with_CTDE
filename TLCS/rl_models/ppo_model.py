@@ -4,13 +4,15 @@ import numpy as np
 
 
 class PPOModel:
-    def __init__(self, input_dim, output_dim, hidden_size=64, learning_rate=0.001, clip_ratio=0.2, update_epochs=10):
+    def __init__(self, input_dim, output_dim, hidden_size=64, learning_rate=0.001, clip_ratio=0.2, update_epochs=10,
+                 batch_size=32):
         self.input_dim = input_dim
         self.output_dim = output_dim
         self.hidden_size = hidden_size
         self.learning_rate = learning_rate
         self.clip_ratio = clip_ratio
         self.update_epochs = update_epochs
+        self._batch_size = batch_size  # Added batch_size attribute
 
         # Build the actor and critic networks
         self.actor, self.critic = self.build_actor_critic()
@@ -43,6 +45,14 @@ class PPOModel:
         action = np.random.choice(self.output_dim, p=probs)
         return action, probs[action]
 
+    def predict_one(self, state):
+        """
+        Returns the action probability distribution for a given state.
+        This allows compatibility with simulation code that uses np.argmax on the result.
+        """
+        state = state.reshape(1, -1)
+        return self.actor(state).numpy().flatten()
+
     def train(self, states, actions, advantages, returns, old_probs):
         """
         Update the actor and critic networks using the PPO clipped objective.
@@ -57,27 +67,20 @@ class PPOModel:
 
         for _ in range(self.update_epochs):
             with tf.GradientTape() as tape:
-                # Compute new action probabilities from the actor network
                 new_probs = self.actor(states)
-                # Create one-hot encoding for actions
                 action_masks = tf.one_hot(actions, self.output_dim)
                 selected_new_probs = tf.reduce_sum(new_probs * action_masks, axis=1)
-
-                # Calculate probability ratio (new / old)
                 ratio = selected_new_probs / (old_probs + 1e-10)
-
-                # Apply clipping to the probability ratio
                 clipped_ratio = tf.clip_by_value(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio)
-                # PPO actor loss (using the clipped surrogate objective)
                 actor_loss = -tf.reduce_mean(tf.minimum(ratio * advantages, clipped_ratio * advantages))
-
-                # Critic loss as mean squared error between returns and predicted state value
                 critic_loss = tf.reduce_mean(tf.square(returns - self.critic(states)))
-
-                # Total loss (actor loss plus a weighted critic loss)
                 total_loss = actor_loss + 0.5 * critic_loss
 
             grads = tape.gradient(total_loss, self.actor.trainable_variables + self.critic.trainable_variables)
             self.optimizer.apply_gradients(zip(grads, self.actor.trainable_variables + self.critic.trainable_variables))
 
         return total_loss.numpy()
+
+    @property
+    def batch_size(self):
+        return self._batch_size

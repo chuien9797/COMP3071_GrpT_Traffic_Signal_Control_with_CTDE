@@ -5,12 +5,12 @@ import os
 import datetime
 from shutil import copyfile
 
-from TLCS.rl_models.ppo_model import PPOModel
 from training_simulation import Simulation
 from generator import TrafficGenerator
 from memory import Memory
 from visualization import Visualization
 from utils import import_train_configuration, set_sumo, set_train_path
+from model import TrainModel
 
 if __name__ == "__main__":
 
@@ -19,21 +19,9 @@ if __name__ == "__main__":
     sumo_cmd = set_sumo(config['gui'], config['sumocfg_file_name'], config['max_steps'])
     path = set_train_path(config['models_path_name'])
 
-    # Choose the algorithm based on the configuration
-    if config.get('algorithm', 'DQN') == 'PPO':
+        
 
-        Model = PPOModel(
-            input_dim=config['num_states'],
-            output_dim=config['num_actions'],
-            hidden_size=config.getint('ppo', 'hidden_size'),
-            learning_rate=config.getfloat('ppo', 'learning_rate'),
-            clip_ratio=config.getfloat('ppo', 'clip_ratio'),
-            update_epochs=config.getint('ppo', 'update_epochs')
-        )
-    else:
-        from model import TrainModel
-
-        Model = TrainModel(
+    Model = TrainModel(
             config['num_layers'],
             config['width_layers'],
             config['batch_size'],

@@ -1,0 +1,43 @@
+<routes>
+    <!-- Define emergency vehicle type -->
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
+    <!-- Define standard vehicle type -->
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
+
+    
+    <route id="W_N1" edges="E13 -E11"/>
+    <route id="W_N2" edges="E13 E14 -E16"/>
+    
+    <route id="W_E" edges="E13 E14 E15"/>
+
+    <route id="W_S1" edges="E13 E12"/>
+    <route id="W_S2" edges="E13 E14 E17"/>
+    
+    <route id="N_W1" edges="E11 -E13"/>
+    <route id="N_W2" edges="E16 -E14 -E13"/>
+    
+    <route id="N_E1" edges="E11 E14 E15"/>
+    <route id="N_E2" edges="E16 E15"/>
+
+    <route id="N_S1" edges="-E12 -E11"/>
+    <route id="N_S2" edges="-E17 -E16"/>
+
+    <route id="E_W" edges="-E15 -E14 -E13"/>
+
+    <route id="E_N1" edges="-E15 -E14 -E11"/>
+    <route id="E_N2" edges="-E15 -E16"/>
+
+    <route id="E_S1" edges="-E15 E17"/>
+    <route id="E_S2" edges="-E15 -E14 E12"/>
+
+    <route id="S_N1" edges="-E12 -E11"/>
+    <route id="S_N2" edges="-E17 -E16"/>
+
+    <route id="S_E1" edges="-E17 E15"/>
+    <route id="S_E2" edges="-E12 E14 E15"/>
+
+    <route id="S_W1" edges="-E12 -E13"/>
+    <route id="S_W2" edges="-E17 -E14 -E13"/>
+    
+
+</routes>

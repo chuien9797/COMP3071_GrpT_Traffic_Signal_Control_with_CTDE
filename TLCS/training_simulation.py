@@ -131,7 +131,7 @@ class Simulation:
                 total_waiting_time += wait_time
                 # If this vehicle is an emergency vehicle, add a heavy penalty.
                 if traci.vehicle.getTypeID(car_id) == "emergency":
-                    emergency_penalty += 100  # fixed penalty per emergency vehicle per step; adjust as needed
+                    emergency_penalty+= wait_time * 0.2  # fixed penalty per emergency vehicle per step; adjust as needed
         return total_waiting_time, emergency_penalty
 
     def _choose_action(self, state, epsilon):

@@ -6,13 +6,15 @@ import os
 import datetime
 from shutil import copyfile
 
+from TLCS.rl_models.ppo_model import PPOModel, PPOSimulation
+
 # Append the parent directory so that 'TLCS' can be imported
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import import_train_configuration, set_sumo, set_train_path
 
 # Import PPO classes from our new merged file
-from ppo_training_loop import PPOModel, PPOSimulation
+
 # If DQN is used, keep the old simulation (and memory) imports:
 # from model import TrainModel
 # from training_simulation import Simulation
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     print("Physical devices:", tf.config.list_physical_devices())
 
     # Choose the algorithm based on the configuration
-    algorithm = config.get('algorithm', 'PPO')
+    algorithm = config.get('algorithm', 'DQN')
 
     if algorithm == 'PPO':
         model = PPOModel(

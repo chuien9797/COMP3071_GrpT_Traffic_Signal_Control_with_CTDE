@@ -14,7 +14,6 @@ PHASE_EW_YELLOW = 5
 PHASE_EWL_GREEN = 6  # action 3 code 11
 PHASE_EWL_YELLOW = 7
 
-
 class Simulation:
     def __init__(self, Model, Memory, TrafficGen, sumo_cmd, gamma, max_steps, green_duration, yellow_duration, num_states, num_actions, training_epochs):
         self._Model = Model
@@ -32,10 +31,13 @@ class Simulation:
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
         self._training_epochs = training_epochs
+        # New: list to log Q-values when emergency flags are active
+        self._emergency_q_logs = []
 
     def run(self, episode, epsilon):
         """
-        Runs an episode of simulation, then starts a training session
+        Runs an episode of simulation, then starts a training session.
+        Also logs Q-values when emergency flags are active.
         """
         start_time = timeit.default_timer()
 
@@ -62,6 +64,12 @@ class Simulation:
 
             # get current state of the intersection (including emergency flags)
             current_state = self._get_state()
+
+            # Log Q-values if emergency flag is active (if any of the last 4 entries is 1)
+            if np.sum(current_state[-4:]) > 0:
+                q_values = self._Model.predict_one(current_state)
+                print("Emergency state detected. Q-values:", q_values)
+                self._emergency_q_logs.append(q_values)
 
             # calculate reward of previous action: (change in cumulative waiting time between actions)
             current_total_wait = self._collect_waiting_times()
@@ -102,6 +110,11 @@ class Simulation:
         for _ in range(self._training_epochs):
             self._replay()
         training_time = round(timeit.default_timer() - start_time, 1)
+
+        # Log average Q-values for emergency states for analysis
+        if len(self._emergency_q_logs) > 0:
+            avg_emergency_q = np.mean(np.array(self._emergency_q_logs), axis=0)
+            print("Average Q-values for emergency states:", avg_emergency_q)
 
         return simulation_time, training_time
 

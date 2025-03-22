@@ -1,3 +1,4 @@
+# ============================ ppo_training_loop.py ============================
 import timeit
 import time
 import numpy as np
@@ -70,8 +71,7 @@ class PPOModel:
     def batch_size(self):
         return self._batch_size
 
-
-# ================= Environment Utility Functions =================
+# ============ Shared Environment Utility Functions ============
 def get_state(num_states):
     state = np.zeros(num_states)
     for car in traci.vehicle.getIDList():
@@ -91,21 +91,24 @@ def get_state(num_states):
                 state[idx] = 1
     return state
 
+
 def set_green_phase(action):
     phase = {0:0, 1:2, 2:4, 3:6}.get(action, 0)
     traci.trafficlight.setPhase("TL", phase)
 
-def compute_reward(old_wait, new_wait, penalty=0):
-    return (old_wait - new_wait) - penalty
+
+def compute_reward(old_wait, new_wait, queue_len, switch, emergency):
+    return (old_wait - new_wait) + 0.5*(old_wait - new_wait - queue_len) - 0.01*queue_len - 0.1*switch - 5*emergency
+
 
 def get_total_wait():
-    return sum(traci.vehicle.getAccumulatedWaitingTime(v)
-               for v in traci.vehicle.getIDList()
+    return sum(traci.vehicle.getAccumulatedWaitingTime(v) for v in traci.vehicle.getIDList()
                if traci.vehicle.getRoadID(v) in ["E2TL","N2TL","W2TL","S2TL"])
-
 
 # ================= PPO Simulation Loop =================
 class PPOSimulation:
+    print("LOADING PPOSimulation from:", __file__)
+
     def __init__(self, model, traffic_gen, sumo_cmd, gamma, max_steps, green_duration, yellow_duration, num_states, num_actions, training_epochs):
         self.model = model
         self.traffic_gen = traffic_gen
@@ -128,23 +131,27 @@ class PPOSimulation:
         ep_reward, steps = 0, 0
         traj_states, traj_actions, traj_rewards = [], [], []
         old_wait = get_total_wait()
+        prev_action = None
 
         while steps < self.max_steps:
             action, _ = self.model.select_action(state)
+            switch = 1 if prev_action is not None and action != prev_action else 0
             set_green_phase(action)
             for _ in range(self.green_duration):
                 traci.simulationStep()
                 steps += 1
             next_state = get_state(self.num_states)
             new_wait = get_total_wait()
-            reward = compute_reward(old_wait, new_wait)
+            queue_len = sum(traci.edge.getLastStepHaltingNumber(edge) for edge in ["N2TL","S2TL","E2TL","W2TL"] )
+            emergency = sum(1 for v in traci.vehicle.getIDList() if traci.vehicle.getTypeID(v)=="emergency")
+            reward = compute_reward(old_wait, new_wait, queue_len, switch, emergency)
             ep_reward += reward
 
             traj_states.append(state)
             traj_actions.append(action)
             traj_rewards.append(reward)
 
-            state, old_wait = next_state, new_wait
+            state, old_wait, prev_action = next_state, new_wait, action
 
         traci.close()
         sim_time = round(timeit.default_timer() - sim_start, 1)
@@ -163,10 +170,10 @@ class PPOSimulation:
     def compute_returns(self, rewards):
         returns, G = [], 0
         for r in reversed(rewards):
-            G = r + self.gamma * G
+            G = r + self.gamma*G
             returns.insert(0, G)
         return np.array(returns)
 
     def compute_advantages(self, returns, states):
-        vals = np.squeeze(self.model.critic.predict(np.array(states)))
+        vals = np.squeeze(self.model.critic.predict(np.array(states), verbose=0))
         return returns - vals

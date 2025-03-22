@@ -35,16 +35,18 @@ if __name__ == "__main__":
     algorithm = config.get('algorithm', 'PPO')
 
     if algorithm == 'PPO':
-        ppo_cfg = config
+        # Create the PPO model using PPO-specific parameters from the config
         model = PPOModel(
             input_dim=int(config['num_states']),
             output_dim=int(config['num_actions']),
-            hidden_size=ppo_cfg['ppo_hidden_size'],
-            learning_rate=ppo_cfg['ppo_learning_rate'],
-            clip_ratio=ppo_cfg['ppo_clip_ratio'],
-            update_epochs=ppo_cfg['ppo_update_epochs']
+            hidden_size=config['ppo_hidden_size'],
+            learning_rate=config['ppo_learning_rate'],
+            clip_ratio=config['ppo_clip_ratio'],
+            update_epochs=config['ppo_update_epochs']
         )
+        # Create the TrafficGenerator instance
         traffic_gen = TrafficGenerator(int(config['max_steps']), int(config['n_cars_generated']))
+        # Instantiate the PPO simulation using our new simulation loop (with separate update)
         Simulation = PPOSimulation(
             model=model,
             traffic_gen=traffic_gen,
@@ -55,7 +57,7 @@ if __name__ == "__main__":
             yellow_duration=int(config['yellow_duration']),
             num_states=int(config['num_states']),
             num_actions=int(config['num_actions']),
-            training_epochs=ppo_cfg['ppo_training_epochs']
+            training_epochs=config['ppo_training_epochs']
         )
 
     elif algorithm == 'DQN':
@@ -98,8 +100,10 @@ if __name__ == "__main__":
     if algorithm == 'PPO':
         for episode in range(total_episodes):
             print(f"----- Episode {episode + 1} of {total_episodes}")
-            states, actions, rewards, reward_sum, sim_time = Simulation.run_episode(episode)
-            train_time = Simulation.update(states, actions, rewards)
+            # run_episode returns: (trajectory_states, trajectory_actions, trajectory_rewards, episode_reward, sim_time)
+            traj_states, traj_actions, traj_rewards, reward_sum, sim_time = Simulation.run_episode(episode)
+            # update() performs the policy update and returns training time
+            train_time = Simulation.update(traj_states, traj_actions, traj_rewards)
             print(f"Reward: {reward_sum} | Simulation time: {sim_time}s | Training time: {train_time}s")
 
     elif algorithm == 'DQN':

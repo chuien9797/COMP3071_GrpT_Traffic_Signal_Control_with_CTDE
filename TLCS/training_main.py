@@ -35,28 +35,25 @@ if __name__ == "__main__":
     algorithm = config.get('algorithm', 'PPO')
 
     if algorithm == 'PPO':
-        # Create the PPO model using PPO-specific parameters from the config
         model = PPOModel(
-            input_dim=int(config['num_states']),
-            output_dim=int(config['num_actions']),
+            input_dim=config['num_states'],
+            output_dim=config['num_actions'],
             hidden_size=config['ppo_hidden_size'],
             learning_rate=config['ppo_learning_rate'],
             clip_ratio=config['ppo_clip_ratio'],
             update_epochs=config['ppo_update_epochs']
         )
-        # Create the TrafficGenerator instance
-        traffic_gen = TrafficGenerator(int(config['max_steps']), int(config['n_cars_generated']))
-        # Instantiate the PPO simulation using our new simulation loop (with separate update)
+        traffic_gen = TrafficGenerator(config['max_steps'], config['n_cars_generated'])
         Simulation = PPOSimulation(
             model=model,
             traffic_gen=traffic_gen,
             sumo_cmd=sumo_cmd,
-            gamma=float(config['gamma']),
-            max_steps=int(config['max_steps']),
-            green_duration=int(config['green_duration']),
-            yellow_duration=int(config['yellow_duration']),
-            num_states=int(config['num_states']),
-            num_actions=int(config['num_actions']),
+            gamma=config['gamma'],
+            max_steps=config['max_steps'],
+            green_duration=config['green_duration'],
+            yellow_duration=config['yellow_duration'],
+            num_states=config['num_states'],
+            num_actions=config['num_actions'],
             training_epochs=config['ppo_training_epochs']
         )
 
@@ -98,13 +95,11 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now()
 
     if algorithm == 'PPO':
-        for episode in range(total_episodes):
-            print(f"----- Episode {episode + 1} of {total_episodes}")
-            # run_episode returns: (trajectory_states, trajectory_actions, trajectory_rewards, episode_reward, sim_time)
-            traj_states, traj_actions, traj_rewards, reward_sum, sim_time = Simulation.run_episode(episode)
-            # update() performs the policy update and returns training time
-            train_time = Simulation.update(traj_states, traj_actions, traj_rewards)
-            print(f"Reward: {reward_sum} | Simulation time: {sim_time}s | Training time: {train_time}s")
+        for ep in range(total_episodes):
+            print(f"----- Episode {ep + 1} of {total_episodes}")
+            states, actions, rewards, reward_sum, sim_time = Simulation.run_episode(ep)
+            train_time = Simulation.update(states, actions, rewards)
+            print(f"Reward: {reward_sum} | Sim time: {sim_time}s | Train time: {train_time}s")
 
     elif algorithm == 'DQN':
         episode = 0
@@ -121,7 +116,7 @@ if __name__ == "__main__":
     print("----- Session info saved at:", path)
 
     # Save the trained model and configuration for future reference
-    Model.save_model(path)
+    model.save_model(path)
     copyfile(src="training_settings.ini", dst=os.path.join(path, "training_settings.ini"))
 
     # Visualization: For PPO, visualize episode rewards; for DQN, use existing stats.

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-03-20 11:55:31 by Eclipse SUMO sumo Version 1.22.0
+<!-- generated on 2025-03-18 03:12:36 by Eclipse SUMO sumo Version 1.22.0
 -->
 
 <sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
@@ -18,9 +18,5 @@
         <time-to-teleport value="-1"/>
     </processing>
 
-    <bluelight_device>
-        <device.bluelight.probability value="1.00"/>
-        <device.bluelight.deterministic value="true"/>
-    </bluelight_device>
 
 </sumoConfiguration>

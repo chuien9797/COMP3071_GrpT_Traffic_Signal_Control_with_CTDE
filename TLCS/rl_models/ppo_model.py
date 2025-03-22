@@ -164,4 +164,4 @@ def get_total_wait():
                if traci.vehicle.getRoadID(v) in ["E2TL","N2TL","W2TL","S2TL"])
 
 def get_queue_length():
-    return sum(traci.edge.getLastStepHaltingNumber(edge) for edge in ["N2TL","S2TL","E2TL","W2TL"])
+    return sum(traci.edge.getLastStepHaltingNumber(edge) for edge in ["N2TL","S2TL","E2TL","W2TL"]) 

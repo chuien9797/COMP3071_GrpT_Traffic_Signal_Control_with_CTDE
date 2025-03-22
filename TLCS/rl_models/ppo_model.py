@@ -162,3 +162,6 @@ def compute_reward(old_wait, new_wait, queue_len, switch, emergency):
 def get_total_wait():
     return sum(traci.vehicle.getAccumulatedWaitingTime(v) for v in traci.vehicle.getIDList()
                if traci.vehicle.getRoadID(v) in ["E2TL","N2TL","W2TL","S2TL"])
+
+def get_queue_length():
+    return sum(traci.edge.getLastStepHaltingNumber(edge) for edge in ["N2TL","S2TL","E2TL","W2TL"])

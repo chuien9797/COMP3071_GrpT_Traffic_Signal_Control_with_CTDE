@@ -14,6 +14,8 @@ PHASE_EW_YELLOW = 5
 PHASE_EWL_GREEN = 6  # action 3 code 11
 PHASE_EWL_YELLOW = 7
 
+from emergency_handler import check_emergency
+
 class Simulation:
     def __init__(self, Model, Memory, TrafficGen, sumo_cmd, gamma, max_steps, green_duration, yellow_duration, num_states, num_actions, training_epochs):
         self._Model = Model
@@ -41,12 +43,11 @@ class Simulation:
         """
         start_time = timeit.default_timer()
 
-        # first, generate the route file for this simulation and set up sumo
+        # route file for this simulation and set up sumo
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
         print("Simulating...")
 
-        # inits
         self._step = 0
         self._waiting_times = {}
         self._sum_neg_reward = 0
@@ -58,8 +59,8 @@ class Simulation:
 
         while self._step < self._max_steps:
 
-            # Check for emergency vehicles and handle them if present
-            if self._check_emergency():
+            # Check for emergency vehicles using the refactored function
+            if check_emergency(self):
                 continue
 
             # get current state of the intersection (including emergency flags)
@@ -317,38 +318,6 @@ class Simulation:
         self._cumulative_wait_store.append(self._sum_waiting_time)
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)
 
-    def _check_emergency(self):
-        """
-        Check if any emergency vehicle is present in the incoming lanes and handle them with priority
-        """
-        for veh in traci.vehicle.getIDList():
-            if traci.vehicle.getTypeID(veh) == "emergency":
-                lane_id = traci.vehicle.getLaneID(veh)
-                if lane_id in ["E2TL", "N2TL", "W2TL", "S2TL"]:
-                    print("Emergency vehicle detected:", veh)
-                    self._handle_emergency_vehicle(veh)
-                    return True
-        return False
-
-    def _handle_emergency_vehicle(self, veh_id):
-        """
-        Handle the emergency vehicle by setting the traffic light phase to allow its passage
-        """
-        route_id = traci.vehicle.getRouteID(veh_id)
-        straight_routes = ["N_S", "S_N", "E_W", "W_E"]
-        if route_id in straight_routes:
-            if route_id[0] in ['N', 'S']:
-                emergency_action = 0  # NS_GREEN
-            else:
-                emergency_action = 2  # EW_GREEN
-        else:
-            if route_id[0] in ['N', 'S']:
-                emergency_action = 1  # NSL_GREEN
-            else:
-                emergency_action = 3  # EWL_GREEN
-        print("Setting emergency phase:", emergency_action, "for vehicle:", veh_id)
-        self._set_green_phase(emergency_action)
-        self._simulate(self._green_duration)
 
     @property
     def reward_store(self):

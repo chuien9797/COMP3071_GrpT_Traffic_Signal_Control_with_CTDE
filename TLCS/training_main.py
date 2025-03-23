@@ -133,3 +133,4 @@ if __name__ == "__main__":
                                xlabel="Episode", ylabel="Cumulative delay (s)")
         viz.save_data_and_plot(data=Simulation.avg_queue_length_store, filename="queue",
                                xlabel="Episode", ylabel="Average queue length (vehicles)")
+

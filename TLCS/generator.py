@@ -131,7 +131,11 @@ class TrafficGenerator:
         num_emergency = 3
         emergency_departures = np.random.uniform(0, self._max_steps, num_emergency)
         emergency_departures = np.rint(np.sort(emergency_departures)).astype(int)
-        routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]
+        # Use a different routes_list for T_intersection to only include defined routes.
+        if self.intersection_type == "T_intersection":
+            routes_list = ["W_E", "E_W", "N_E", "N_W", "E_N", "W_N"]
+        else:
+            routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]
         for i, depart_time in enumerate(emergency_departures):
             chosen_route = np.random.choice(routes_list)
             entry = '    <vehicle id="emergency_%i" type="emergency" route="%s" depart="%s" departLane="random" departSpeed="10" />' % (i, chosen_route, depart_time)

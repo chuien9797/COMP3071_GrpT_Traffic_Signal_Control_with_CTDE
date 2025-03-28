@@ -34,7 +34,7 @@ if __name__ == "__main__":
     print("Physical devices:", tf.config.list_physical_devices())
 
     # Choose the algorithm based on the configuration
-    algorithm = config.get('algorithm', 'DQN')
+    algorithm = config.get('algorithm', 'PPO')
 
     if algorithm == 'PPO':
         model = PPOModel(

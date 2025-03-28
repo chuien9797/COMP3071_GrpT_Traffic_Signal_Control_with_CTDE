@@ -6,7 +6,6 @@ import tensorflow as tf
 from tensorflow.keras import layers, models, optimizers
 from torch.utils.tensorboard import SummaryWriter
 
-# ================= PPO Model Definition =================
 class PPOModel:
     def __init__(self, input_dim, output_dim, hidden_size=64, learning_rate=3e-4,
                  clip_ratio=0.2, update_epochs=10, batch_size=32, entropy_coef=0.01):
@@ -60,7 +59,7 @@ class PPOModel:
 
         return total_loss
 
-# ================= PPO Simulation Loop =================
+
 class PPOSimulation:
     def __init__(self, model, traffic_gen, sumo_cmd, gamma, max_steps,
                  green_duration, yellow_duration, num_states, num_actions, training_epochs):

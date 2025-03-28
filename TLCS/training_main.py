@@ -56,7 +56,8 @@ if __name__ == "__main__":
             yellow_duration=config['yellow_duration'],
             num_states=config['num_states'],
             num_actions=config['num_actions'],
-            training_epochs=config['ppo_training_epochs']
+            training_epochs=config['ppo_training_epochs'],
+            intersection_type=config.get('intersection_type', 'cross')
         )
 
     elif algorithm == 'DQN':
@@ -88,7 +89,8 @@ if __name__ == "__main__":
             int(config['yellow_duration']),
             int(config['num_states']),
             int(config['num_actions']),
-            int(config['training_epochs'])
+            int(config['training_epochs']),
+            intersection_type=config.get('intersection_type', 'cross')  # NEW parameter
         )
     else:
         raise ValueError("Unsupported algorithm: {}. Please choose either 'PPO' or 'DQN'.".format(algorithm))

@@ -3,7 +3,7 @@ import math
 import os
 
 class TrafficGenerator:
-    def __init__(self, max_steps, n_cars_generated, intersection_type="cross"):
+    def __init__(self, max_steps, n_cars_generated, intersection_type="T_intersection"):
         self._n_cars_generated = n_cars_generated  # number of standard cars per episode
         self._max_steps = max_steps
         self.intersection_type = intersection_type
@@ -131,7 +131,7 @@ class TrafficGenerator:
         num_emergency = 3
         emergency_departures = np.random.uniform(0, self._max_steps, num_emergency)
         emergency_departures = np.rint(np.sort(emergency_departures)).astype(int)
-        routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "E_S", "S_W", "S_N", "S_E"]
+        routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]
         for i, depart_time in enumerate(emergency_departures):
             chosen_route = np.random.choice(routes_list)
             entry = '    <vehicle id="emergency_%i" type="emergency" route="%s" depart="%s" departLane="random" departSpeed="10" />' % (i, chosen_route, depart_time)
@@ -141,11 +141,14 @@ class TrafficGenerator:
         vehicle_entries.sort(key=lambda x: x[0])
 
         # Build the output file path based on the intersection type.
-        # For example, if intersection_type == "T_intersection", write to "intersection/T_intersection/episode_routes.rou.xml"
+        # For example, if intersection_type == "T_intersection", write to "intersection/T_intersection/t_routes.rou.xml"
         output_folder = os.path.join("intersection", self.intersection_type)
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
-        output_file = os.path.join(output_folder, "episode_routes.rou.xml")
+        if self.intersection_type == "T_intersection":
+            output_file = os.path.join(output_folder, "t_routes.rou.xml")
+        else:
+            output_file = os.path.join(output_folder, "episode_routes.rou.xml")
 
         # Write the header and all vehicle entries to the route file
         with open(output_file, "w") as routes:

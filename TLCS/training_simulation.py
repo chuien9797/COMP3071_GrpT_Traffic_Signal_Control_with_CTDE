@@ -12,7 +12,7 @@ import intersection_config as int_config
 class Simulation:
     def __init__(self, Model, Memory, TrafficGen, sumo_cmd, gamma, max_steps,
                  green_duration, yellow_duration, num_states, num_actions, training_epochs,
-                 intersection_type="cross"):
+                 intersection_type="T_intersection"):
         self._Model = Model
         self._Memory = Memory
         self._TrafficGen = TrafficGen

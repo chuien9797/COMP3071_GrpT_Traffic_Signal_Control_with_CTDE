@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <input>
+        <node-files value="t_nodes.nod.xml"/>
+        <edge-files value="t_edges.edg.xml"/>
+    </input>
+    <output>
+        <output-file value="t_intersection.net.xml"/>
+    </output>
+    <!-- Optional: adjust additional parameters as needed -->
+</configuration>

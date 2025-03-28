@@ -90,7 +90,7 @@ if __name__ == "__main__":
             int(config['num_states']),
             int(config['num_actions']),
             int(config['training_epochs']),
-            intersection_type=config.get('intersection_type', 'cross')  # NEW parameter
+            intersection_type=config.get('intersection_type', 'T_intersection')  # NEW parameter
         )
     else:
         raise ValueError("Unsupported algorithm: {}. Please choose either 'PPO' or 'DQN'.".format(algorithm))

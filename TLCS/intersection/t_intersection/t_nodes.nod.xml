@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodes>
+    <!-- Center intersection node -->
+    <node id="1" x="0.00" y="0.00" type="traffic_light"/>
+    <!-- Left approach -->
+    <node id="2" x="-500.00" y="0.00" type="priority"/>
+    <!-- Right approach -->
+    <node id="3" x="500.00" y="0.00" type="priority"/>
+    <!-- Top approach -->
+    <node id="4" x="0.00" y="500.00" type="priority"/>
+</nodes>

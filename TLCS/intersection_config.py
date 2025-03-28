@@ -44,12 +44,14 @@ INTERSECTION_CONFIGS = {
     },
     "T_intersection": {
         "incoming_lanes": {
-            "main": ["T_main_0", "T_main_1"],
-            "side": ["T_side_0", "T_side_1"]
+            "main": ["left_in_0", "left_in_1", "right_in_0", "right_in_1"],
+            "side": ["top_in_0", "top_in_1"]
         },
         "phase_mapping": {
             0: {"green": 0, "yellow": 1},   # Action 0: main road green
-            1: {"green": 2, "yellow": 3}    # Action 1: side road green
+            1: {"green": 2, "yellow": 3},   # Action 1: side road green
+            2: {"green": 0, "yellow": 1},   # Action 2: main road green (duplicate of action 0)
+            3: {"green": 2, "yellow": 3}    # Action 3: side road green (duplicate of action 1)
         },
         "occupancy_grid": {
             "cells_per_lane": 8,

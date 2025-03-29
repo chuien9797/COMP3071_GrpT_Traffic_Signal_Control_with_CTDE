@@ -12,6 +12,7 @@ from TLCS.rl_models.ppo_model import PPOModel, PPOSimulation
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import import_train_configuration, set_sumo, set_train_path
+from environment_utils import compute_environment_parameters, build_dynamic_model
 
 # Import PPO classes from our new merged file
 
@@ -23,6 +24,8 @@ from utils import import_train_configuration, set_sumo, set_train_path
 from generator import TrafficGenerator
 from visualization import Visualization
 
+import intersection_config as int_config
+
 if __name__ == "__main__":
     # Load configuration and set up simulation paths
     config = import_train_configuration("training_settings.ini")
@@ -30,8 +33,23 @@ if __name__ == "__main__":
     path = set_train_path(config['models_path_name'])
 
     import tensorflow as tf
+
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print("Physical devices:", tf.config.list_physical_devices())
+
+    # Load intersection configuration based on intersection type
+    intersection_type = config.get('intersection_type', 'cross')
+    if intersection_type not in int_config.INTERSECTION_CONFIGS:
+        raise ValueError("Intersection type '{}' not found in configuration.".format(intersection_type))
+    int_conf = int_config.INTERSECTION_CONFIGS[intersection_type]
+
+    # Automatically compute state and action dimensions from intersection configuration
+    num_states, num_actions = compute_environment_parameters(int_conf)
+    config['num_states'] = num_states
+    config['num_actions'] = num_actions
+
+    print("Computed num_states:", num_states)
+    print("Computed num_actions:", num_actions)
 
     # Choose the algorithm based on the configuration
     algorithm = config.get('algorithm', 'DQN')
@@ -45,7 +63,8 @@ if __name__ == "__main__":
             clip_ratio=config['ppo_clip_ratio'],
             update_epochs=config['ppo_update_epochs']
         )
-        traffic_gen = TrafficGenerator(config['max_steps'], config['n_cars_generated'])
+        traffic_gen = TrafficGenerator(config['max_steps'], config['n_cars_generated'],
+                                       intersection_type=intersection_type)
         Simulation = PPOSimulation(
             model=model,
             traffic_gen=traffic_gen,
@@ -57,27 +76,34 @@ if __name__ == "__main__":
             num_states=config['num_states'],
             num_actions=config['num_actions'],
             training_epochs=config['ppo_training_epochs'],
-            intersection_type=config.get('intersection_type', 'cross')
+            intersection_type=intersection_type
         )
 
     elif algorithm == 'DQN':
         # Instantiate DQN model and simulation as before.
         from model import TrainModel
+        from training_simulation import Simulation
+        from memory import Memory
+
+        # Build dynamic neural network model for DQN
+        hidden_layers = config.get('dqn_hidden_layers', [64, 64])
+        dynamic_model = build_dynamic_model(num_states, num_actions, hidden_layers)
+
         Model = TrainModel(
             int(config['num_layers']),
             int(config['width_layers']),
             int(config['batch_size']),
             float(config['learning_rate']),
             input_dim=int(config['num_states']),
-            output_dim=int(config['num_actions'])
+            output_dim=int(config['num_actions']),
+            model=dynamic_model
         )
-        from training_simulation import Simulation
-        from memory import Memory
         MemoryInstance = Memory(
             int(config['memory_size_max']),
             int(config['memory_size_min'])
         )
-        TrafficGen = TrafficGenerator(int(config['max_steps']), int(config['n_cars_generated']))
+        TrafficGen = TrafficGenerator(int(config['max_steps']), int(config['n_cars_generated']),
+                                      intersection_type=intersection_type)
         Simulation = Simulation(
             Model,
             MemoryInstance,
@@ -90,7 +116,7 @@ if __name__ == "__main__":
             int(config['num_states']),
             int(config['num_actions']),
             int(config['training_epochs']),
-            intersection_type=config.get('intersection_type', 'T_intersection')  # NEW parameter
+            intersection_type=intersection_type  # NEW parameter
         )
     else:
         raise ValueError("Unsupported algorithm: {}. Please choose either 'PPO' or 'DQN'.".format(algorithm))
@@ -120,7 +146,11 @@ if __name__ == "__main__":
     print("----- Session info saved at:", path)
 
     # Save the trained model and configuration for future reference
-    model.save_model(path)
+    # For DQN, the model is stored in Model variable, for PPO in model variable
+    if algorithm == 'PPO':
+        model.save_model(path)
+    elif algorithm == 'DQN':
+        Model.save_model(path)
     copyfile(src="training_settings.ini", dst=os.path.join(path, "training_settings.ini"))
 
     # Visualization: For PPO, visualize episode rewards; for DQN, use existing stats.

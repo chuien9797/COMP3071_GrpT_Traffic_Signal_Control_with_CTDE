@@ -191,7 +191,7 @@ class Simulation:
         """
         Retrieve the current state of the intersection, composed of:
           1. An occupancy grid for standard vehicles.
-          2. Emergency vehicle flags for each lane group.
+          2. Emergency vehicle flags (one per lane group).
         """
         grid_conf = self.int_conf["occupancy_grid"]
         cells_per_lane = grid_conf["cells_per_lane"]
@@ -221,7 +221,7 @@ class Simulation:
                 occupancy_index = lane_index * cells_per_lane + cell
                 occupancy[occupancy_index] = 1
 
-        # Generate emergency flags: one flag per lane group (ordered alphabetically)
+        # Generate emergency flags: ONE flag per lane group (ordered alphabetically)
         emergency_flags = []
         for group in sorted(incoming_lanes.keys()):
             flag = 0
@@ -230,7 +230,10 @@ class Simulation:
                     if traci.vehicle.getTypeID(car_id) == "emergency" and traci.vehicle.getLaneID(car_id) == lane:
                         flag = 1
                         break
-                emergency_flags.append(flag)
+                if flag == 1:
+                    break
+            emergency_flags.append(flag)
+
         emergency_flags = np.array(emergency_flags)
 
         # Combine occupancy grid and emergency flags into one state vector

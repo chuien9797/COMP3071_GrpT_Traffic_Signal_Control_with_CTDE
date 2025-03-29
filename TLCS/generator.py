@@ -4,7 +4,7 @@ import os
 import intersection_config as int_config
 
 class TrafficGenerator:
-    def __init__(self, max_steps, n_cars_generated, intersection_type="T_intersection"):
+    def __init__(self, max_steps, n_cars_generated, intersection_type="cross"):
         self._n_cars_generated = n_cars_generated  # number of standard cars per episode
         self._max_steps = max_steps
         self.intersection_type = intersection_type
@@ -60,7 +60,7 @@ class TrafficGenerator:
         if self.intersection_type == "T_intersection":
             output_file = os.path.join(output_folder, "t_routes.rou.xml")
         else:
-            output_file = os.path.join(output_folder, "episode_routes.rou.xml")
+            output_file = os.path.join(output_folder, "cross_routes.rou.xml")
 
         # Get header from configuration (if provided) or use default.
         header = self._get_header()

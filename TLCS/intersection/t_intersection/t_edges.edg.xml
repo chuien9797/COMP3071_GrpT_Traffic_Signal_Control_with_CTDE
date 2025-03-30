@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges>
+    <!-- Incoming edges -->
+    <edge id="left_in" from="2" to="TL" numLanes="2" speed="13.89"/>
+    <edge id="right_in" from="3" to="TL" numLanes="2" speed="13.89"/>
+    <edge id="top_in" from="4" to="TL" numLanes="2" speed="13.89"/>
+    <!-- Outgoing edges -->
+    <edge id="left_out" from="TL" to="2" numLanes="2" speed="13.89"/>
+    <edge id="right_out" from="TL" to="3" numLanes="2" speed="13.89"/>
+    <edge id="top_out" from="TL" to="4" numLanes="2" speed="13.89"/>
+</edges>

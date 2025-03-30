@@ -4,20 +4,15 @@ import random
 import timeit
 import os
 
-# phase codes based on environment.net.xml
-PHASE_NS_GREEN = 0  # action 0 code 00
-PHASE_NS_YELLOW = 1
-PHASE_NSL_GREEN = 2  # action 1 code 01
-PHASE_NSL_YELLOW = 3
-PHASE_EW_GREEN = 4  # action 2 code 10
-PHASE_EW_YELLOW = 5
-PHASE_EWL_GREEN = 6  # action 3 code 11
-PHASE_EWL_YELLOW = 7
-
 from emergency_handler import check_emergency
 
+# Import the intersection configuration
+import intersection_config as int_config
+
 class Simulation:
-    def __init__(self, Model, Memory, TrafficGen, sumo_cmd, gamma, max_steps, green_duration, yellow_duration, num_states, num_actions, training_epochs):
+    def __init__(self, Model, Memory, TrafficGen, sumo_cmd, gamma, max_steps,
+                 green_duration, yellow_duration, num_states, num_actions, training_epochs,
+                 intersection_type="cross"):
         self._Model = Model
         self._Memory = Memory
         self._TrafficGen = TrafficGen
@@ -27,14 +22,20 @@ class Simulation:
         self._max_steps = max_steps
         self._green_duration = green_duration
         self._yellow_duration = yellow_duration
-        self._num_states = num_states  # should be 84 (80 occupancy + 4 emergency flags)
+        self._num_states = num_states  # this value can be adjusted dynamically if needed
         self._num_actions = num_actions
         self._reward_store = []
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
         self._training_epochs = training_epochs
-        # New: list to log Q-values when emergency flags are active
         self._emergency_q_logs = []
+        self._waiting_times = {}
+
+        # Load the appropriate intersection configuration based on type
+        self.intersection_type = intersection_type
+        if self.intersection_type not in int_config.INTERSECTION_CONFIGS:
+            raise ValueError("Intersection type '{}' not found in configuration.".format(self.intersection_type))
+        self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
 
     def run(self, episode, epsilon):
         """
@@ -43,7 +44,7 @@ class Simulation:
         """
         start_time = timeit.default_timer()
 
-        # route file for this simulation and set up sumo
+        # Generate route file and start SUMO simulation
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
         print("Simulating...")
@@ -54,50 +55,50 @@ class Simulation:
         self._sum_queue_length = 0
         self._sum_waiting_time = 0
         old_total_wait = 0
-        old_state = -1
-        old_action = -1
+        old_state = None
+        old_action = None
+
+        # Determine the number of emergency flags from the configuration (one per lane group)
+        num_emergency_flags = len(sorted(self.int_conf["incoming_lanes"].keys()))
 
         while self._step < self._max_steps:
-
             # Check for emergency vehicles using the refactored function
             if check_emergency(self):
                 continue
 
-            # get current state of the intersection (including emergency flags)
+            # Get current state (occupancy grid + emergency flags)
             current_state = self._get_state()
 
-            # Log Q-values if emergency flag is active (if any of the last 4 entries is 1)
-            if np.sum(current_state[-4:]) > 0:
+            # Log Q-values if any emergency flag is active
+            if np.sum(current_state[-num_emergency_flags:]) > 0:
                 q_values = self._Model.predict_one(current_state)
                 print("Emergency state detected. Q-values:", q_values)
                 self._emergency_q_logs.append(q_values)
 
-            # calculate reward of previous action: (change in cumulative waiting time between actions)
+            # Calculate reward as the change in cumulative waiting time
             current_total_wait = self._collect_waiting_times()
             reward = old_total_wait - current_total_wait
 
-            # saving the data into the memory
+            # Save experience (state, action, reward, next state) to memory
             if self._step != 0:
                 self._Memory.add_sample((old_state, old_action, reward, current_state))
 
-            # choose the light phase to activate, based on the current state of the intersection
+            # Choose an action using epsilon-greedy policy
             action = self._choose_action(current_state, epsilon)
 
-            # if the chosen phase is different from the last phase, activate the yellow phase
-            if self._step != 0 and old_action != action:
+            # If the action has changed, activate the yellow phase before switching
+            if self._step != 0 and (old_action is not None and old_action != action):
                 self._set_yellow_phase(old_action)
                 self._simulate(self._yellow_duration)
 
-            # execute the phase selected before
+            # Activate the green phase for the chosen action
             self._set_green_phase(action)
             self._simulate(self._green_duration)
 
-            # saving variables for later & accumulate reward
             old_state = current_state
             old_action = action
             old_total_wait = current_total_wait
 
-            # saving only the meaningful reward to better see if the agent is behaving correctly
             if reward < 0:
                 self._sum_neg_reward += reward
 
@@ -112,7 +113,6 @@ class Simulation:
             self._replay()
         training_time = round(timeit.default_timer() - start_time, 1)
 
-        # Log average Q-values for emergency states for analysis
         if len(self._emergency_q_logs) > 0:
             avg_emergency_q = np.mean(np.array(self._emergency_q_logs), axis=0)
             print("Average Q-values for emergency states:", avg_emergency_q)
@@ -121,190 +121,145 @@ class Simulation:
 
     def _simulate(self, steps_todo):
         """
-        Execute steps in sumo while gathering statistics
+        Execute a number of simulation steps in SUMO while gathering statistics.
         """
         if (self._step + steps_todo) >= self._max_steps:
             steps_todo = self._max_steps - self._step
 
         while steps_todo > 0:
-            traci.simulationStep()  # simulate 1 step in sumo
+            traci.simulationStep()  # Simulate one step in SUMO
             self._step += 1
             steps_todo -= 1
             queue_length = self._get_queue_length()
             self._sum_queue_length += queue_length
-            self._sum_waiting_time += queue_length  # 1 queued vehicle per step = 1 waited second
+            self._sum_waiting_time += queue_length  # each queued vehicle counts as one waited second
 
     def _collect_waiting_times(self):
         """
-        Retrieve the waiting time of every car in the incoming roads
+        Retrieve the accumulated waiting time for vehicles in the incoming lanes.
         """
-        incoming_roads = ["E2TL", "N2TL", "W2TL", "S2TL"]
+        incoming_lane_ids = []
+        for lanes in self.int_conf["incoming_lanes"].values():
+            incoming_lane_ids.extend(lanes)
+
         car_list = traci.vehicle.getIDList()
         for car_id in car_list:
-            wait_time = traci.vehicle.getAccumulatedWaitingTime(car_id)
-            road_id = traci.vehicle.getRoadID(car_id)
-            if road_id in incoming_roads:
-                self._waiting_times[car_id] = wait_time
+            lane_id = traci.vehicle.getLaneID(car_id)
+            if lane_id in incoming_lane_ids:
+                self._waiting_times[car_id] = traci.vehicle.getAccumulatedWaitingTime(car_id)
             else:
                 if car_id in self._waiting_times:
                     del self._waiting_times[car_id]
-        total_waiting_time = sum(self._waiting_times.values())
-        return total_waiting_time
+        return sum(self._waiting_times.values())
 
     def _choose_action(self, state, epsilon):
         """
-        Decide whether to perform an explorative or exploitative action, according to an epsilon-greedy policy
+        Choose an action using an epsilon-greedy policy.
         """
         if random.random() < epsilon:
             return random.randint(0, self._num_actions - 1)
         else:
             return np.argmax(self._Model.predict_one(state))
 
-    def _set_yellow_phase(self, old_action):
+    def _set_yellow_phase(self, action_number):
         """
-        Activate the correct yellow light combination in sumo
+        Activate the yellow phase based on the intersection configuration.
         """
-        yellow_phase_code = old_action * 2 + 1
-        traci.trafficlight.setPhase("TL", yellow_phase_code)
+        phase_config = self.int_conf["phase_mapping"][action_number]["yellow"]
+        traci.trafficlight.setPhase("TL", phase_config)
 
     def _set_green_phase(self, action_number):
         """
-        Activate the correct green light combination in sumo
+        Activate the green phase based on the intersection configuration.
         """
-        if action_number == 0:
-            traci.trafficlight.setPhase("TL", PHASE_NS_GREEN)
-        elif action_number == 1:
-            traci.trafficlight.setPhase("TL", PHASE_NSL_GREEN)
-        elif action_number == 2:
-            traci.trafficlight.setPhase("TL", PHASE_EW_GREEN)
-        elif action_number == 3:
-            traci.trafficlight.setPhase("TL", PHASE_EWL_GREEN)
+        phase_config = self.int_conf["phase_mapping"][action_number]["green"]
+        traci.trafficlight.setPhase("TL", phase_config)
 
     def _get_queue_length(self):
         """
-        Retrieve the number of cars with speed = 0 in every incoming lane
+        Retrieve the total number of halted vehicles across all incoming lanes.
         """
-        halt_N = traci.edge.getLastStepHaltingNumber("N2TL")
-        halt_S = traci.edge.getLastStepHaltingNumber("S2TL")
-        halt_E = traci.edge.getLastStepHaltingNumber("E2TL")
-        halt_W = traci.edge.getLastStepHaltingNumber("W2TL")
-        queue_length = halt_N + halt_S + halt_E + halt_W
-        return queue_length
+        incoming_lane_ids = []
+        for lanes in self.int_conf["incoming_lanes"].values():
+            incoming_lane_ids.extend(lanes)
+        total_queue = 0
+        for lane in incoming_lane_ids:
+            total_queue += traci.lane.getLastStepHaltingNumber(lane)
+        return total_queue
 
     def _get_state(self):
         """
-        Retrieve the state of the intersection from SUMO, including emergency vehicle presence.
-        The state vector is composed of two parts:
-          1. An occupancy grid (of length self._num_states - 4) for standard vehicles.
-          2. Four binary flags indicating if an emergency vehicle is present on [N, S, E, W] incoming lanes.
+        Retrieve the current state of the intersection, composed of:
+          1. An occupancy grid for standard vehicles.
+          2. Emergency vehicle flags (one per lane group).
         """
-        # Occupancy grid for standard (non-emergency) vehicles
-        occupancy_grid_length = self._num_states - 4  # expected to be 80
-        occupancy = np.zeros(occupancy_grid_length)
-        car_list = traci.vehicle.getIDList()
+        grid_conf = self.int_conf["occupancy_grid"]
+        cells_per_lane = grid_conf["cells_per_lane"]
+        max_distance = grid_conf["max_distance"]
 
+        # Create a consistent ordering of lane IDs from the configuration.
+        incoming_lanes = self.int_conf["incoming_lanes"]
+        lane_order = []
+        for group in sorted(incoming_lanes.keys()):
+            lane_order.extend(incoming_lanes[group])
+        total_lanes = len(lane_order)
+        occupancy_length = total_lanes * cells_per_lane
+        occupancy = np.zeros(occupancy_length)
+
+        car_list = traci.vehicle.getIDList()
         for car_id in car_list:
-            # Skip emergency vehicles in occupancy grid calculation
             if traci.vehicle.getTypeID(car_id) == "emergency":
                 continue
-
-            lane_pos = traci.vehicle.getLanePosition(car_id)
             lane_id = traci.vehicle.getLaneID(car_id)
-            lane_pos = 750 - lane_pos  # invert lane position: 0 means near the traffic light
+            if lane_id in lane_order:
+                lane_index = lane_order.index(lane_id)
+                lane_length = traci.lane.getLength(lane_id)
+                lane_pos = traci.vehicle.getLanePosition(car_id)
+                normalized_pos = lane_length - lane_pos
+                cell = int((normalized_pos / max_distance) * cells_per_lane)
+                cell = min(cell, cells_per_lane - 1)
+                occupancy_index = lane_index * cells_per_lane + cell
+                occupancy[occupancy_index] = 1
 
-            # Map lane position to cells
-            if lane_pos < 7:
-                lane_cell = 0
-            elif lane_pos < 14:
-                lane_cell = 1
-            elif lane_pos < 21:
-                lane_cell = 2
-            elif lane_pos < 28:
-                lane_cell = 3
-            elif lane_pos < 40:
-                lane_cell = 4
-            elif lane_pos < 60:
-                lane_cell = 5
-            elif lane_pos < 100:
-                lane_cell = 6
-            elif lane_pos < 160:
-                lane_cell = 7
-            elif lane_pos < 400:
-                lane_cell = 8
-            elif lane_pos <= 750:
-                lane_cell = 9
+        # Generate emergency flags: ONE flag per lane group (ordered alphabetically)
+        emergency_flags = []
+        for group in sorted(incoming_lanes.keys()):
+            flag = 0
+            for lane in incoming_lanes[group]:
+                for car_id in car_list:
+                    if traci.vehicle.getTypeID(car_id) == "emergency" and traci.vehicle.getLaneID(car_id) == lane:
+                        flag = 1
+                        break
+                if flag == 1:
+                    break
+            emergency_flags.append(flag)
 
-            # Determine lane group based on lane_id
-            if lane_id in ["W2TL_0", "W2TL_1", "W2TL_2"]:
-                lane_group = 0
-            elif lane_id == "W2TL_3":
-                lane_group = 1
-            elif lane_id in ["N2TL_0", "N2TL_1", "N2TL_2"]:
-                lane_group = 2
-            elif lane_id == "N2TL_3":
-                lane_group = 3
-            elif lane_id in ["E2TL_0", "E2TL_1", "E2TL_2"]:
-                lane_group = 4
-            elif lane_id == "E2TL_3":
-                lane_group = 5
-            elif lane_id in ["S2TL_0", "S2TL_1", "S2TL_2"]:
-                lane_group = 6
-            elif lane_id == "S2TL_3":
-                lane_group = 7
-            else:
-                lane_group = -1
+        emergency_flags = np.array(emergency_flags)
 
-            if lane_group >= 1 and lane_group <= 7:
-                car_position = int(str(lane_group) + str(lane_cell))  # yields a number in [10, 79]
-                valid_car = True
-            elif lane_group == 0:
-                car_position = lane_cell  # yields a number in [0,9]
-                valid_car = True
-            else:
-                valid_car = False
-
-            if valid_car and car_position < occupancy_grid_length:
-                occupancy[car_position] = 1
-
-        # Emergency vehicle flags (order: [N, S, E, W])
-        emergency_flags = np.zeros(4)
-        for car_id in car_list:
-            if traci.vehicle.getTypeID(car_id) == "emergency":
-                lane_id = traci.vehicle.getLaneID(car_id)
-                if lane_id.startswith("N2TL"):
-                    emergency_flags[0] = 1
-                elif lane_id.startswith("S2TL"):
-                    emergency_flags[1] = 1
-                elif lane_id.startswith("E2TL"):
-                    emergency_flags[2] = 1
-                elif lane_id.startswith("W2TL"):
-                    emergency_flags[3] = 1
-
-        # Combine occupancy grid and emergency flags
+        # Combine occupancy grid and emergency flags into one state vector
         state = np.concatenate((occupancy, emergency_flags))
         return state
 
     def _replay(self):
         """
-        Retrieve a group of samples from the memory and for each update the Q-learning equation, then train
+        Sample a batch from memory, update the Q-values using the Q-learning equation, and train the model.
         """
         batch = self._Memory.get_samples(self._Model.batch_size)
 
         if len(batch) > 0:
-            states = np.array([val[0] for val in batch])
-            next_states = np.array([val[3] for val in batch])
+            states = np.array([sample[0] for sample in batch])
+            next_states = np.array([sample[3] for sample in batch])
 
-            # Predict Q-values for current and next states
             q_s_a = self._Model.predict_batch(states)
-            q_s_a_d = self._Model.predict_batch(next_states)
+            q_s_a_next = self._Model.predict_batch(next_states)
 
             x = np.zeros((len(batch), self._num_states))
             y = np.zeros((len(batch), self._num_actions))
 
-            for i, b in enumerate(batch):
-                state, action, reward, _ = b[0], b[1], b[2], b[3]
+            for i, sample in enumerate(batch):
+                state, action, reward, _ = sample
                 current_q = q_s_a[i]
-                current_q[action] = reward + self._gamma * np.amax(q_s_a_d[i])
+                current_q[action] = reward + self._gamma * np.amax(q_s_a_next[i])
                 x[i] = state
                 y[i] = current_q
 
@@ -312,12 +267,11 @@ class Simulation:
 
     def _save_episode_stats(self):
         """
-        Save episode statistics for later visualization
+        Save episode statistics for later visualization.
         """
         self._reward_store.append(self._sum_neg_reward)
         self._cumulative_wait_store.append(self._sum_waiting_time)
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)
-
 
     @property
     def reward_store(self):

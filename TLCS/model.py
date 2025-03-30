@@ -1,9 +1,8 @@
-
 import os
 from keras.src.saving.saving_lib import load_model
 from keras.src.utils import plot_model
 
-os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import numpy as np
 import sys
@@ -15,12 +14,15 @@ from tensorflow.keras.optimizers import Adam
 
 
 class TrainModel:
-    def __init__(self, num_layers, width, batch_size, learning_rate, input_dim, output_dim):
+    def __init__(self, num_layers, width, batch_size, learning_rate, input_dim, output_dim, model=None):
         self._input_dim = input_dim
         self._output_dim = output_dim
         self._batch_size = batch_size
         self._learning_rate = learning_rate
-        self._model = self._build_model(num_layers, width)
+        if model is not None:
+            self._model = model
+        else:
+            self._model = self._build_model(num_layers, width)
 
     def _build_model(self, num_layers, width):
         """

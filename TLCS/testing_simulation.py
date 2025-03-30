@@ -4,7 +4,7 @@ import random
 import timeit
 import os
 
-# phase codes based on environment.net.xml
+# phase codes based on cross_environment.net.xml
 PHASE_NS_GREEN = 0  # action 0 code 00
 PHASE_NS_YELLOW = 1
 PHASE_NSL_GREEN = 2  # action 1 code 01
@@ -126,7 +126,7 @@ class Simulation:
         """
         Activate the correct yellow light combination in sumo
         """
-        yellow_phase_code = old_action * 2 + 1 # obtain the yellow phase code, based on the old action (ref on environment.net.xml)
+        yellow_phase_code = old_action * 2 + 1 # obtain the yellow phase code, based on the old action (ref on cross_environment.net.xml)
         traci.trafficlight.setPhase("TL", yellow_phase_code)
 
 

@@ -1,87 +1,194 @@
 import numpy as np
 import math
+import os
+import intersection_config as int_config
 
 class TrafficGenerator:
-    def __init__(self, max_steps, n_cars_generated):
+    def __init__(self, max_steps, n_cars_generated, intersection_type="cross"):
         self._n_cars_generated = n_cars_generated  # number of standard cars per episode
         self._max_steps = max_steps
+        self.intersection_type = intersection_type
+        # Load the intersection configuration for this type.
+        if self.intersection_type in int_config.INTERSECTION_CONFIGS:
+            self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
+        else:
+            raise ValueError("Intersection type '{}' not found in configuration.".format(self.intersection_type))
 
     def generate_routefile(self, seed):
         """
-        Generation of the route file for one episode.
+        Generate the route file for one episode.
         Standard vehicles follow a Weibull distribution for their depart times.
         Additionally, three emergency vehicles with random departure times are added.
         The final file is sorted by departure time.
         """
         np.random.seed(seed)  # for reproducibility
 
-        # Generate departure timings for standard vehicles using a Weibull distribution
+        # Generate departure timings using a Weibull distribution.
         timings = np.random.weibull(2, self._n_cars_generated)
         timings = np.sort(timings)
 
-        # Rescale timings to fit in the interval [0, max_steps]
+        # Rescale timings to fit in the interval [0, max_steps].
         car_gen_steps = []
         min_old = math.floor(timings[1])
         max_old = math.ceil(timings[-1])
         for value in timings:
-            # Scale value to [0, max_steps]
             scaled_value = ((self._max_steps) / (max_old - min_old)) * (value - max_old) + self._max_steps
             car_gen_steps = np.append(car_gen_steps, scaled_value)
-        car_gen_steps = np.rint(car_gen_steps).astype(int)  # round each value to int
+        car_gen_steps = np.rint(car_gen_steps).astype(int)
 
-        # List to store all vehicle entries as tuples: (depart_time, entry_string)
+        # Modularized route generation based on intersection type.
+        if self.intersection_type == "cross":
+            vehicle_entries = self._generate_cross_routes(car_gen_steps)
+        elif self.intersection_type == "roundabout":
+            vehicle_entries = self._generate_roundabout_routes(car_gen_steps)
+        elif self.intersection_type == "T_intersection":
+            vehicle_entries = self._generate_T_intersection_routes(car_gen_steps)
+        else:
+            vehicle_entries = self._generate_default_routes(car_gen_steps)
+
+        # Generate emergency vehicle entries.
+        emergency_entries = self._generate_emergency_routes()
+        vehicle_entries.extend(emergency_entries)
+
+        # Sort all vehicle entries by departure time.
+        vehicle_entries.sort(key=lambda x: x[0])
+
+        # Build the output file path based on the intersection type.
+        output_folder = os.path.join("intersection", self.intersection_type)
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        if self.intersection_type == "T_intersection":
+            output_file = os.path.join(output_folder, "t_routes.rou.xml")
+        else:
+            output_file = os.path.join(output_folder, "cross_routes.rou.xml")
+
+        # Get header from configuration (if provided) or use default.
+        header = self._get_header()
+
+        # Write header and all vehicle entries to the route file.
+        with open(output_file, "w") as routes:
+            print(header, file=routes)
+            for _, entry in vehicle_entries:
+                print(entry, file=routes)
+            print("</routes>", file=routes)
+
+    def _generate_cross_routes(self, car_gen_steps):
+        """
+        Generate routes for a cross intersection.
+        Expects int_conf to have a 'route_config' key with 'straight' and 'turn' definitions.
+        Example in intersection_config.py:
+            "cross": {
+                "route_config": {
+                    "straight": {"routes": ["W_E", "E_W", "N_S", "S_N"], "probability": 0.75},
+                    "turn": {"routes": ["W_N", "W_S", "N_W", "N_E", "E_N", "E_S", "S_W", "S_E"], "probability": 0.25}
+                },
+                "header": "...custom header..."
+            }
+        """
         vehicle_entries = []
+        route_conf = self.int_conf.get("route_config", {})
+        straight_conf = route_conf.get("straight", {"routes": ["W_E", "E_W", "N_S", "S_N"], "probability": 0.75})
+        turn_conf = route_conf.get("turn", {"routes": ["W_N", "W_S", "N_W", "N_E", "E_N", "E_S", "S_W", "S_E"], "probability": 0.25})
+        straight_prob = straight_conf.get("probability", 0.75)
 
-        # Generate standard vehicle entries
         for car_counter, step in enumerate(car_gen_steps):
             depart_time = step
-            straight_or_turn = np.random.uniform()
-            if straight_or_turn < 0.75:  # 75% chance for going straight
-                route_straight = np.random.randint(1, 5)  # choose a random route among four options
-                if route_straight == 1:
-                    entry = '    <vehicle id="W_E_%i" type="standard_car" route="W_E" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_straight == 2:
-                    entry = '    <vehicle id="E_W_%i" type="standard_car" route="E_W" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_straight == 3:
-                    entry = '    <vehicle id="N_S_%i" type="standard_car" route="N_S" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                else:
-                    entry = '    <vehicle id="S_N_%i" type="standard_car" route="S_N" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-            else:  # 25% chance for turning vehicles
-                route_turn = np.random.randint(1, 9)  # choose among eight possible turning routes
-                if route_turn == 1:
-                    entry = '    <vehicle id="W_N_%i" type="standard_car" route="W_N" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_turn == 2:
-                    entry = '    <vehicle id="W_S_%i" type="standard_car" route="W_S" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_turn == 3:
-                    entry = '    <vehicle id="N_W_%i" type="standard_car" route="N_W" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_turn == 4:
-                    entry = '    <vehicle id="N_E_%i" type="standard_car" route="N_E" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_turn == 5:
-                    entry = '    <vehicle id="E_N_%i" type="standard_car" route="E_N" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_turn == 6:
-                    entry = '    <vehicle id="E_S_%i" type="standard_car" route="E_S" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_turn == 7:
-                    entry = '    <vehicle id="S_W_%i" type="standard_car" route="S_W" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
-                elif route_turn == 8:
-                    entry = '    <vehicle id="S_E_%i" type="standard_car" route="S_E" depart="%s" departLane="random" departSpeed="10" />' % (car_counter, depart_time)
+            if np.random.uniform() < straight_prob:
+                chosen_route = np.random.choice(straight_conf.get("routes", []))
+            else:
+                chosen_route = np.random.choice(turn_conf.get("routes", []))
+            entry = '    <vehicle id="{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                chosen_route + "_" + str(car_counter), chosen_route, depart_time)
             vehicle_entries.append((depart_time, entry))
+        return vehicle_entries
 
-        # Generate emergency vehicle entries with random departure times
+    def _generate_roundabout_routes(self, car_gen_steps):
+        """
+        Generate routes for a roundabout intersection.
+        Expects a route_config with keys like 'in_out' and 'turn'.
+        """
+        vehicle_entries = []
+        route_conf = self.int_conf.get("route_config", {})
+        in_out_conf = route_conf.get("in_out", {"routes": ["roundabout_in_out"], "probability": 0.8})
+        turn_conf = route_conf.get("turn", {"routes": ["roundabout_turn"], "probability": 0.2})
+        in_out_prob = in_out_conf.get("probability", 0.8)
+
+        for car_counter, step in enumerate(car_gen_steps):
+            depart_time = step
+            if np.random.uniform() < in_out_prob:
+                chosen_route = np.random.choice(in_out_conf.get("routes", []))
+            else:
+                chosen_route = np.random.choice(turn_conf.get("routes", []))
+            entry = '    <vehicle id="roundabout_{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                car_counter, chosen_route, depart_time)
+            vehicle_entries.append((depart_time, entry))
+        return vehicle_entries
+
+    def _generate_T_intersection_routes(self, car_gen_steps):
+        """
+        Generate routes for a T-intersection.
+        Expects a route_config with keys such as 'main' and 'side'.
+        """
+        vehicle_entries = []
+        route_conf = self.int_conf.get("route_config", {})
+        main_conf = route_conf.get("main", {"routes": ["W_E", "E_W"], "probability": 0.7})
+        side_conf = route_conf.get("side", {"routes": ["N_E", "N_W"], "probability": 0.3})
+        main_prob = main_conf.get("probability", 0.7)
+
+        for car_counter, step in enumerate(car_gen_steps):
+            depart_time = step
+            if np.random.uniform() < main_prob:
+                chosen_route = np.random.choice(main_conf.get("routes", []))
+            else:
+                chosen_route = np.random.choice(side_conf.get("routes", []))
+            entry = '    <vehicle id="{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                chosen_route + "_" + str(car_counter), chosen_route, depart_time)
+            vehicle_entries.append((depart_time, entry))
+        return vehicle_entries
+
+    def _generate_default_routes(self, car_gen_steps):
+        """
+        Fallback route generation if the intersection type is not recognized.
+        Uses the cross intersection logic.
+        """
+        return self._generate_cross_routes(car_gen_steps)
+
+    def _generate_emergency_routes(self):
+        """
+        Generate emergency vehicle entries.
+        Reads an optional 'emergency_routes' key from the intersection configuration.
+        If not defined, defaults are used.
+        """
+        vehicle_entries = []
         num_emergency = 3
         emergency_departures = np.random.uniform(0, self._max_steps, num_emergency)
         emergency_departures = np.rint(np.sort(emergency_departures)).astype(int)
-        routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "E_S", "S_W", "S_N", "S_E"]
+        # For T_intersection, use a defined routes list if provided.
+        routes_list = self.int_conf.get("emergency_routes", None)
+        if self.intersection_type == "T_intersection":
+            if not routes_list:
+                routes_list = self.int_conf.get("defined_routes", ["W_E", "E_W", "N_E", "N_W", "E_N", "W_N"])
+        else:
+            if not routes_list:
+                routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]
         for i, depart_time in enumerate(emergency_departures):
             chosen_route = np.random.choice(routes_list)
-            entry = '    <vehicle id="emergency_%i" type="emergency" route="%s" depart="%s" departLane="random" departSpeed="10" />' % (i, chosen_route, depart_time)
+            entry = '    <vehicle id="emergency_{}" type="emergency" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                i, chosen_route, depart_time)
             vehicle_entries.append((depart_time, entry))
+        return vehicle_entries
 
-        # Sort all vehicle entries by departure time (first element of tuple)
-        vehicle_entries.sort(key=lambda x: x[0])
-
-        # Write the header and all sorted vehicle entries to the route file
-        with open("intersection/episode_routes.rou.xml", "w") as routes:
-            print("""<routes>
+    def _get_header(self):
+        """
+        Retrieve a header from the intersection configuration if provided.
+        Otherwise, return a default header for each intersection type.
+        """
+        header = self.int_conf.get("header", None)
+        if header:
+            return header
+        else:
+            if self.intersection_type == "cross":
+                return """<routes>
     <!-- Define emergency vehicle type -->
     <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
     <!-- Define standard vehicle type -->
@@ -98,7 +205,50 @@ class TrafficGenerator:
     <route id="E_S" edges="E2TL TL2S"/>
     <route id="S_W" edges="S2TL TL2W"/>
     <route id="S_N" edges="S2TL TL2N"/>
-    <route id="S_E" edges="S2TL TL2E"/>""", file=routes)
-            for _, entry in vehicle_entries:
-                print(entry, file=routes)
-            print("</routes>", file=routes)
+    <route id="S_E" edges="S2TL TL2E"/>"""
+            elif self.intersection_type == "roundabout":
+                return """<routes>
+    <!-- Define emergency vehicle type -->
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
+    <!-- Define standard vehicle type -->
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
+
+    <route id="roundabout_in_out" edges="in_edge out_edge"/>
+    <route id="roundabout_turn" edges="in_edge turn_edge out_edge"/>"""
+            elif self.intersection_type == "T_intersection":
+                return """<routes>
+    <!-- Define emergency vehicle type -->
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true"/>
+    <!-- Define standard vehicle type -->
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5"/>
+
+    <!-- Main road routes (west-east and east-west) -->
+    <route id="W_E" edges="left_in right_out"/>
+    <route id="E_W" edges="right_in left_out"/>
+
+    <!-- Routes from the north approach joining the main road -->
+    <route id="N_E" edges="top_in right_out"/>
+    <route id="N_W" edges="top_in left_out"/>
+
+    <!-- Optional: if vehicles on the main road can turn northward -->
+    <route id="E_N" edges="right_in top_out"/>
+    <route id="W_N" edges="left_in top_out"/>"""
+            else:
+                return """<routes>
+    <!-- Define emergency vehicle type -->
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
+    <!-- Define standard vehicle type -->
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
+
+    <route id="W_N" edges="W2TL TL2N"/>
+    <route id="W_E" edges="W2TL TL2E"/>
+    <route id="W_S" edges="W2TL TL2S"/>
+    <route id="N_W" edges="N2TL TL2W"/>
+    <route id="N_E" edges="N2TL TL2E"/>
+    <route id="N_S" edges="N2TL TL2S"/>
+    <route id="E_W" edges="E2TL TL2W"/>
+    <route id="E_N" edges="E2TL TL2N"/>
+    <route id="E_S" edges="E2TL TL2S"/>
+    <route id="S_W" edges="S2TL TL2W"/>
+    <route id="S_N" edges="S2TL TL2N"/>
+    <route id="S_E" edges="S2TL TL2E"/>"""

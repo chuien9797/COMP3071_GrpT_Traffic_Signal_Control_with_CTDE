@@ -29,6 +29,12 @@ import intersection_config as int_config
 if __name__ == "__main__":
     # Load configuration and set up simulation paths
     config = import_train_configuration("training_settings.ini")
+
+    # Check if command line argument for intersection type is provided and override config if so
+    if len(sys.argv) > 1:
+        print("Overriding intersection type with command line argument:", sys.argv[1])
+        config['intersection_type'] = sys.argv[1]
+
     sumo_cmd = set_sumo(config['gui'], config['sumocfg_file_name'], config['max_steps'])
     path = set_train_path(config['models_path_name'])
 

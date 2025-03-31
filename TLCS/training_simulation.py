@@ -42,9 +42,10 @@ class Simulation:
         Runs an episode of simulation, then starts a training session.
         Also logs Q-values when emergency flags are active.
         """
-        start_time = timeit.default_timer()
+        os.makedirs("logs", exist_ok=True)  # make sure logs directory exists
+        log_file = open(f"logs/episode_{episode}.log", "w")
 
-        # Generate route file and start SUMO simulation
+        start_time = timeit.default_timer()
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
         print("Simulating...")
@@ -66,32 +67,35 @@ class Simulation:
             if check_emergency(self):
                 continue
 
-            # Get current state (occupancy grid + emergency flags)
             current_state = self._get_state()
 
-            # Log Q-values if any emergency flag is active
-            if np.sum(current_state[-num_emergency_flags:]) > 0:
+            if np.sum(current_state[-(num_emergency_flags + 9):]) > 0:
                 q_values = self._Model.predict_one(current_state)
                 print("Emergency state detected. Q-values:", q_values)
                 self._emergency_q_logs.append(q_values)
 
-            # Calculate reward as the change in cumulative waiting time
             current_total_wait = self._collect_waiting_times()
             reward = old_total_wait - current_total_wait
-
-            # Save experience (state, action, reward, next state) to memory
+            
             if self._step != 0:
                 self._Memory.add_sample((old_state, old_action, reward, current_state))
 
-            # Choose an action using epsilon-greedy policy
             action = self._choose_action(current_state, epsilon)
 
-            # If the action has changed, activate the yellow phase before switching
+            # Extract state components for logging
+            halted = current_state[-13:-9]
+            waiting = current_state[-9:-5]
+            current_phase = int(current_state[-1])
+
+            log_file.write(
+                f"[Step {self._step}] Action: {action}, Phase: {current_phase}, "
+                f"Halts: {halted}, Waiting: {waiting}\n"
+            )
+            
             if self._step != 0 and (old_action is not None and old_action != action):
                 self._set_yellow_phase(old_action)
                 self._simulate(self._yellow_duration)
 
-            # Activate the green phase for the chosen action
             self._set_green_phase(action)
             self._simulate(self._green_duration)
 
@@ -120,19 +124,16 @@ class Simulation:
         return simulation_time, training_time
 
     def _simulate(self, steps_todo):
-        """
-        Execute a number of simulation steps in SUMO while gathering statistics.
-        """
         if (self._step + steps_todo) >= self._max_steps:
             steps_todo = self._max_steps - self._step
 
         while steps_todo > 0:
-            traci.simulationStep()  # Simulate one step in SUMO
+            traci.simulationStep()
             self._step += 1
             steps_todo -= 1
             queue_length = self._get_queue_length()
             self._sum_queue_length += queue_length
-            self._sum_waiting_time += queue_length  # each queued vehicle counts as one waited second
+            self._sum_waiting_time += queue_length
 
     def _collect_waiting_times(self):
         """
@@ -162,23 +163,14 @@ class Simulation:
             return np.argmax(self._Model.predict_one(state))
 
     def _set_yellow_phase(self, action_number):
-        """
-        Activate the yellow phase based on the intersection configuration.
-        """
         phase_config = self.int_conf["phase_mapping"][action_number]["yellow"]
         traci.trafficlight.setPhase("TL", phase_config)
 
     def _set_green_phase(self, action_number):
-        """
-        Activate the green phase based on the intersection configuration.
-        """
         phase_config = self.int_conf["phase_mapping"][action_number]["green"]
         traci.trafficlight.setPhase("TL", phase_config)
 
     def _get_queue_length(self):
-        """
-        Retrieve the total number of halted vehicles across all incoming lanes.
-        """
         incoming_lane_ids = []
         for lanes in self.int_conf["incoming_lanes"].values():
             incoming_lane_ids.extend(lanes)
@@ -188,16 +180,10 @@ class Simulation:
         return total_queue
 
     def _get_state(self):
-        """
-        Retrieve the current state of the intersection, composed of:
-          1. An occupancy grid for standard vehicles.
-          2. Emergency vehicle flags (one per lane group).
-        """
         grid_conf = self.int_conf["occupancy_grid"]
         cells_per_lane = grid_conf["cells_per_lane"]
         max_distance = grid_conf["max_distance"]
 
-        # Create a consistent ordering of lane IDs from the configuration.
         incoming_lanes = self.int_conf["incoming_lanes"]
         lane_order = []
         for group in sorted(incoming_lanes.keys()):
@@ -221,7 +207,6 @@ class Simulation:
                 occupancy_index = lane_index * cells_per_lane + cell
                 occupancy[occupancy_index] = 1
 
-        # Generate emergency flags: ONE flag per lane group (ordered alphabetically)
         emergency_flags = []
         for group in sorted(incoming_lanes.keys()):
             flag = 0
@@ -236,14 +221,25 @@ class Simulation:
 
         emergency_flags = np.array(emergency_flags)
 
-        # Combine occupancy grid and emergency flags into one state vector
-        state = np.concatenate((occupancy, emergency_flags))
+        # Adaptive features
+        halted = [
+            traci.edge.getLastStepHaltingNumber("N2TL"),
+            traci.edge.getLastStepHaltingNumber("S2TL"),
+            traci.edge.getLastStepHaltingNumber("E2TL"),
+            traci.edge.getLastStepHaltingNumber("W2TL")
+        ]
+        waiting = [
+            traci.lane.getWaitingTime("N2TL_0"),
+            traci.lane.getWaitingTime("S2TL_0"),
+            traci.lane.getWaitingTime("E2TL_0"),
+            traci.lane.getWaitingTime("W2TL_0")
+        ]
+        current_phase = [traci.trafficlight.getPhase("TL")]
+
+        state = np.concatenate((occupancy, emergency_flags, halted, waiting, current_phase))
         return state
 
     def _replay(self):
-        """
-        Sample a batch from memory, update the Q-values using the Q-learning equation, and train the model.
-        """
         batch = self._Memory.get_samples(self._Model.batch_size)
 
         if len(batch) > 0:
@@ -266,9 +262,6 @@ class Simulation:
             self._Model.train_batch(x, y)
 
     def _save_episode_stats(self):
-        """
-        Save episode statistics for later visualization.
-        """
         self._reward_store.append(self._sum_neg_reward)
         self._cumulative_wait_store.append(self._sum_waiting_time)
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)

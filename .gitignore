@@ -1,3 +1,6 @@
 .vscode/settings.json
 *.pyc
 changes.txt
+/.venv/
+TLCS/adaptive_controller.py
+TLCS/check_vehicles.py

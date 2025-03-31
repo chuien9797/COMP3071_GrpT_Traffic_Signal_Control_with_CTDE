@@ -1,0 +1,515 @@
+Episode 1:
+  Reward: -5747.0
+  Delay:  7266s
+  Queue:  1.35
+
+Episode 2:
+  Reward: -5338.0
+  Delay:  7141s
+  Queue:  1.32
+
+Episode 2:
+  Reward: -5338.0
+  Delay:  7141s
+  Queue:  1.32
+
+Episode 1:
+  Reward: -4302.0
+  Delay:  5760s
+  Queue:  1.07
+
+Episode 2:
+  Reward: -4749.0
+  Delay:  6202s
+  Queue:  1.15
+
+Episode 3:
+  Reward: -6056.0
+  Delay:  7810s
+  Queue:  1.45
+
+Episode 4:
+  Reward: -4829.0
+  Delay:  6115s
+  Queue:  1.13
+
+Episode 5:
+  Reward: -4363.0
+  Delay:  5566s
+  Queue:  1.03
+
+Episode 6:
+  Reward: -4392.0
+  Delay:  5804s
+  Queue:  1.07
+
+Episode 7:
+  Reward: -3959.0
+  Delay:  5441s
+  Queue:  1.01
+
+Episode 8:
+  Reward: -3723.0
+  Delay:  5169s
+  Queue:  0.96
+
+Episode 9:
+  Reward: -4236.0
+  Delay:  5895s
+  Queue:  1.09
+
+Episode 10:
+  Reward: -4482.0
+  Delay:  5908s
+  Queue:  1.09
+
+Episode 11:
+  Reward: -3573.0
+  Delay:  4879s
+  Queue:  0.90
+
+Episode 12:
+  Reward: -3705.0
+  Delay:  5099s
+  Queue:  0.94
+
+Episode 13:
+  Reward: -3836.0
+  Delay:  5232s
+  Queue:  0.97
+
+Episode 14:
+  Reward: -3593.0
+  Delay:  4901s
+  Queue:  0.91
+
+Episode 15:
+  Reward: -3443.0
+  Delay:  4824s
+  Queue:  0.89
+
+Episode 16:
+  Reward: -4019.0
+  Delay:  5405s
+  Queue:  1.00
+
+Episode 17:
+  Reward: -4547.0
+  Delay:  5966s
+  Queue:  1.10
+
+Episode 18:
+  Reward: -3834.0
+  Delay:  5168s
+  Queue:  0.96
+
+Episode 19:
+  Reward: -4406.0
+  Delay:  5924s
+  Queue:  1.10
+
+Episode 20:
+  Reward: -3016.0
+  Delay:  4373s
+  Queue:  0.81
+
+Episode 21:
+  Reward: -3512.0
+  Delay:  4863s
+  Queue:  0.90
+
+Episode 22:
+  Reward: -3183.0
+  Delay:  4537s
+  Queue:  0.84
+
+Episode 23:
+  Reward: -3661.0
+  Delay:  5132s
+  Queue:  0.95
+
+Episode 24:
+  Reward: -2812.0
+  Delay:  4049s
+  Queue:  0.75
+
+Episode 25:
+  Reward: -2952.0
+  Delay:  4230s
+  Queue:  0.78
+
+Episode 26:
+  Reward: -2743.0
+  Delay:  4091s
+  Queue:  0.76
+
+Episode 27:
+  Reward: -2633.0
+  Delay:  3953s
+  Queue:  0.73
+
+Episode 28:
+  Reward: -3033.0
+  Delay:  4328s
+  Queue:  0.80
+
+Episode 29:
+  Reward: -2590.0
+  Delay:  3838s
+  Queue:  0.71
+
+Episode 30:
+  Reward: -3056.0
+  Delay:  4301s
+  Queue:  0.80
+
+Episode 31:
+  Reward: -2416.0
+  Delay:  3587s
+  Queue:  0.66
+
+Episode 32:
+  Reward: -2283.0
+  Delay:  3584s
+  Queue:  0.66
+
+Episode 33:
+  Reward: -2879.0
+  Delay:  4170s
+  Queue:  0.77
+
+Episode 34:
+  Reward: -2899.0
+  Delay:  4334s
+  Queue:  0.80
+
+Episode 35:
+  Reward: -2267.0
+  Delay:  3602s
+  Queue:  0.67
+
+Episode 36:
+  Reward: -1722.0
+  Delay:  2696s
+  Queue:  0.50
+
+Episode 37:
+  Reward: -2277.0
+  Delay:  3646s
+  Queue:  0.68
+
+Episode 38:
+  Reward: -2026.0
+  Delay:  3066s
+  Queue:  0.57
+
+Episode 39:
+  Reward: -2027.0
+  Delay:  3298s
+  Queue:  0.61
+
+Episode 40:
+  Reward: -2400.0
+  Delay:  3820s
+  Queue:  0.71
+
+Episode 41:
+  Reward: -2504.0
+  Delay:  3840s
+  Queue:  0.71
+
+Episode 42:
+  Reward: -2203.0
+  Delay:  3218s
+  Queue:  0.60
+
+Episode 43:
+  Reward: -1736.0
+  Delay:  2957s
+  Queue:  0.55
+
+Episode 44:
+  Reward: -1828.0
+  Delay:  2864s
+  Queue:  0.53
+
+Episode 45:
+  Reward: -1572.0
+  Delay:  2650s
+  Queue:  0.49
+
+Episode 46:
+  Reward: -2211.0
+  Delay:  3434s
+  Queue:  0.64
+
+Episode 47:
+  Reward: -1744.0
+  Delay:  2775s
+  Queue:  0.51
+
+Episode 48:
+  Reward: -2054.0
+  Delay:  3148s
+  Queue:  0.58
+
+Episode 49:
+  Reward: -1805.0
+  Delay:  3064s
+  Queue:  0.57
+
+Episode 50:
+  Reward: -2149.0
+  Delay:  3360s
+  Queue:  0.62
+
+Episode 51:
+  Reward: -1653.0
+  Delay:  2734s
+  Queue:  0.51
+
+Episode 52:
+  Reward: -1238.0
+  Delay:  2197s
+  Queue:  0.41
+
+Episode 53:
+  Reward: -1497.0
+  Delay:  2452s
+  Queue:  0.45
+
+Episode 54:
+  Reward: -1309.0
+  Delay:  2292s
+  Queue:  0.42
+
+Episode 55:
+  Reward: -1489.0
+  Delay:  2509s
+  Queue:  0.46
+
+Episode 56:
+  Reward: -1649.0
+  Delay:  2722s
+  Queue:  0.50
+
+Episode 57:
+  Reward: -1081.0
+  Delay:  2086s
+  Queue:  0.39
+
+Episode 58:
+  Reward: -1357.0
+  Delay:  2425s
+  Queue:  0.45
+
+Episode 59:
+  Reward: -1639.0
+  Delay:  2734s
+  Queue:  0.51
+
+Episode 60:
+  Reward: -1294.0
+  Delay:  2382s
+  Queue:  0.44
+
+Episode 61:
+  Reward: -1093.0
+  Delay:  1890s
+  Queue:  0.35
+
+Episode 62:
+  Reward: -1278.0
+  Delay:  2246s
+  Queue:  0.42
+
+Episode 63:
+  Reward: -1245.0
+  Delay:  2066s
+  Queue:  0.38
+
+Episode 64:
+  Reward: -1326.0
+  Delay:  2356s
+  Queue:  0.44
+
+Episode 65:
+  Reward: -1097.0
+  Delay:  1886s
+  Queue:  0.35
+
+Episode 66:
+  Reward: -1004.0
+  Delay:  1816s
+  Queue:  0.34
+
+Episode 67:
+  Reward: -1158.0
+  Delay:  1978s
+  Queue:  0.37
+
+Episode 68:
+  Reward: -1057.0
+  Delay:  1940s
+  Queue:  0.36
+
+Episode 69:
+  Reward: -920.0
+  Delay:  1683s
+  Queue:  0.31
+
+Episode 70:
+  Reward: -879.0
+  Delay:  1756s
+  Queue:  0.33
+
+Episode 71:
+  Reward: -1050.0
+  Delay:  1914s
+  Queue:  0.35
+
+Episode 72:
+  Reward: -854.0
+  Delay:  1590s
+  Queue:  0.29
+
+Episode 73:
+  Reward: -958.0
+  Delay:  1813s
+  Queue:  0.34
+
+Episode 74:
+  Reward: -902.0
+  Delay:  1819s
+  Queue:  0.34
+
+Episode 75:
+  Reward: -1133.0
+  Delay:  1922s
+  Queue:  0.36
+
+Episode 76:
+  Reward: -929.0
+  Delay:  1726s
+  Queue:  0.32
+
+Episode 77:
+  Reward: -864.0
+  Delay:  1681s
+  Queue:  0.31
+
+Episode 78:
+  Reward: -832.0
+  Delay:  1504s
+  Queue:  0.28
+
+Episode 79:
+  Reward: -943.0
+  Delay:  1676s
+  Queue:  0.31
+
+Episode 80:
+  Reward: -775.0
+  Delay:  1516s
+  Queue:  0.28
+
+Episode 81:
+  Reward: -758.0
+  Delay:  1505s
+  Queue:  0.28
+
+Episode 82:
+  Reward: -534.0
+  Delay:  1195s
+  Queue:  0.22
+
+Episode 83:
+  Reward: -773.0
+  Delay:  1453s
+  Queue:  0.27
+
+Episode 84:
+  Reward: -733.0
+  Delay:  1445s
+  Queue:  0.27
+
+Episode 85:
+  Reward: -716.0
+  Delay:  1458s
+  Queue:  0.27
+
+Episode 86:
+  Reward: -583.0
+  Delay:  1307s
+  Queue:  0.24
+
+Episode 87:
+  Reward: -735.0
+  Delay:  1430s
+  Queue:  0.26
+
+Episode 88:
+  Reward: -559.0
+  Delay:  1217s
+  Queue:  0.23
+
+Episode 89:
+  Reward: -473.0
+  Delay:  1035s
+  Queue:  0.19
+
+Episode 90:
+  Reward: -487.0
+  Delay:  1081s
+  Queue:  0.20
+
+Episode 91:
+  Reward: -551.0
+  Delay:  1192s
+  Queue:  0.22
+
+Episode 92:
+  Reward: -523.0
+  Delay:  1140s
+  Queue:  0.21
+
+Episode 93:
+  Reward: -397.0
+  Delay:  877s
+  Queue:  0.16
+
+Episode 94:
+  Reward: -591.0
+  Delay:  1387s
+  Queue:  0.26
+
+Episode 95:
+  Reward: -398.0
+  Delay:  1005s
+  Queue:  0.19
+
+Episode 96:
+  Reward: -508.0
+  Delay:  1194s
+  Queue:  0.22
+
+Episode 97:
+  Reward: -545.0
+  Delay:  1183s
+  Queue:  0.22
+
+Episode 98:
+  Reward: -573.0
+  Delay:  1251s
+  Queue:  0.23
+
+Episode 99:
+  Reward: -459.0
+  Delay:  999s
+  Queue:  0.18
+
+Episode 100:
+  Reward: -343.0
+  Delay:  826s
+  Queue:  0.15
+

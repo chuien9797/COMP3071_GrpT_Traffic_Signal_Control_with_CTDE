@@ -6,7 +6,7 @@ import os
 import datetime
 from shutil import copyfile
 
-from TLCS.rl_models.ppo_model import PPOModel, PPOSimulation
+from rl_models.ppo_model import PPOModel, PPOSimulation
 
 # Append the parent directory so that 'TLCS' can be imported
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -51,6 +51,7 @@ if __name__ == "__main__":
 
     # Automatically compute state and action dimensions from intersection configuration
     num_states, num_actions = compute_environment_parameters(int_conf)
+    num_states += 9
     config['num_states'] = num_states
     config['num_actions'] = num_actions
 
@@ -144,6 +145,18 @@ if __name__ == "__main__":
             epsilon = 1.0 - (episode / total_episodes)
             simulation_time, training_time = Simulation.run(episode, epsilon)
             print('Simulation time:', simulation_time, 's - Training time:', training_time, 's')
+            
+            # 📦 Save stats to log
+            log_dir = "logs"
+            os.makedirs(log_dir, exist_ok=True)
+            log_path = os.path.join(log_dir, "TLCS/training_summary.log")
+
+            with open(log_path, "a") as f:
+                f.write(f"Episode {episode + 1}:\n")
+                f.write(f"  Reward: {Simulation.reward_store[-1]}\n")
+                f.write(f"  Delay:  {Simulation.cumulative_wait_store[-1]}s\n")
+                f.write(f"  Queue:  {Simulation.avg_queue_length_store[-1]:.2f}\n\n")
+
             episode += 1
 
     end_time = datetime.datetime.now()

@@ -1,0 +1,9 @@
+<configuration>
+    <input>
+        <node-files value="roundabout.nod.xml"/>
+        <edge-files value="roundabout.edg.xml"/>
+    </input>
+    <output>
+        <output-file value="roundabout.net.xml"/>
+    </output>
+</configuration>

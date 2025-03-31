@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges>
+    <!-- Roundabout circular edges with smooth curves -->
+
+    <!-- r1: Arc from (100,0) to (0,100) -->
+    <edge id="r1" from="n1" to="n2" numLanes="2" speed="13.9"
+          shape="100,0 99.6,8.7 98.5,17.4 96.6,25.9 93.97,34.2 90.4,42.3 86.6,50.0 82.2,57.4 76.6,64.3 70.7,70.7 64.3,76.6 57.4,82.2 50.0,86.6 42.3,90.4 34.2,94.0 25.9,96.6 17.4,98.5 8.7,99.6 0,100"/>
+
+    <!-- r2: Arc from (0,100) to (-100,0) -->
+    <edge id="r2" from="n2" to="n3" numLanes="2" speed="13.9"
+          shape="0,100 -8.7,99.6 -17.4,98.5 -25.9,96.6 -34.2,94.0 -42.3,90.4 -50.0,86.6 -57.4,82.2 -64.3,76.6 -70.7,70.7 -76.6,64.3 -82.2,57.4 -86.6,50.0 -90.4,42.3 -93.97,34.2 -96.6,25.9 -98.5,17.4 -99.6,8.7 -100,0"/>
+
+    <!-- r3: Arc from (-100,0) to (0,-100) -->
+    <edge id="r3" from="n3" to="n4" numLanes="2" speed="13.9"
+          shape="-100,0 -99.6,-8.7 -98.5,-17.4 -96.6,-25.9 -93.97,-34.2 -90.4,-42.3 -86.6,-50.0 -82.2,-57.4 -76.6,-64.3 -70.7,-70.7 -64.3,-76.6 -57.4,-82.2 -50.0,-86.6 -42.3,-90.4 -34.2,-94.0 -25.9,-96.6 -17.4,-98.5 -8.7,-99.6 0,-100"/>
+
+    <!-- r4: Arc from (0,-100) to (100,0) -->
+    <edge id="r4" from="n4" to="n1" numLanes="2" speed="13.9"
+          shape="0,-100 8.7,-99.6 17.4,-98.5 25.9,-96.6 34.2,-94.0 42.3,-90.4 50.0,-86.6 57.4,-82.2 64.3,-76.6 70.7,-70.7 76.6,-64.3 82.2,-57.4 86.6,-50.0 90.4,-42.3 93.97,-34.2 96.6,-25.9 98.5,-17.4 99.6,-8.7 100,0"/>
+
+    <!-- Approaching roads connecting outer nodes to the roundabout -->
+    <edge id="e1" from="n1_in" to="n1" numLanes="2" speed="13.9" shape="200,0 150,0 100,0"/>
+    <edge id="e2" from="n2_in" to="n2" numLanes="2" speed="13.9" shape="0,200 0,150 0,100"/>
+    <edge id="e3" from="n3_in" to="n3" numLanes="2" speed="13.9" shape="-200,0 -150,0 -100,0"/>
+    <edge id="e4" from="n4_in" to="n4" numLanes="2" speed="13.9" shape="0,-200 0,-150 0,-100"/>
+
+    <!-- Exiting roads from the roundabout (reverse of the approach) -->
+    <edge id="e1_out" from="n1" to="n1_in" numLanes="2" speed="13.9" shape="100,0 150,0 200,0"/>
+    <edge id="e2_out" from="n2" to="n2_in" numLanes="2" speed="13.9" shape="0,100 0,150 0,200"/>
+    <edge id="e3_out" from="n3" to="n3_in" numLanes="2" speed="13.9" shape="-100,0 -150,0 -200,0"/>
+    <edge id="e4_out" from="n4" to="n4_in" numLanes="2" speed="13.9" shape="0,-100 0,-150 0,-200"/>
+</edges>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <!-- Define a vehicle type -->
+    <vType id="car" accel="2.6" decel="4.5" length="5" minGap="2.5" maxSpeed="13.9" />
+
+    <!-- Define routes for vehicles using the roundabout edges -->
+    <route id="route1" edges="e1 r1 r2 e3_out"/>
+    <route id="route2" edges="e2 r2 r3 e4_out"/>
+    <route id="route3" edges="e3 r3 r4 e1_out"/>
+    <route id="route4" edges="e4 r4 r1 e2_out"/>
+
+    <!-- Assign vehicles to the routes with departure times -->
+    <vehicle id="veh1" type="car" route="route1" depart="0"/>
+    <vehicle id="veh2" type="car" route="route2" depart="10"/>
+    <vehicle id="veh3" type="car" route="route3" depart="20"/>
+    <vehicle id="veh4" type="car" route="route4" depart="30"/>
+</routes>

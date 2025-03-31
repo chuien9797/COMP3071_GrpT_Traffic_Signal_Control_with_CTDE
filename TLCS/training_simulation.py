@@ -5,9 +5,8 @@ import timeit
 import os
 
 from emergency_handler import check_emergency
-
-# Import the intersection configuration
 import intersection_config as int_config
+
 
 class Simulation:
     def __init__(self, Model, Memory, TrafficGen, sumo_cmd, gamma, max_steps,
@@ -30,6 +29,10 @@ class Simulation:
         self._training_epochs = training_epochs
         self._emergency_q_logs = []
         self._waiting_times = {}
+
+        # Initialize attributes for simulation statistics
+        self._sum_queue_length = 0
+        self._sum_waiting_time = 0
 
         # Load the appropriate intersection configuration based on type
         self.intersection_type = intersection_type
@@ -62,36 +65,28 @@ class Simulation:
         num_emergency_flags = len(sorted(self.int_conf["incoming_lanes"].keys()))
 
         while self._step < self._max_steps:
-            # Check for emergency vehicles using the refactored function
             if check_emergency(self):
                 continue
 
-            # Get current state (occupancy grid + emergency flags)
             current_state = self._get_state()
 
-            # Log Q-values if any emergency flag is active
             if np.sum(current_state[-num_emergency_flags:]) > 0:
                 q_values = self._Model.predict_one(current_state)
                 print("Emergency state detected. Q-values:", q_values)
                 self._emergency_q_logs.append(q_values)
 
-            # Calculate reward as the change in cumulative waiting time
             current_total_wait = self._collect_waiting_times()
             reward = old_total_wait - current_total_wait
 
-            # Save experience (state, action, reward, next state) to memory
             if self._step != 0:
                 self._Memory.add_sample((old_state, old_action, reward, current_state))
 
-            # Choose an action using epsilon-greedy policy
             action = self._choose_action(current_state, epsilon)
 
-            # If the action has changed, activate the yellow phase before switching
             if self._step != 0 and (old_action is not None and old_action != action):
                 self._set_yellow_phase(old_action)
                 self._simulate(self._yellow_duration)
 
-            # Activate the green phase for the chosen action
             self._set_green_phase(action)
             self._simulate(self._green_duration)
 
@@ -127,12 +122,12 @@ class Simulation:
             steps_todo = self._max_steps - self._step
 
         while steps_todo > 0:
-            traci.simulationStep()  # Simulate one step in SUMO
+            traci.simulationStep()
             self._step += 1
             steps_todo -= 1
             queue_length = self._get_queue_length()
             self._sum_queue_length += queue_length
-            self._sum_waiting_time += queue_length  # each queued vehicle counts as one waited second
+            self._sum_waiting_time += queue_length
 
     def _collect_waiting_times(self):
         """
@@ -164,15 +159,19 @@ class Simulation:
     def _set_yellow_phase(self, action_number):
         """
         Activate the yellow phase based on the intersection configuration.
+        Uses modulo to ensure the action index is valid.
         """
-        phase_config = self.int_conf["phase_mapping"][action_number]["yellow"]
+        valid_index = action_number % len(self.int_conf["phase_mapping"])
+        phase_config = self.int_conf["phase_mapping"][valid_index]["yellow"]
         traci.trafficlight.setPhase("TL", phase_config)
 
     def _set_green_phase(self, action_number):
         """
         Activate the green phase based on the intersection configuration.
+        Uses modulo to ensure the action index is valid.
         """
-        phase_config = self.int_conf["phase_mapping"][action_number]["green"]
+        valid_index = action_number % len(self.int_conf["phase_mapping"])
+        phase_config = self.int_conf["phase_mapping"][valid_index]["green"]
         traci.trafficlight.setPhase("TL", phase_config)
 
     def _get_queue_length(self):
@@ -197,7 +196,6 @@ class Simulation:
         cells_per_lane = grid_conf["cells_per_lane"]
         max_distance = grid_conf["max_distance"]
 
-        # Create a consistent ordering of lane IDs from the configuration.
         incoming_lanes = self.int_conf["incoming_lanes"]
         lane_order = []
         for group in sorted(incoming_lanes.keys()):
@@ -221,7 +219,6 @@ class Simulation:
                 occupancy_index = lane_index * cells_per_lane + cell
                 occupancy[occupancy_index] = 1
 
-        # Generate emergency flags: ONE flag per lane group (ordered alphabetically)
         emergency_flags = []
         for group in sorted(incoming_lanes.keys()):
             flag = 0
@@ -235,8 +232,6 @@ class Simulation:
             emergency_flags.append(flag)
 
         emergency_flags = np.array(emergency_flags)
-
-        # Combine occupancy grid and emergency flags into one state vector
         state = np.concatenate((occupancy, emergency_flags))
         return state
 
@@ -245,24 +240,19 @@ class Simulation:
         Sample a batch from memory, update the Q-values using the Q-learning equation, and train the model.
         """
         batch = self._Memory.get_samples(self._Model.batch_size)
-
         if len(batch) > 0:
             states = np.array([sample[0] for sample in batch])
             next_states = np.array([sample[3] for sample in batch])
-
             q_s_a = self._Model.predict_batch(states)
             q_s_a_next = self._Model.predict_batch(next_states)
-
             x = np.zeros((len(batch), self._num_states))
             y = np.zeros((len(batch), self._num_actions))
-
             for i, sample in enumerate(batch):
                 state, action, reward, _ = sample
                 current_q = q_s_a[i]
                 current_q[action] = reward + self._gamma * np.amax(q_s_a_next[i])
                 x[i] = state
                 y[i] = current_q
-
             self._Model.train_batch(x, y)
 
     def _save_episode_stats(self):

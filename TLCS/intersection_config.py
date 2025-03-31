@@ -61,27 +61,28 @@ INTERSECTION_CONFIGS = {
         # "emergency_routes" can be added here if needed.
     },
     "roundabout": {
-        "incoming_lanes": {
-            "in": ["roundabout_in_0", "roundabout_in_1"]
+    # Use the approach lane IDs that exist in your network.
+    "incoming_lanes": {
+        "in": ["e1_0", "e2_0", "e3_0", "e4_0"]
+    },
+    "phase_mapping": {
+        0: {"green": 0, "yellow": 1}
+    },
+    "occupancy_grid": {
+        "cells_per_lane": 8,
+        "max_distance": 500
+    },
+    "route_config": {
+        "in_out": {
+            "routes": ["roundabout_in_out"],
+            "probability": 0.8
         },
-        "phase_mapping": {
-            0: {"green": 0, "yellow": 1}
-        },
-        "occupancy_grid": {
-            "cells_per_lane": 8,
-            "max_distance": 500
-        },
-        "route_config": {
-            "in_out": {
-                "routes": ["roundabout_in_out"],
-                "probability": 0.8
-            },
-            "turn": {
-                "routes": ["roundabout_turn"],
-                "probability": 0.2
-            }
-        },
-        "header": """<routes>
+        "turn": {
+            "routes": ["roundabout_turn"],
+            "probability": 0.2
+        }
+    },
+    "header": """<routes>
     <!-- Define emergency vehicle type -->
     <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
     <!-- Define standard vehicle type -->

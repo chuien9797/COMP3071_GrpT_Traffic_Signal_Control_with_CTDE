@@ -175,15 +175,16 @@ class Simulation:
         traci.trafficlight.setPhase("TL", phase_config)
 
     def _get_queue_length(self):
-        """
-        Retrieve the total number of halted vehicles across all incoming lanes.
-        """
         incoming_lane_ids = []
         for lanes in self.int_conf["incoming_lanes"].values():
             incoming_lane_ids.extend(lanes)
         total_queue = 0
+        available_lanes = traci.lane.getIDList()
         for lane in incoming_lane_ids:
-            total_queue += traci.lane.getLastStepHaltingNumber(lane)
+            if lane in available_lanes:
+                total_queue += traci.lane.getLastStepHaltingNumber(lane)
+            else:
+                print("Warning: lane {} not found in simulation".format(lane))
         return total_queue
 
     def _get_state(self):

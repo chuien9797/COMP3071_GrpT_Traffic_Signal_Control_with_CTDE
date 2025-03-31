@@ -23,15 +23,12 @@ import intersection_config as int_config
 
 import tensorflow as tf
 import numpy as np
-from tensorflow import keras
-from tensorflow.keras import layers, losses
 from tensorflow.keras.optimizers import Adam
 
 import traci  # SUMO interface
 
 
 # ------------------ MAML Helper Functions ------------------
-
 def dqn_loss(model, states, actions, targets):
     """
     Compute the DQN loss (MSE) between Q-values for selected actions and target Q-values.
@@ -42,6 +39,7 @@ def dqn_loss(model, states, actions, targets):
     loss_val = tf.reduce_mean(tf.square(targets - q_selected))
     return loss_val
 
+
 def set_model_weights(model, new_weights):
     """
     Assign new_weights (a list of tensors) to model.trainable_variables.
@@ -49,14 +47,12 @@ def set_model_weights(model, new_weights):
     for var, new_w in zip(model.trainable_variables, new_weights):
         var.assign(new_w)
 
+
 def collect_experience(simulation, batch_size=32, steps=100):
     """
     Run the simulation for a fixed number of steps to collect a mini-batch of experience.
-    This version runs a mini-run of the simulation loop using random actions and a dummy reward.
-    It resets the simulation's step counter and clears memory before collecting experience.
     (In your final implementation, replace the random action and dummy reward with real simulation data.)
     """
-    # Ensure connection to SUMO
     try:
         traci.simulationStep()
     except traci.exceptions.FatalTraCIError:
@@ -67,21 +63,22 @@ def collect_experience(simulation, batch_size=32, steps=100):
         simulation._step = 0
         old_state = simulation._get_state()
         for _ in range(steps):
-            # Choose a random action for simulation progression
             action = random.randint(0, simulation._num_actions - 1)
             simulation._set_green_phase(action)
             simulation._simulate(1)
             new_state = simulation._get_state()
-            # Compute a dummy reward (for instance, 0 or based on waiting time difference)
-            reward = 0
-            # Only add sample if not the first step
+            reward = 0  # Dummy reward; update with your real reward function if desired
             if simulation._step != 0:
                 simulation._Memory.add_sample((old_state, action, reward, new_state))
             old_state = new_state
         batch = simulation._Memory.get_samples(batch_size)
         return batch
     finally:
-        traci.close()
+        try:
+            traci.close()
+        except Exception:
+            pass
+
 
 def compute_targets(model, batch, gamma):
     """
@@ -99,13 +96,11 @@ def compute_targets(model, batch, gamma):
     targets = rewards + gamma * max_q_next
     return states, actions, targets
 
+
 # ------------------ End MAML Helper Functions ------------------
 
-
-# ------------------ Main Code (Configuration & Setup) ------------------
-
 if __name__ == "__main__":
-    # Load configuration and set up simulation paths
+    # Load training configuration
     config = import_train_configuration("training_settings.ini")
 
     # Check for command line override of intersection type
@@ -113,23 +108,33 @@ if __name__ == "__main__":
         print("Overriding intersection type with command line argument:", sys.argv[1])
         config['intersection_type'] = sys.argv[1]
 
-    sumo_cmd = set_sumo(config['gui'], config['sumocfg_file_name'], config['max_steps'])
+    # Choose the initial SUMO configuration file based on the agent's intersection type.
+    # Note: 'intersection_type' is stored at the top level of config.
+    intersection_type = config.get('intersection_type', 'cross')
+    if intersection_type == "cross":
+        sumocfg_file = config['sumocfg_file_cross']
+    elif intersection_type == "roundabout":
+        sumocfg_file = config['sumocfg_file_roundabout']
+    elif intersection_type == "T_intersection":
+        sumocfg_file = config['sumocfg_file_T_intersection']
+    else:
+        raise ValueError("Unsupported intersection type: {}".format(intersection_type))
+
+    sumo_cmd = set_sumo(config['gui'], sumocfg_file, config['max_steps'])
     path = set_train_path(config['models_path_name'])
 
     print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
     print("Physical devices:", tf.config.list_physical_devices())
 
-    # Load intersection configuration based on intersection type
-    intersection_type = config.get('intersection_type', 'cross')
+    # Load intersection configuration based on the agent configuration
     if intersection_type not in int_config.INTERSECTION_CONFIGS:
         raise ValueError("Intersection type '{}' not found in configuration.".format(intersection_type))
     int_conf = int_config.INTERSECTION_CONFIGS[intersection_type]
 
-    # Compute environment parameters
+    # Compute environment parameters from the intersection configuration
     num_states, num_actions = compute_environment_parameters(int_conf)
     config['num_states'] = num_states
     config['num_actions'] = num_actions
-
     print("Computed num_states:", num_states)
     print("Computed num_actions:", num_actions)
 
@@ -137,8 +142,8 @@ if __name__ == "__main__":
 
     if algorithm == 'PPO':
         model = PPOModel(
-            input_dim=config['num_states'],
-            output_dim=config['num_actions'],
+            input_dim=num_states,
+            output_dim=num_actions,
             hidden_size=config['ppo_hidden_size'],
             learning_rate=config['ppo_learning_rate'],
             clip_ratio=config['ppo_clip_ratio'],
@@ -154,8 +159,8 @@ if __name__ == "__main__":
             max_steps=config['max_steps'],
             green_duration=config['green_duration'],
             yellow_duration=config['yellow_duration'],
-            num_states=config['num_states'],
-            num_actions=config['num_actions'],
+            num_states=num_states,
+            num_actions=num_actions,
             training_epochs=config['ppo_training_epochs'],
             intersection_type=intersection_type
         )
@@ -168,14 +173,13 @@ if __name__ == "__main__":
 
         hidden_layers = config.get('dqn_hidden_layers', [64, 64])
         dynamic_model = build_dynamic_model(num_states, num_actions, hidden_layers)
-
         Model_obj = TrainModel(
             int(config['num_layers']),
             int(config['width_layers']),
             int(config['batch_size']),
             float(config['learning_rate']),
-            input_dim=int(config['num_states']),
-            output_dim=int(config['num_actions']),
+            input_dim=num_states,
+            output_dim=num_actions,
             model=dynamic_model
         )
         MemoryInstance = Memory(
@@ -193,8 +197,8 @@ if __name__ == "__main__":
             int(config['max_steps']),
             int(config['green_duration']),
             int(config['yellow_duration']),
-            int(config['num_states']),
-            int(config['num_actions']),
+            num_states,
+            num_actions,
             int(config['training_epochs']),
             intersection_type=intersection_type
         )
@@ -202,44 +206,67 @@ if __name__ == "__main__":
         raise ValueError("Unsupported algorithm: {}. Please choose either 'PPO' or 'DQN'.".format(algorithm))
 
     # ------------------ MAML Meta-Training Loop ------------------
-    # Define tasks (each task is an intersection type)
+    # Define tasks corresponding to the different intersection types
     tasks = ["cross", "roundabout", "T_intersection"]
-
-    meta_steps = 1000      # Number of meta-training iterations
-    inner_steps = 1        # Number of inner-loop updates per task
-    inner_lr = 0.01        # Inner-loop learning rate
-    meta_lr = 0.001        # Meta (outer-loop) learning rate
+    meta_steps = 1000  # Number of meta-training iterations
+    inner_steps = 1  # Number of inner-loop updates per task
+    inner_lr = 0.01  # Inner-loop learning rate
+    meta_lr = 0.001  # Meta (outer-loop) learning rate
     gamma = float(config['gamma'])
 
     optimizer = Adam(meta_lr)
-
-    # Use the computed dimensions
-    input_dim = int(config['num_states'])
-    output_dim = int(config['num_actions'])
+    input_dim = num_states
+    output_dim = num_actions
 
     print("\nStarting MAML meta-training for DQN...\n")
+
+    # Initialize a variable to store meta loss from at least one task
+    meta_loss_value = None
+
     for meta_iter in range(meta_steps):
         # Initialize meta-gradient accumulator
         meta_gradient_sum = [tf.zeros_like(var) for var in Model_obj._model.trainable_variables]
 
-        # Loop over each task
+        # Loop over each task (intersection type)
         for task in tasks:
-            # Reconfigure the simulation for the given task
+            # Close any running SUMO simulation
+            try:
+                traci.close()
+            except Exception:
+                pass
+
+            # Set new intersection type and update configuration for the simulation
             Simulation_obj.intersection_type = task
             if task not in int_config.INTERSECTION_CONFIGS:
                 raise ValueError("Intersection type '{}' not found.".format(task))
             Simulation_obj.int_conf = int_config.INTERSECTION_CONFIGS[task]
 
-            # Save the current meta-parameters (original weights)
-            original_weights = [w.numpy() for w in Model_obj._model.trainable_variables]
+            # Select the appropriate sumocfg file for the task
+            if task == "cross":
+                new_sumocfg = config['sumocfg_file_cross']
+            elif task == "roundabout":
+                new_sumocfg = config['sumocfg_file_roundabout']
+            elif task == "T_intersection":
+                new_sumocfg = config['sumocfg_file_T_intersection']
+            else:
+                raise ValueError("Unsupported task type: {}".format(task))
+
+            # Restart SUMO with the new configuration
+            sumo_cmd = set_sumo(config['gui'], new_sumocfg, config['max_steps'])
+            traci.start(sumo_cmd)
 
             # -------- Inner Loop: Adaptation on task --------
             batch_inner = collect_experience(Simulation_obj, batch_size=32, steps=100)
-            # Check that batch_inner is not empty (if empty, skip this task)
             if len(batch_inner) < 4:
+                try:
+                    traci.close()
+                except Exception:
+                    pass
                 continue
             states_inner, actions_inner, targets_inner = compute_targets(Model_obj._model, batch_inner, gamma)
-            adapted_weights = Model_obj._model.trainable_variables
+            # Save the current meta-parameters (original weights)
+            original_weights = [w.numpy() for w in Model_obj._model.trainable_variables]
+            adapted_weights = original_weights
             for _ in range(inner_steps):
                 with tf.GradientTape() as tape:
                     set_model_weights(Model_obj._model, adapted_weights)
@@ -251,6 +278,10 @@ if __name__ == "__main__":
             # -------- Outer Loop: Meta-loss computation --------
             batch_meta = collect_experience(Simulation_obj, batch_size=32, steps=100)
             if len(batch_meta) < 4:
+                try:
+                    traci.close()
+                except Exception:
+                    pass
                 continue
             states_meta, actions_meta, targets_meta = compute_targets(Model_obj._model, batch_meta, gamma)
             set_model_weights(Model_obj._model, adapted_weights)
@@ -258,16 +289,25 @@ if __name__ == "__main__":
                 meta_loss = dqn_loss(Model_obj._model, states_meta, actions_meta, targets_meta)
             meta_grads = meta_tape.gradient(meta_loss, Model_obj._model.trainable_variables)
             meta_gradient_sum = [mg + g for mg, g in zip(meta_gradient_sum, meta_grads)]
+            # Store meta_loss from the last valid task for printing later
+            meta_loss_value = meta_loss
             # Restore the original meta-parameters for the next task
             set_model_weights(Model_obj._model, original_weights)
-        # End task loop
+            try:
+                traci.close()
+            except Exception:
+                pass
+            # -------- End Outer Loop for this task --------
 
         # Average meta-gradients over tasks and apply the update
         meta_gradient_avg = [mg / len(tasks) for mg in meta_gradient_sum]
         optimizer.apply_gradients(zip(meta_gradient_avg, Model_obj._model.trainable_variables))
 
         if meta_iter % 10 == 0:
-            print("Meta iteration", meta_iter, "completed with meta loss:", meta_loss.numpy())
+            if meta_loss_value is None:
+                print("Meta iteration", meta_iter, "completed with meta loss: 0")
+            else:
+                print("Meta iteration", meta_iter, "completed with meta loss:", meta_loss_value.numpy())
     # ------------------ End Meta-Training Loop ------------------
 
     meta_training_end_time = datetime.datetime.now()
@@ -279,7 +319,7 @@ if __name__ == "__main__":
         Model_obj.save_model(path)
     copyfile(src="training_settings.ini", dst=os.path.join(path, "training_settings.ini"))
 
-    # Visualization (using your existing stats, if desired)
+    # Visualization (using your existing statistics)
     viz = Visualization(path, dpi=96)
     viz.save_data_and_plot(data=Simulation_obj.reward_store, filename="reward",
                            xlabel="Episode", ylabel="Cumulative negative reward")

@@ -157,22 +157,22 @@ class Simulation:
             return np.argmax(self._Model.predict_one(state))
 
     def _set_yellow_phase(self, action_number):
-        """
-        Activate the yellow phase based on the intersection configuration.
-        Uses modulo to ensure the action index is valid.
-        """
         valid_index = action_number % len(self.int_conf["phase_mapping"])
         phase_config = self.int_conf["phase_mapping"][valid_index]["yellow"]
-        traci.trafficlight.setPhase("TL", phase_config)
+        if self.intersection_type == "roundabout":
+            for tl in ["TL1", "TL2", "TL3", "TL4"]:
+                traci.trafficlight.setPhase(tl, phase_config)
+        else:
+            traci.trafficlight.setPhase("TL", phase_config)
 
     def _set_green_phase(self, action_number):
-        """
-        Activate the green phase based on the intersection configuration.
-        Uses modulo to ensure the action index is valid.
-        """
         valid_index = action_number % len(self.int_conf["phase_mapping"])
         phase_config = self.int_conf["phase_mapping"][valid_index]["green"]
-        traci.trafficlight.setPhase("TL", phase_config)
+        if self.intersection_type == "roundabout":
+            for tl in ["TL1", "TL2", "TL3", "TL4"]:
+                traci.trafficlight.setPhase(tl, phase_config)
+        else:
+            traci.trafficlight.setPhase("TL", phase_config)
 
     def _get_queue_length(self):
         incoming_lane_ids = []

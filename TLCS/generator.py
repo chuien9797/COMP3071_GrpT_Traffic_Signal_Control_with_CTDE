@@ -44,6 +44,7 @@ class TrafficGenerator:
         elif self.intersection_type == "T_intersection":
             vehicle_entries = self._generate_T_intersection_routes(car_gen_steps)
         else:
+            # If it's something like "Y_intersection" or others, fallback:
             vehicle_entries = self._generate_default_routes(car_gen_steps)
 
         # Generate emergency vehicle entries.
@@ -57,9 +58,14 @@ class TrafficGenerator:
         output_folder = os.path.join("intersection", self.intersection_type)
         if not os.path.exists(output_folder):
             os.makedirs(output_folder)
+
+        # Decide on filename based on intersection type
         if self.intersection_type == "T_intersection":
             output_file = os.path.join(output_folder, "t_routes.rou.xml")
+        elif self.intersection_type == "roundabout":
+            output_file = os.path.join(output_folder, "roundabout_routes.rou.xml")
         else:
+            # For "cross", "Y_intersection", etc. we can reuse "cross_routes.rou.xml"
             output_file = os.path.join(output_folder, "cross_routes.rou.xml")
 
         # Get header from configuration (if provided) or use default.
@@ -106,11 +112,19 @@ class TrafficGenerator:
         """
         Generate routes for a roundabout intersection.
         Expects a route_config with keys like 'in_out' and 'turn'.
+
+        Example:
+            "route_config": {
+                "in_out": {"routes": ["route1","route2","route3","route4"], "probability": 0.8},
+                "turn":   {"routes": ["route5","route6","route7","route8"], "probability": 0.2}
+            }
         """
         vehicle_entries = []
         route_conf = self.int_conf.get("route_config", {})
+
+        # Default placeholders, but your intersection_config.py should override them
         in_out_conf = route_conf.get("in_out", {"routes": ["roundabout_in_out"], "probability": 0.8})
-        turn_conf = route_conf.get("turn", {"routes": ["roundabout_turn"], "probability": 0.2})
+        turn_conf   = route_conf.get("turn",   {"routes": ["roundabout_turn"],   "probability": 0.2})
         in_out_prob = in_out_conf.get("probability", 0.8)
 
         for car_counter, step in enumerate(car_gen_steps):
@@ -163,14 +177,22 @@ class TrafficGenerator:
         num_emergency = 3
         emergency_departures = np.random.uniform(0, self._max_steps, num_emergency)
         emergency_departures = np.rint(np.sort(emergency_departures)).astype(int)
-        # For T_intersection, use a defined routes list if provided.
+
+        # Attempt to read from config first
         routes_list = self.int_conf.get("emergency_routes", None)
-        if self.intersection_type == "T_intersection":
-            if not routes_list:
-                routes_list = self.int_conf.get("defined_routes", ["W_E", "E_W", "N_E", "N_W", "E_N", "W_N"])
-        else:
-            if not routes_list:
+
+        # If no config for emergency routes is found, we pick default sets
+        if not routes_list:
+            if self.intersection_type == "T_intersection":
+                # T-intersection default
+                routes_list = ["W_E", "E_W", "N_E", "N_W", "E_N", "W_N"]
+            elif self.intersection_type == "roundabout":
+                # Roundabout default → all route IDs
+                routes_list = ["route1","route2","route3","route4","route5","route6","route7","route8"]
+            else:
+                # Cross or fallback
                 routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]
+
         for i, depart_time in enumerate(emergency_departures):
             chosen_route = np.random.choice(routes_list)
             entry = '    <vehicle id="emergency_{}" type="emergency" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
@@ -213,6 +235,7 @@ class TrafficGenerator:
     <!-- Define standard vehicle type -->
     <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
 
+    <!-- Example of simple in/out routes, override in config or .rou.xml if needed -->
     <route id="roundabout_in_out" edges="in_edge out_edge"/>
     <route id="roundabout_turn" edges="in_edge turn_edge out_edge"/>"""
             elif self.intersection_type == "T_intersection":

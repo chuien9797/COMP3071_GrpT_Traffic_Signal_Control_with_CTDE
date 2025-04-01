@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <!-- Define vehicle types -->
+    <vType id="car" accel="2.6" decel="4.5" length="5" minGap="2.5" maxSpeed="13.9" />
+
+    <!-- Define routes for vehicles traversing the roundabout -->
+    <!-- Route 1: Enter from e1 (to TL1), traverse r1 from TL1 to TL2, then exit via e2_out from TL2 -->
+    <route id="route1" edges="e1 r1 e2_out"/>
+    <!-- Route 2: Enter from e2 (to TL2), traverse r2 from TL2 to TL3, then exit via e3_out from TL3 -->
+    <route id="route2" edges="e2 r2 e3_out"/>
+    <!-- Route 3: Enter from e3 (to TL3), traverse r3 from TL3 to TL4, then exit via e4_out from TL4 -->
+    <route id="route3" edges="e3 r3 e4_out"/>
+    <!-- Route 4: Enter from e4 (to TL4), traverse r4 from TL4 to TL1, then exit via e1_out from TL1 -->
+    <route id="route4" edges="e4 r4 e1_out"/>
+
+    <!-- Additional routes covering longer journeys (optional) -->
+    <!-- Vehicles that traverse two arcs before exiting -->
+    <route id="route5" edges="e1 r1 r2 e3_out"/>
+    <route id="route6" edges="e2 r2 r3 e4_out"/>
+    <route id="route7" edges="e3 r3 r4 e1_out"/>
+    <route id="route8" edges="e4 r4 r1 e2_out"/>
+
+    <!-- Assign vehicles to the routes with departure times -->
+    <vehicle id="veh1" type="car" route="route1" depart="0"/>
+    <vehicle id="veh2" type="car" route="route2" depart="5"/>
+    <vehicle id="veh3" type="car" route="route3" depart="10"/>
+    <vehicle id="veh4" type="car" route="route4" depart="15"/>
+    <vehicle id="veh5" type="car" route="route5" depart="20"/>
+    <vehicle id="veh6" type="car" route="route6" depart="25"/>
+    <vehicle id="veh7" type="car" route="route7" depart="30"/>
+    <vehicle id="veh8" type="car" route="route8" depart="35"/>
+</routes>

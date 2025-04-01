@@ -1,17 +1,19 @@
 <routes>
     <!-- Define emergency vehicle type -->
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true"/>
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
+           maxSpeed="20" sigma="0.5" emergency="true"/>
     <!-- Define standard vehicle type -->
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5"/>
-    
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
+           minGap="2.5" maxSpeed="25" sigma="0.5"/>
+
     <!-- Main road routes (west-east and east-west) -->
     <route id="W_E" edges="left_in right_out"/>
     <route id="E_W" edges="right_in left_out"/>
-    
+
     <!-- Routes from the north approach joining the main road -->
     <route id="N_E" edges="top_in right_out"/>
     <route id="N_W" edges="top_in left_out"/>
-    
+
     <!-- Optional: if vehicles on the main road can turn northward -->
     <route id="E_N" edges="right_in top_out"/>
     <route id="W_N" edges="left_in top_out"/>

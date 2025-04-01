@@ -8,6 +8,10 @@ def import_train_configuration(config_file):
     """
     Read the config file regarding training and import its content,
     including PPO‑specific hyperparameters.
+
+    For multi-environment training (Method A), we do NOT rely on a single
+    sumocfg_file from the .ini. Instead, each intersection's .sumocfg
+    is stored in intersection_config.py under 'sumocfg_file'.
     """
     content = configparser.ConfigParser()
     content.read(config_file)
@@ -37,10 +41,9 @@ def import_train_configuration(config_file):
     config['num_actions'] = content['agent'].getint('num_actions')
     config['gamma'] = content['agent'].getfloat('gamma')
     config['algorithm'] = content['agent'].get('algorithm')
-    # NEW: Read intersection type from config; default to "cross" if not specified
     config['intersection_type'] = content['agent'].get('intersection_type', 'cross')
 
-    # PPO-specific
+    # PPO-specific (if needed)
     if 'ppo' in content:
         config['ppo_hidden_size'] = content['ppo'].getint('hidden_size')
         config['ppo_learning_rate'] = content['ppo'].getfloat('learning_rate')
@@ -50,18 +53,25 @@ def import_train_configuration(config_file):
 
     # Paths
     config['models_path_name'] = content['dir']['models_path_name']
-    config['sumocfg_file_name'] = content['dir']['sumocfg_file_name']
+
+    # COMMENT OUT (or remove) to avoid forcing a single .sumocfg:
+    # config['sumocfg_file_name'] = content['dir']['sumocfg_file_name']
 
     return config
 
 
 def import_test_configuration(config_file):
     """
-    Read the config file regarding the testing and import its content
+    Read the config file regarding the testing and import its content.
+
+    If you're doing single-environment testing, you might still want
+    to use sumocfg_file_name from the .ini. Otherwise, you can also
+    comment it out here if you're testing multiple intersections.
     """
     content = configparser.ConfigParser()
     content.read(config_file)
     config = {}
+
     config['gui'] = content['simulation'].getboolean('gui')
     config['max_steps'] = content['simulation'].getint('max_steps')
     config['n_cars_generated'] = content['simulation'].getint('n_cars_generated')
@@ -70,44 +80,53 @@ def import_test_configuration(config_file):
     config['yellow_duration'] = content['simulation'].getint('yellow_duration')
     config['num_states'] = content['agent'].getint('num_states')
     config['num_actions'] = content['agent'].getint('num_actions')
-    config['sumocfg_file_name'] = content['dir']['sumocfg_file_name']
+    config['sumocfg_file_name'] = content['dir']['sumocfg_file_name']  # Keep for single-env test
     config['models_path_name'] = content['dir']['models_path_name']
     config['model_to_test'] = content['dir'].getint('model_to_test')
+
     return config
 
 
 def set_sumo(gui, sumocfg_file_name, max_steps):
     """
-    Configure various parameters of SUMO
+    Configure various parameters of SUMO.
+    If you're using multi-env training, sumocfg_file_name typically
+    comes from intersection_config.py, not the .ini.
     """
-    # sumo things - we need to import python modules from the $SUMO_HOME/tools directory
+    # sumo environment variable
     if 'SUMO_HOME' in os.environ:
         tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
         sys.path.append(tools)
     else:
         sys.exit("please declare environment variable 'SUMO_HOME'")
 
-    # setting the cmd mode or the visual mode
-    if gui == False:
+    # either sumo (CMD) or sumo-gui
+    if not gui:
         sumoBinary = checkBinary('sumo')
     else:
         sumoBinary = checkBinary('sumo-gui')
 
-    # setting the cmd command to run sumo at simulation time
-    sumo_cmd = [sumoBinary, "-c", os.path.join('intersection', sumocfg_file_name),
-                "--no-step-log", "true", "--waiting-time-memory", str(max_steps)]
+    # build the command
+    sumo_cmd = [
+        sumoBinary,
+        "-c", os.path.join('intersection', sumocfg_file_name),
+        "--no-step-log", "true",
+        "--waiting-time-memory", str(max_steps)
+    ]
     return sumo_cmd
 
 
 def set_train_path(models_path_name):
     """
-    Create a new model path with an incremental integer, also considering previously created model paths
+    Create a new model path with an incremental integer, also
+    considering previously created model paths.
     """
     models_path = os.path.join(os.getcwd(), models_path_name, '')
     os.makedirs(os.path.dirname(models_path), exist_ok=True)
 
     dir_content = os.listdir(models_path)
     if dir_content:
+        # we expect folder names like "model_1", "model_2", ...
         previous_versions = [int(name.split("_")[1]) for name in dir_content]
         new_version = str(max(previous_versions) + 1)
     else:
@@ -120,7 +139,7 @@ def set_train_path(models_path_name):
 
 def set_test_path(models_path_name, model_n):
     """
-    Returns a model path that identifies the model number provided as argument and a newly created 'test' path
+    Returns a model path for the tested model number, plus a 'test' subdir
     """
     model_folder_path = os.path.join(os.getcwd(), models_path_name, 'model_' + str(model_n), '')
 

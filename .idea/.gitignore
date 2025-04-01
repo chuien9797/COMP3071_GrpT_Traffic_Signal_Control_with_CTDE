@@ -1,3 +1,6 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/TLCS\intersection\episode_routes.rou.xml
+/TLCS\intersection\episode2_routes.rou.xml
+/.venv/

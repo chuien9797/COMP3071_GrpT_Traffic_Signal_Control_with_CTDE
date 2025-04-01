@@ -513,3 +513,18 @@ Episode 100:
   Delay:  826s
   Queue:  0.15
 
+Episode 1:
+  Reward: -4260.0
+  Delay:  5597s
+  Queue:  1.04
+
+Episode 2:
+  Reward: -8796.0
+  Delay:  10190s
+  Queue:  1.89
+
+Episode 1:
+  Reward: -5077.0
+  Delay:  6729s
+  Queue:  1.25
+

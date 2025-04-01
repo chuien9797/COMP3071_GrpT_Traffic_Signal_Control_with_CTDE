@@ -63,10 +63,13 @@ class TrafficGenerator:
         if self.intersection_type == "T_intersection":
             output_file = os.path.join(output_folder, "t_routes.rou.xml")
         elif self.intersection_type == "roundabout":
-            output_file = os.path.join(output_folder, "roundabout_routes.rou.xml")
-        else:
-            # For "cross", "Y_intersection", etc. we can reuse "cross_routes.rou.xml"
+            output_file = os.path.join(output_folder, "roundabout.rou.xml")
+        elif self.intersection_type == "cross_intersection":
             output_file = os.path.join(output_folder, "cross_routes.rou.xml")
+
+        else:
+            # For "Y_intersection", etc. we can reuse "cross_routes.rou.xml as template"
+            output_file = os.path.join(output_folder, "default_routes.rou.xml")
 
         # Get header from configuration (if provided) or use default.
         header = self._get_header()

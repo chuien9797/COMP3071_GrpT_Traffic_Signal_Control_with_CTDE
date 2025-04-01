@@ -59,6 +59,8 @@ class TrafficGenerator:
             os.makedirs(output_folder)
         if self.intersection_type == "T_intersection":
             output_file = os.path.join(output_folder, "t_routes.rou.xml")
+        if self.intersection_type == "roundabout":
+            output_file = os.path.join(output_folder, "roundabout.rou.xml")
         else:
             output_file = os.path.join(output_folder, "cross_routes.rou.xml")
 

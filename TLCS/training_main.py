@@ -1,186 +1,151 @@
-from __future__ import absolute_import
-from __future__ import print_function
-
-import sys
 import os
+import sys
+import random
 import datetime
-from shutil import copyfile
+import numpy as np
+import tensorflow as tf
 
-from rl_models.ppo_model import PPOModel, PPOSimulation
-
-# Append the parent directory so that 'TLCS' can be imported
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+# Your existing imports:
 from utils import import_train_configuration, set_sumo, set_train_path
-from environment_utils import compute_environment_parameters, build_dynamic_model
-
-# Import PPO classes from our new merged file
-
-# If DQN is used, keep the old simulation (and memory) imports:
-# from model import TrainModel
-# from training_simulation import Simulation
-# from memory import Memory
-
+from intersection_config import INTERSECTION_CONFIGS
 from generator import TrafficGenerator
+from training_simulation import Simulation
+from memory import Memory
 from visualization import Visualization
 
-import intersection_config as int_config
+# 1) Instead of your old "TrainModel" or "build_dynamic_model",
+#    import our new aggregator class:
+from model import TrainModelAggregator
 
-if __name__ == "__main__":
-    # Load configuration and set up simulation paths
+
+def main():
+    """
+    Multi-environment DQN training loop using a per-lane embedding + aggregator
+    approach. We do not rely on a single huge input_dim. Instead, each environment
+    returns (num_lanes, lane_feature_dim) states that are aggregated inside the model.
+    """
+
+    # 1) Load config from .ini
     config = import_train_configuration("training_settings.ini")
+    algorithm = config.get('algorithm', 'DQN')
+    if algorithm != 'DQN':
+        raise ValueError("This script is for DQN. Found algorithm=%s" % algorithm)
 
-    # Check if command line argument for intersection type is provided and override config if so
-    if len(sys.argv) > 1:
-        print("Overriding intersection type with command line argument:", sys.argv[1])
-        config['intersection_type'] = sys.argv[1]
+    # The intersection types you want to train on in one run:
+    possible_envs = ["cross", "roundabout", "T_intersection"]
+    # e.g. add "Y_intersection" if you like
 
-    sumo_cmd = set_sumo(config['gui'], config['sumocfg_file_name'], config['max_steps'])
-    path = set_train_path(config['models_path_name'])
+    # 2) We only need the largest *action* space across those envs,
+    #    because aggregator doesn't require a single 'num_states'.
+    #    We'll pick the max # of actions we see among possible_envs.
+    max_num_actions = 0
+    for env_name in possible_envs:
+        env_conf = INTERSECTION_CONFIGS[env_name]
+        # The 'phase_mapping' typically has len() = # possible actions
+        # Or you might read from 'num_actions' if stored in config
+        nA = len(env_conf["phase_mapping"])
+        if nA > max_num_actions:
+            max_num_actions = nA
 
-    import tensorflow as tf
+    # We'll store that in the config so our aggregator knows how many Q-values to produce
+    config['num_actions'] = max_num_actions
 
-    print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
+    # 3) Build our aggregator model
+    # Typically, lane_feature_dim is how many features you store PER lane.
+    # For example, you might store 3 or 5 features per lane. We'll read from .ini if you want:
+    # Or you can just hard-code a guess like 5
+    lane_feature_dim = 5  # e.g. occupancy, waiting, emergency_flag, etc.
+    aggregator_embedding_dim = 32  # for lane embeddings
+    aggregator_final_hidden = 64   # final MLP hidden size
+
+    Model = TrainModelAggregator(
+        lane_feature_dim = lane_feature_dim,
+        embedding_dim    = aggregator_embedding_dim,
+        final_hidden     = aggregator_final_hidden,
+        num_actions      = max_num_actions,
+        batch_size       = config['batch_size'],
+        learning_rate    = config['learning_rate']
+    )
+
+    # 4) Create a single replay Memory instance
+    MemoryInstance = Memory(
+        config['memory_size_max'],
+        config['memory_size_min']
+    )
+
+    # 5) Build a Simulation() object per environment
+    simulations = {}
+    for env_name in possible_envs:
+        # Copy config so we can tweak intersection_type
+        local_conf = config.copy()
+        local_conf['intersection_type'] = env_name
+
+        # Retrieve the sumocfg_file from intersection_config
+        tmp_conf = INTERSECTION_CONFIGS[env_name]
+        sumocfg_file = tmp_conf.get("sumocfg_file", "cross_intersection/cross_intersection.sumocfg")
+        sumo_cmd = set_sumo(local_conf['gui'], sumocfg_file, local_conf['max_steps'])
+
+        # Traffic generator
+        TrafficGen = TrafficGenerator(
+            max_steps         = local_conf['max_steps'],
+            n_cars_generated  = local_conf['n_cars_generated'],
+            intersection_type = env_name
+        )
+
+        # Create the Simulation, referencing aggregator Model and shared Memory
+        sim = Simulation(
+            Model           = Model,
+            Memory          = MemoryInstance,
+            TrafficGen      = TrafficGen,
+            sumo_cmd        = sumo_cmd,
+            gamma           = local_conf['gamma'],
+            max_steps       = local_conf['max_steps'],
+            green_duration  = local_conf['green_duration'],
+            yellow_duration = local_conf['yellow_duration'],
+            # We can ignore num_states or set it arbitrarily:
+            num_states      = 9999,  # not used by aggregator
+            num_actions     = max_num_actions,  # from aggregator
+            training_epochs = local_conf['training_epochs'],
+            intersection_type = env_name
+        )
+        simulations[env_name] = sim
+
+    # 6) Main training loop
+    total_episodes = config['total_episodes']
+    start_time = datetime.datetime.now()
+    print("Num GPUs Available:", len(tf.config.list_physical_devices('GPU')))
     print("Physical devices:", tf.config.list_physical_devices())
 
-    # Load intersection configuration based on intersection type
-    intersection_type = config.get('intersection_type', 'cross')
-    if intersection_type not in int_config.INTERSECTION_CONFIGS:
-        raise ValueError("Intersection type '{}' not found in configuration.".format(intersection_type))
-    int_conf = int_config.INTERSECTION_CONFIGS[intersection_type]
+    for ep in range(total_episodes):
+        # pick environment type randomly
+        chosen_env = random.choice(possible_envs)
+        sim = simulations[chosen_env]
 
-    # Automatically compute state and action dimensions from intersection configuration
-    num_states, num_actions = compute_environment_parameters(int_conf)
-    num_states += 9
-    config['num_states'] = num_states
-    config['num_actions'] = num_actions
-
-    print("Computed num_states:", num_states)
-    print("Computed num_actions:", num_actions)
-
-    # Choose the algorithm based on the configuration
-    algorithm = config.get('algorithm', 'DQN')
-
-    if algorithm == 'PPO':
-        model = PPOModel(
-            input_dim=config['num_states'],
-            output_dim=config['num_actions'],
-            hidden_size=config['ppo_hidden_size'],
-            learning_rate=config['ppo_learning_rate'],
-            clip_ratio=config['ppo_clip_ratio'],
-            update_epochs=config['ppo_update_epochs']
-        )
-        traffic_gen = TrafficGenerator(config['max_steps'], config['n_cars_generated'],
-                                       intersection_type=intersection_type)
-        Simulation = PPOSimulation(
-            model=model,
-            traffic_gen=traffic_gen,
-            sumo_cmd=sumo_cmd,
-            gamma=config['gamma'],
-            max_steps=config['max_steps'],
-            green_duration=config['green_duration'],
-            yellow_duration=config['yellow_duration'],
-            num_states=config['num_states'],
-            num_actions=config['num_actions'],
-            training_epochs=config['ppo_training_epochs'],
-            intersection_type=intersection_type
-        )
-
-    elif algorithm == 'DQN':
-        # Instantiate DQN model and simulation as before.
-        from model import TrainModel
-        from training_simulation import Simulation
-        from memory import Memory
-
-        # Build dynamic neural network model for DQN
-        hidden_layers = config.get('dqn_hidden_layers', [64, 64])
-        dynamic_model = build_dynamic_model(num_states, num_actions, hidden_layers)
-
-        Model = TrainModel(
-            int(config['num_layers']),
-            int(config['width_layers']),
-            int(config['batch_size']),
-            float(config['learning_rate']),
-            input_dim=int(config['num_states']),
-            output_dim=int(config['num_actions']),
-            model=dynamic_model
-        )
-        MemoryInstance = Memory(
-            int(config['memory_size_max']),
-            int(config['memory_size_min'])
-        )
-        TrafficGen = TrafficGenerator(int(config['max_steps']), int(config['n_cars_generated']),
-                                      intersection_type=intersection_type)
-        Simulation = Simulation(
-            Model,
-            MemoryInstance,
-            TrafficGen,
-            sumo_cmd,
-            float(config['gamma']),
-            int(config['max_steps']),
-            int(config['green_duration']),
-            int(config['yellow_duration']),
-            int(config['num_states']),
-            int(config['num_actions']),
-            int(config['training_epochs']),
-            intersection_type=intersection_type  # NEW parameter
-        )
-    else:
-        raise ValueError("Unsupported algorithm: {}. Please choose either 'PPO' or 'DQN'.".format(algorithm))
-
-    total_episodes = int(config['total_episodes'])
-    start_time = datetime.datetime.now()
-
-    if algorithm == 'PPO':
-        for ep in range(total_episodes):
-            print(f"----- Episode {ep + 1} of {total_episodes}")
-            states, actions, rewards, reward_sum, sim_time = Simulation.run_episode(ep)
-            train_time = Simulation.update(states, actions, rewards)
-            print(f"Reward: {reward_sum} | Sim time: {sim_time}s | Train time: {train_time}s")
-
-    elif algorithm == 'DQN':
-        episode = 0
-        while episode < total_episodes:
-            print("----- Episode", episode + 1, "of", total_episodes)
-            epsilon = 1.0 - (episode / total_episodes)
-            simulation_time, training_time = Simulation.run(episode, epsilon)
-            print('Simulation time:', simulation_time, 's - Training time:', training_time, 's')
-            
-            # 📦 Save stats to log
-            log_dir = "logs"
-            os.makedirs(log_dir, exist_ok=True)
-            log_path = os.path.join(log_dir, "TLCS/training_summary.log")
-
-            with open(log_path, "a") as f:
-                f.write(f"Episode {episode + 1}:\n")
-                f.write(f"  Reward: {Simulation.reward_store[-1]}\n")
-                f.write(f"  Delay:  {Simulation.cumulative_wait_store[-1]}s\n")
-                f.write(f"  Queue:  {Simulation.avg_queue_length_store[-1]:.2f}\n\n")
-
-            episode += 1
+        print(f"----- Episode {ep + 1} of {total_episodes} on environment '{chosen_env}' -----")
+        epsilon = 1.0 - (ep / total_episodes)  # naive linear decay
+        sim_time, train_time = sim.run(episode=ep, epsilon=epsilon)
+        print(f"Episode {ep + 1} done | env={chosen_env} | sim time={sim_time}s | train time={train_time}s\n")
 
     end_time = datetime.datetime.now()
     print("\n----- Start time:", start_time)
     print("----- End time:", end_time)
-    print("----- Session info saved at:", path)
 
-    # Save the trained model and configuration for future reference
-    # For DQN, the model is stored in Model variable, for PPO in model variable
-    if algorithm == 'PPO':
-        model.save_model(path)
-    elif algorithm == 'DQN':
-        Model.save_model(path)
-    copyfile(src="training_settings.ini", dst=os.path.join(path, "training_settings.ini"))
+    # 7) Save final aggregator model
+    path = set_train_path(config['models_path_name'])
+    Model.save_model(path)
 
-    # Visualization: For PPO, visualize episode rewards; for DQN, use existing stats.
+    # 8) (Optional) Visualization. We'll pick "cross" as an example
+    cross_sim = simulations["cross"]
     viz = Visualization(path, dpi=96)
-    if algorithm == 'PPO':
-        viz.save_data_and_plot(data=Simulation.episode_rewards, filename="ppo_reward",
-                               xlabel="Episode", ylabel="Reward")
-    else:
-        viz.save_data_and_plot(data=Simulation.reward_store, filename="reward",
-                               xlabel="Episode", ylabel="Cumulative negative reward")
-        viz.save_data_and_plot(data=Simulation.cumulative_wait_store, filename="delay",
-                               xlabel="Episode", ylabel="Cumulative delay (s)")
-        viz.save_data_and_plot(data=Simulation.avg_queue_length_store, filename="queue",
-                               xlabel="Episode", ylabel="Average queue length (vehicles)")
+    viz.save_data_and_plot(data=cross_sim.reward_store, filename="reward",
+                           xlabel="Episode", ylabel="Cumulative negative reward")
+    viz.save_data_and_plot(data=cross_sim.cumulative_wait_store, filename="delay",
+                           xlabel="Episode", ylabel="Cumulative delay (s)")
+    viz.save_data_and_plot(data=cross_sim.avg_queue_length_store, filename="queue",
+                           xlabel="Episode", ylabel="Avg queue length (vehicles)")
+
+    print("All done! Model + plots saved at:", path)
+
+
+if __name__ == "__main__":
+    main()

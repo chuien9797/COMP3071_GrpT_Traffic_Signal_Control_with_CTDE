@@ -1,7 +1,7 @@
 ##############################################################################
-# Filename: unified_training.py (or training_main_multi_env.py)
+# Filename: unified_training.py
 # Purpose:  Interleave multiple intersection types in a single DQN training run
-#           using *one* model, each with its own SUMO .sumocfg file.
+#           using *one* aggregator-based model, each with its own SUMO .sumocfg
 ##############################################################################
 
 import os
@@ -11,92 +11,94 @@ import datetime
 import numpy as np
 import tensorflow as tf
 
-# Your existing imports
+# Your existing imports:
 from utils import import_train_configuration, set_sumo, set_train_path
-from environment_utils import compute_environment_parameters, build_dynamic_model
-from intersection_config import INTERSECTION_CONFIGS  # We read sumocfg_file from here
+from intersection_config import INTERSECTION_CONFIGS
 from generator import TrafficGenerator
-from model import TrainModel
 from training_simulation import Simulation
 from memory import Memory
 from visualization import Visualization
 
+# 1) Instead of your old "TrainModel" or "build_dynamic_model",
+#    import our new aggregator class:
+from model import TrainModelAggregator
+
+
 def main():
     """
-    Multi-environment DQN training loop. Trains one DQN model on all
-    intersection types by randomly picking an environment each episode,
-    now using each environment's custom .sumocfg file.
+    Multi-environment DQN training loop using a per-lane embedding + aggregator
+    approach. We do not rely on a single huge input_dim. Instead, each environment
+    returns (num_lanes, lane_feature_dim) states that are aggregated inside the model.
     """
 
-    # 1) Load your training config from .ini
+    # 1) Load config from .ini
     config = import_train_configuration("training_settings.ini")
     algorithm = config.get('algorithm', 'DQN')
     if algorithm != 'DQN':
         raise ValueError("This script is for DQN. Found algorithm=%s" % algorithm)
 
-    # The intersection types you want to train on:
+    # The intersection types you want to train on in one run:
     possible_envs = ["cross", "roundabout", "T_intersection"]
-    # (Add "Y_intersection" if you want, etc.)
+    # e.g. add "Y_intersection" if you like
 
-    # 2) Find largest state/action spaces across those envs
-    max_num_states = 0
+    # 2) We only need the largest *action* space across those envs,
+    #    because aggregator doesn't require a single 'num_states'.
+    #    We'll pick the max # of actions we see among possible_envs.
     max_num_actions = 0
     for env_name in possible_envs:
         env_conf = INTERSECTION_CONFIGS[env_name]
-        nS, nA = compute_environment_parameters(env_conf)
-        nS += 9  # your existing offset
-        if nS > max_num_states:
-            max_num_states = nS
+        # The 'phase_mapping' typically has len() = # possible actions
+        # Or you might read from 'num_actions' if stored in config
+        nA = len(env_conf["phase_mapping"])
         if nA > max_num_actions:
             max_num_actions = nA
 
-    config['num_states'] = max_num_states
+    # We'll store that in the config so our aggregator knows how many Q-values to produce
     config['num_actions'] = max_num_actions
 
-    # 3) Build a single DQN model big enough for all
-    hidden_layers = config.get('dqn_hidden_layers', [64, 64])  # or from .ini
-    dqn_model = build_dynamic_model(input_dim=max_num_states,
-                                    output_dim=max_num_actions,
-                                    hidden_layers=hidden_layers)
+    # 3) Build our aggregator model
+    # Typically, lane_feature_dim is how many features you store PER lane.
+    # For example, you might store 3 or 5 features per lane. We'll read from .ini if you want:
+    # Or you can just hard-code a guess like 5
+    lane_feature_dim = 5  # e.g. occupancy, waiting, emergency_flag, etc.
+    aggregator_embedding_dim = 32  # for lane embeddings
+    aggregator_final_hidden = 64   # final MLP hidden size
 
-    Model = TrainModel(
-        num_layers    = config['num_layers'],
-        width         = config['width_layers'],
-        batch_size    = config['batch_size'],
-        learning_rate = config['learning_rate'],
-        input_dim     = max_num_states,
-        output_dim    = max_num_actions,
-        model         = dqn_model
+    Model = TrainModelAggregator(
+        lane_feature_dim = lane_feature_dim,
+        embedding_dim    = aggregator_embedding_dim,
+        final_hidden     = aggregator_final_hidden,
+        num_actions      = max_num_actions,
+        batch_size       = config['batch_size'],
+        learning_rate    = config['learning_rate']
     )
 
-    # One global replay memory
-    MemoryInstance = Memory(config['memory_size_max'],
-                            config['memory_size_min'])
+    # 4) Create a single replay Memory instance
+    MemoryInstance = Memory(
+        config['memory_size_max'],
+        config['memory_size_min']
+    )
 
-    # 4) Build a Simulation() object per environment
+    # 5) Build a Simulation() object per environment
     simulations = {}
     for env_name in possible_envs:
+        # Copy config so we can tweak intersection_type
         local_conf = config.copy()
         local_conf['intersection_type'] = env_name
-        # Recompute environment parameters for this env
-        tmp_conf = INTERSECTION_CONFIGS[env_name]
-        nS, nA = compute_environment_parameters(tmp_conf)
-        nS += 9
-        local_conf['num_states'] = nS
-        local_conf['num_actions'] = nA
 
-        # Pull the sumocfg_file from the intersection_config
+        # Retrieve the sumocfg_file from intersection_config
+        tmp_conf = INTERSECTION_CONFIGS[env_name]
         sumocfg_file = tmp_conf.get("sumocfg_file", "cross_intersection/cross_intersection.sumocfg")
         sumo_cmd = set_sumo(local_conf['gui'], sumocfg_file, local_conf['max_steps'])
 
-        # The traffic generator
+        # Traffic generator
         TrafficGen = TrafficGenerator(
             max_steps         = local_conf['max_steps'],
             n_cars_generated  = local_conf['n_cars_generated'],
             intersection_type = env_name
         )
 
-        # Create the DQN Simulation
+        # Create the Simulation, referencing aggregator Model and shared Memory
         sim = Simulation(
             Model           = Model,
             Memory          = MemoryInstance,
@@ -106,14 +108,15 @@ def main():
             max_steps       = local_conf['max_steps'],
             green_duration  = local_conf['green_duration'],
             yellow_duration = local_conf['yellow_duration'],
-            num_states      = local_conf['num_states'],
-            num_actions     = local_conf['num_actions'],
+            # We can ignore num_states or set it arbitrarily:
+            num_states      = 9999,  # not used by aggregator
+            num_actions     = max_num_actions,  # from aggregator
             training_epochs = local_conf['training_epochs'],
             intersection_type = env_name
         )
         simulations[env_name] = sim
 
-    # 5) Main training loop
+    # 6) Main training loop
     total_episodes = config['total_episodes']
     start_time = datetime.datetime.now()
     print("Num GPUs Available:", len(tf.config.list_physical_devices('GPU')))
@@ -133,11 +136,11 @@ def main():
     print("\n----- Start time:", start_time)
     print("----- End time:", end_time)
 
-    # 6) Save the final model
+    # 7) Save final aggregator model
     path = set_train_path(config['models_path_name'])
     Model.save_model(path)
 
-    # (Optional) Visualization
+    # 8) (Optional) Visualization. We'll pick "cross" as an example
     cross_sim = simulations["cross"]
     viz = Visualization(path, dpi=96)
     viz.save_data_and_plot(data=cross_sim.reward_store, filename="reward",

@@ -3,6 +3,7 @@ import numpy as np
 import random
 import timeit
 import os
+import matplotlib.pyplot as plt
 
 from emergency_handler import check_emergency
 import intersection_config as int_config
@@ -11,6 +12,7 @@ class Simulation:
     def __init__(
         self,
         Model,
+        TargetModel,
         Memory,
         TrafficGen,
         sumo_cmd,
@@ -18,12 +20,14 @@ class Simulation:
         max_steps,
         green_duration,
         yellow_duration,
-        num_states,         # Not actually used here with aggregator, can be ignored
+        num_states,
         num_actions,
         training_epochs,
-        intersection_type="cross"
+        intersection_type="cross",
+        signal_fault_prob=0.01,
     ):
         self._Model = Model
+        self._TargetModel = TargetModel
         self._Memory = Memory
         self._TrafficGen = TrafficGen
         self._gamma = gamma
@@ -32,7 +36,7 @@ class Simulation:
         self._max_steps = max_steps
         self._green_duration = green_duration
         self._yellow_duration = yellow_duration
-        self._num_states = num_states      # not used in aggregator approach
+        self._num_states = num_states
         self._num_actions = num_actions
         self._reward_store = []
         self._cumulative_wait_store = []
@@ -40,22 +44,18 @@ class Simulation:
         self._training_epochs = training_epochs
         self._emergency_q_logs = []
         self._waiting_times = {}
+        self.signal_fault_prob = signal_fault_prob  # Probability a 'G' flips to 'r'
+        self.manual_override = False 
+        self.recovery_queue = {}  # { (tlid, phase): { 'step': recover_at, 'original': 'GGG...r' } }
 
-        # Load the intersection configuration
         self.intersection_type = intersection_type
         if self.intersection_type not in int_config.INTERSECTION_CONFIGS:
             raise ValueError(f"Intersection type '{self.intersection_type}' not found in config.")
         self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
 
     def run(self, episode, epsilon):
-        """
-        1) Generate routes and launch SUMO.
-        2) At each step, build a lane-based state (shape: (num_lanes, lane_feature_dim)),
-           choose an action, step the environment, and store the transition.
-        3) After the episode, perform training.
-        """
-        os.makedirs("logs", exist_ok=True)
-        log_file = open(f"logs/episode_{episode}.log", "w")
+        os.makedirs("logs8", exist_ok=True)
+        log_file = open(f"logs8/episode_{episode}.log", "w")
 
         start_time = timeit.default_timer()
         self._TrafficGen.generate_routefile(seed=episode)
@@ -70,12 +70,12 @@ class Simulation:
         old_total_wait = 0
         old_state = None
         old_action = None
+        self.faulty_lights = set()
 
         while self._step < self._max_steps:
             if check_emergency(self):
                 continue
 
-            # Build adaptive lane-based state: shape = (num_lanes, lane_feature_dim)
             current_state = self._get_state()
 
             current_total_wait = self._collect_waiting_times()
@@ -108,6 +108,11 @@ class Simulation:
         traci.close()
         simulation_time = round(timeit.default_timer() - start_time, 1)
 
+                # Write summary log 
+        with open(f"logs8/episode_{episode}_summary.log", "w") as f:
+            f.write(f"""Intersection Type: {self.intersection_type} \nTotal reward: {self._sum_neg_reward} - Epsilon: {round(epsilon, 2)}
+            """)
+
         print("Training...")
         start_time = timeit.default_timer()
         for _ in range(self._training_epochs):
@@ -121,12 +126,57 @@ class Simulation:
             steps_todo = self._max_steps - self._step
 
         while steps_todo > 0:
+            self._inject_signal_faults()  # Apply signal-level faults before each step
             traci.simulationStep()
             self._step += 1
             steps_todo -= 1
             queue_length = self._get_queue_length()
             self._sum_queue_length += queue_length
             self._sum_waiting_time += queue_length
+
+    def _inject_signal_faults(self):
+        self.manual_override = False
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+
+        # Inject faults
+        for tlid in tl_ids:
+            logic = traci.trafficlight.getCompleteRedYellowGreenDefinition(tlid)[0]
+            current_phase = traci.trafficlight.getPhase(tlid)
+            current_state = logic.phases[current_phase].state
+
+            # Schedule recovery if it's time
+            key = (tlid, current_phase)
+            if key in self.recovery_queue and self._step >= self.recovery_queue[key]["step"]:
+                recovered_state = self.recovery_queue[key]["original"]
+                traci.trafficlight.setRedYellowGreenState(tlid, recovered_state)
+                print(f"[Step {self._step}] ✅ Signal recovered at TL={tlid}, phase={current_phase}")
+                print(f"    Recovered state: {recovered_state}")
+                del self.recovery_queue[key]
+                continue  # Skip fault injection this step
+
+            # Inject new faults
+            new_state = list(current_state)
+            flipped_indices = []
+            for i, signal in enumerate(current_state):
+                if signal == 'G' and random.random() < self.signal_fault_prob:
+                    new_state[i] = 'r'
+                    flipped_indices.append(i)
+
+            new_state_str = ''.join(new_state)
+            if new_state_str != current_state:
+                traci.trafficlight.setRedYellowGreenState(tlid, new_state_str)
+                self.manual_override = True
+                recover_after = random.randint(20, 50)  # N steps to recover
+                self.recovery_queue[(tlid, current_phase)] = {
+                    "step": self._step + recover_after,
+                    "original": current_state,
+                }
+                print(f"[Step {self._step}] ❌ Signal fault injected at TL={tlid}, phase={current_phase}")
+                print(f"    Original state: {current_state}")
+                print(f"    Modified state: {new_state_str}")
+                print(f"    Flipped indices: {flipped_indices}")
+                print(f"    Scheduled recovery at step {self._step + recover_after}")
+
 
     def _collect_waiting_times(self):
         incoming_lane_ids = []
@@ -144,15 +194,14 @@ class Simulation:
         return float(sum(self._waiting_times.values()))
 
     def _choose_action(self, state, epsilon):
-        # state is shape (num_lanes, lane_feature_dim)
         if random.random() < epsilon:
             return random.randint(0, self._num_actions - 1)
         else:
-            q_vals = self._Model.predict_one(state)  # shape: (1, num_actions)
+            q_vals = self._Model.predict_one(state)
             return int(np.argmax(q_vals[0]))
 
     def _set_green_phase(self, action_number):
-        if "phase_mapping" not in self.int_conf:
+        if hasattr(self, "manual_override") and self.manual_override:
             return
         phase_map = self.int_conf["phase_mapping"]
         if action_number not in phase_map:
@@ -160,7 +209,15 @@ class Simulation:
         green_phase = phase_map[action_number]["green"]
         tl_ids = self.int_conf.get("traffic_light_ids", [])
         for tlid in tl_ids:
-            traci.trafficlight.setPhase(tlid, green_phase)
+            if tlid not in self.faulty_lights:
+                # Reset the traffic light to its default logic before setting the phase
+                try:
+                    traci.trafficlight.setProgram(tlid, "0")
+                    traci.trafficlight.setPhase(tlid, green_phase)
+                except traci.exceptions.TraCIException as e:
+                    print(f"⚠️ Failed to set green phase {green_phase} for {tlid}: {e}")
+
+
 
     def _set_yellow_phase(self, action_number):
         if "phase_mapping" not in self.int_conf:
@@ -171,68 +228,62 @@ class Simulation:
         yellow_phase = phase_map[action_number]["yellow"]
         tl_ids = self.int_conf.get("traffic_light_ids", [])
         for tlid in tl_ids:
-            traci.trafficlight.setPhase(tlid, yellow_phase)
+            logics = traci.trafficlight.getAllProgramLogics(tlid)
+            if not logics:
+                continue
+            num_phases = len(logics[0].phases)
+            if yellow_phase < num_phases:
+                traci.trafficlight.setProgram(tlid, "0")  # 👈 reset to default before setting phase
+                traci.trafficlight.setPhase(tlid, yellow_phase)
+            else:
+                print(f"⚠️ Skipping invalid yellow phase {yellow_phase} for {tlid} (only {num_phases} phases)")
+
+
+
 
     def _get_queue_length(self):
         incoming_lane_ids = []
         for lanes in self.int_conf["incoming_lanes"].values():
             incoming_lane_ids.extend(lanes)
-        total_queue = 0
-        for lane in incoming_lane_ids:
-            total_queue += traci.lane.getLastStepHaltingNumber(lane)
-        return total_queue
+        return sum(traci.lane.getLastStepHaltingNumber(lane) for lane in incoming_lane_ids)
 
     def _get_state(self):
-        """
-        Build lane-based features for each lane.
-        Returns a 2D array with shape (num_lanes, lane_feature_dim),
-        where lane_feature_dim = 5, containing:
-          0) occupancy_count: number of vehicles on this lane.
-          1) waiting_time: from traci.lane.getWaitingTime.
-          2) emergency_flag: 1 if at least one emergency vehicle is present.
-          3) halted_count: from traci.lane.getLastStepHaltingNumber.
-          4) traffic_light_phase: replicate global phase (or 0 if none).
-        """
         incoming_lanes = self.int_conf["incoming_lanes"]
         lane_order = []
         for group in sorted(incoming_lanes.keys()):
             lane_order.extend(incoming_lanes[group])
         num_lanes = len(lane_order)
-        lane_feature_dim = 5
+        lane_feature_dim = 9
         lane_features = np.zeros((num_lanes, lane_feature_dim), dtype=np.float32)
 
-        # 1) occupancy_count
+        intersection_encoding = {
+            "cross": [1.0, 0.0, 0.0],
+            "roundabout": [0.0, 1.0, 0.0],
+            "T_intersection": [0.0, 0.0, 1.0]
+        }
+        type_vector = intersection_encoding.get(self.intersection_type, [0.0, 0.0, 0.0])
+
         for i, lane_id in enumerate(lane_order):
             lane_features[i, 0] = traci.lane.getLastStepVehicleNumber(lane_id)
-        # 2) waiting_time
-        for i, lane_id in enumerate(lane_order):
             lane_features[i, 1] = traci.lane.getWaitingTime(lane_id)
-        # 3) emergency_flag
-        for i, lane_id in enumerate(lane_order):
             flag = 0
             for car_id in traci.lane.getLastStepVehicleIDs(lane_id):
                 if traci.vehicle.getTypeID(car_id) == "emergency":
                     flag = 1
                     break
             lane_features[i, 2] = float(flag)
-        # 4) halted_count
-        for i, lane_id in enumerate(lane_order):
             lane_features[i, 3] = traci.lane.getLastStepHaltingNumber(lane_id)
-        # 5) traffic_light_phase: replicate the phase of the first traffic light (if any)
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        phase_val = 0.0
-        if tl_ids:
-            phase_val = float(traci.trafficlight.getPhase(tl_ids[0]))
-        for i in range(num_lanes):
+            tl_ids = self.int_conf.get("traffic_light_ids", [])
+            phase_val = 0.0
+            if tl_ids:
+                phase_val = float(traci.trafficlight.getPhase(tl_ids[0]))
             lane_features[i, 4] = phase_val
+            lane_features[i, 5] = 1.0 if tl_ids and tl_ids[0] in self.faulty_lights else 0.0
+            # print(f"Lane {i} faulty light status: {lane_features[i,5]}")
 
         return lane_features
 
     def _pad_states(self, state_list):
-        """
-        Pad a list of lane-state arrays (each shape: (num_lanes, lane_feature_dim))
-        so that they all have the same number of lanes (equal to the max in the batch).
-        """
         lane_feature_dim = state_list[0].shape[1]
         max_lanes = max(state.shape[0] for state in state_list)
         padded = []
@@ -247,11 +298,6 @@ class Simulation:
         return np.array(padded, dtype=np.float32)
 
     def _replay(self):
-        """
-        Sample from replay memory and train.
-        The aggregator model expects states shaped (batch_size, num_lanes, lane_feature_dim).
-        Since different samples may have different numbers of lanes, we pad them per batch.
-        """
         batch = self._Memory.get_samples(self._Model.batch_size)
         if len(batch) == 0:
             return
@@ -268,18 +314,20 @@ class Simulation:
             actions.append(act)
             rewards.append(rew)
 
-        # Pad states so that all samples in the batch have the same number of lanes
-        states = self._pad_states(state_list)       # shape: (batch_size, max_num_lanes, lane_feature_dim)
+        states = self._pad_states(state_list)
         next_states = self._pad_states(next_state_list)
         actions = np.array(actions, dtype=np.int32)
         rewards = np.array(rewards, dtype=np.float32)
 
-        q_s_a = self._Model.predict_batch(states)       # shape: (batch_size, num_actions)
-        q_s_a_next = self._Model.predict_batch(next_states)
+        q_s_a = self._Model.predict_batch(states)
+        
+        # Double DQN logic
+        best_next_actions = np.argmax(self._Model.predict_batch(next_states), axis=1)
+        target_q_next = self._TargetModel.predict_batch(next_states)
+        target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
 
         y = np.copy(q_s_a)
-        for i in range(len(batch)):
-            y[i, actions[i]] = rewards[i] + self._gamma * np.max(q_s_a_next[i])
+        y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
 
         self._Model.train_batch(states, y)
 
@@ -287,6 +335,32 @@ class Simulation:
         self._reward_store.append(self._sum_neg_reward)
         self._cumulative_wait_store.append(self._sum_waiting_time)
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)
+
+
+    def analyze_results(self):
+        plt.figure(figsize=(15, 5))
+
+        plt.subplot(1, 3, 1)
+        plt.plot(self.reward_store)
+        plt.title("Reward per Episode")
+        plt.xlabel("Episode")
+        plt.ylabel("Reward")
+
+        plt.subplot(1, 3, 2)
+        plt.plot(self.avg_queue_length_store)
+        plt.title("Average Queue Length per Episode")
+        plt.xlabel("Episode")
+        plt.ylabel("Average Queue Length")
+
+        plt.subplot(1, 3, 3)
+        plt.plot(self.cumulative_wait_store)
+        plt.title("Cumulative Waiting Time per Episode")
+        plt.xlabel("Episode")
+        plt.ylabel("Cumulative Waiting Time")
+
+        plt.show()
+
+        print(f"Final Faulty Lights: {self.faulty_lights}")
 
     @property
     def reward_store(self):

@@ -4,3 +4,11 @@ changes.txt
 /.venv/
 TLCS/adaptive_controller.py
 TLCS/check_vehicles.py
+TLCS/logs
+TLCS/logs2
+TLCS/logs3
+TLCS/logs4
+TLCS/logs5
+TLCS/logs6
+TLCS/logs7
+TLCS/fault_handler.py

@@ -67,6 +67,16 @@ def main():
         learning_rate    = config['learning_rate']
     )
 
+    TargetModel = TrainModelAggregator(
+        lane_feature_dim    = lane_feature_dim,
+        embedding_dim       = aggregator_embedding_dim,
+        final_hidden        = aggregator_final_hidden,
+        num_actions         = max_num_actions,
+        batch_size          = config['batch_size'],
+        learning_rate       = config['learning_rate']
+    )
+    TargetModel.set_weights(Model.get_weights())  # Initial sync
+
     # 4) Create a single replay Memory instance
     MemoryInstance = Memory(
         config['memory_size_max'],
@@ -95,6 +105,7 @@ def main():
         # Create the Simulation, referencing aggregator Model and shared Memory
         sim = Simulation(
             Model           = Model,
+            TargetModel=TargetModel,
             Memory          = MemoryInstance,
             TrafficGen      = TrafficGen,
             sumo_cmd        = sumo_cmd,

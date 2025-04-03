@@ -1,412 +1,471 @@
-[Step 0] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 10] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 24] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 38] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 52] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 66] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 80] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 94] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 108] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 118] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 128] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 142] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 152] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 166] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 176] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 190] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 200] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 214] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 228] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 242] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 256] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 270] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 284] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 298] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 308] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 318] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 3.]
-[Step 328] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 4.]
-[Step 342] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 356] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 370] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 384] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 398] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 412] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 426] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 436] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 450] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 464] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 478] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 492] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 1.]
-[Step 506] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 2.]
-[Step 520] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 1.]
-[Step 534] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 548] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 1.]
-[Step 558] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 1.]
-[Step 572] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 586] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 600] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 610] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 624] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 634] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 644] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [2. 1. 0. 0.]
-[Step 654] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [2. 1. 0. 0.]
-[Step 668] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 682] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 696] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 706] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 0.]
-[Step 720] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 1. 1.]
-[Step 730] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 1. 1.]
-[Step 744] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 0. 0.]
-[Step 758] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 772] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 786] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 796] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 810] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 2. 0.]
-[Step 824] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 838] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 852] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 1. 0.]
-[Step 866] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 880] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 894] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 908] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 918] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 932] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 1. 2.]
-[Step 942] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 1. 2.]
-[Step 956] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 1.]
-[Step 966] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [2. 1. 0. 1.]
-[Step 980] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [3. 1. 0. 1.]
-[Step 994] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 1008] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 1022] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 1036] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 1050] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 1060] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 1. 3.]
-[Step 1070] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 1. 4.]
-[Step 1084] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 1098] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 1112] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 0.]
-[Step 1126] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 2. 1.]
-[Step 1140] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 1154] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 1164] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 2. 0. 0.]
-[Step 1178] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 1.]
-[Step 1192] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 1206] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 1220] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 1234] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 1248] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 1262] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 1272] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 3.]
-[Step 1286] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 3.]
-[Step 1296] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 3.]
-[Step 1306] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 3.]
-[Step 1320] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 1334] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 1348] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [2. 1. 0. 0.]
-[Step 1358] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [2. 1. 0. 0.]
-[Step 1372] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [2. 1. 0. 0.]
-[Step 1386] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [3. 1. 0. 0.]
-[Step 1400] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [4. 1. 0. 1.]
-[Step 1410] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [4. 1. 0. 2.]
-[Step 1420] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [5. 1. 1. 3.]
-[Step 1430] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [5. 1. 4. 3.]
-[Step 1444] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 4. 3.]
-[Step 1458] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 4. 3.]
-[Step 1472] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 4. 4.]
-[Step 1486] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 4. 4.]
-[Step 1500] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 4. 4.]
-[Step 1514] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 1528] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 1542] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 1556] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 1.]
-[Step 1570] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 1584] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 1598] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 1612] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 1622] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [2. 0. 0. 1.]
-[Step 1632] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [3. 0. 0. 1.]
-[Step 1642] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [3. 0. 0. 1.]
-[Step 1656] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 1670] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 1684] Action: 2, Phase: 6, Halts: [0. 1. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 1698] Action: 1, Phase: 4, Halts: [0. 1. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 1712] Action: 3, Phase: 2, Halts: [0. 1. 0. 0.], Waiting: [0. 1. 3. 0.]
-[Step 1726] Action: 2, Phase: 6, Halts: [0. 1. 0. 0.], Waiting: [2. 2. 3. 2.]
-[Step 1740] Action: 0, Phase: 4, Halts: [0. 1. 0. 0.], Waiting: [4. 4. 0. 0.]
-[Step 1754] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 1768] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 1778] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 1792] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 1. 2.]
-[Step 1806] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 2. 0. 0.]
-[Step 1820] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 2. 0.]
-[Step 1834] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 2. 0.]
-[Step 1848] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 2. 0. 0.]
-[Step 1862] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 2. 0. 0.]
-[Step 1876] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 1890] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 1904] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 1.]
-[Step 1918] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [2. 0. 0. 1.]
-[Step 1932] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [2. 0. 0. 1.]
-[Step 1946] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [3. 0. 0. 0.]
-[Step 1956] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [4. 0. 0. 0.]
-[Step 1970] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [4. 0. 0. 0.]
-[Step 1984] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [5. 0. 0. 0.]
-[Step 1998] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2012] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2026] Action: 2, Phase: 0, Halts: [0. 1. 0. 0.], Waiting: [0. 0. 2. 1.]
-[Step 2040] Action: 1, Phase: 4, Halts: [0. 1. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 2054] Action: 0, Phase: 2, Halts: [0. 1. 0. 0.], Waiting: [1. 1. 2. 0.]
-[Step 2068] Action: 3, Phase: 0, Halts: [0. 1. 0. 0.], Waiting: [0. 0. 2. 0.]
-[Step 2082] Action: 2, Phase: 6, Halts: [0. 1. 0. 0.], Waiting: [1. 1. 3. 1.]
-[Step 2096] Action: 0, Phase: 4, Halts: [0. 1. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 2110] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 1.]
-[Step 2124] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 2138] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 2148] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 0. 0.]
-[Step 2158] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 2. 0. 0.]
-[Step 2172] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2186] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2200] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2214] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2224] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2238] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2252] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2266] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 2. 0.]
-[Step 2280] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2294] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2308] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2322] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 2336] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 2350] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [2. 0. 0. 0.]
-[Step 2364] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [2. 0. 0. 0.]
-[Step 2378] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2392] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2402] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 0.]
-[Step 2412] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 0.]
-[Step 2426] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2440] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2454] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 0.]
-[Step 2468] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 2482] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2496] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 1. 0.]
-[Step 2506] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 1. 0.]
-[Step 2520] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2534] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 2548] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 2558] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 1.]
-[Step 2572] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 2586] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 2600] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2614] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2628] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 2642] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2652] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2666] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2680] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2694] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 0.]
-[Step 2708] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 1. 0.]
-[Step 2722] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 2736] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 1. 0. 0.]
-[Step 2750] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 2. 0. 1.]
-[Step 2764] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2778] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2792] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2802] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2816] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2830] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2844] Action: 0, Phase: 2, Halts: [1. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2858] Action: 2, Phase: 0, Halts: [1. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2872] Action: 0, Phase: 4, Halts: [1. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2886] Action: 2, Phase: 0, Halts: [1. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2900] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2914] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 2928] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2942] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 0.]
-[Step 2956] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2970] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2980] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 2994] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 1.]
-[Step 3008] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 1.]
-[Step 3022] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 1. 0. 0.]
-[Step 3036] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3050] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3064] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3078] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3092] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3102] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3116] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3126] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 3140] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 1. 2.]
-[Step 3154] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3164] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3178] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3192] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3206] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3220] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3234] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3248] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 3262] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 3276] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [1. 0. 0. 0.]
-[Step 3290] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3300] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3314] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3328] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3338] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3352] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3366] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3380] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3394] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3408] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3422] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3436] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3450] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3460] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3474] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3488] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3502] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3516] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3530] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3544] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3554] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3564] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3578] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3588] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 3602] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 2.]
-[Step 3616] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 2.]
-[Step 3626] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 2.]
-[Step 3636] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 2.]
-[Step 3646] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 2.]
-[Step 3660] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 2.]
-[Step 3674] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 2.]
-[Step 3688] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3702] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3716] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3726] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3740] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3754] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3764] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3778] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3792] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3802] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3816] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3830] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3840] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3850] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3864] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3878] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3892] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3906] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3920] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3934] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3944] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3958] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3972] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 3986] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4000] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4014] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4028] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4042] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4052] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4066] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4080] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4094] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4108] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4118] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4132] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4146] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4160] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4170] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4184] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4194] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4208] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4222] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4232] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4246] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4260] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4270] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4280] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4294] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4304] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4318] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4328] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4342] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4356] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4370] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4384] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4398] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4412] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4422] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4432] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4446] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4460] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4474] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4484] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4498] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4512] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4526] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4540] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4554] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4568] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4582] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4596] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4610] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4620] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4634] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4648] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4658] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4672] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4686] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4700] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4714] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4728] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4738] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4752] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 4766] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 4780] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 1.]
-[Step 4794] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4804] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4818] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4828] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4842] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4852] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4866] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4880] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4894] Action: 0, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4908] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4922] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4932] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4946] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4960] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4970] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4984] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 4998] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5012] Action: 3, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5022] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5036] Action: 3, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5050] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5064] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5078] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5092] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5102] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5116] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5130] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5144] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5158] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5172] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5182] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5196] Action: 2, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5210] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5224] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5238] Action: 3, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5252] Action: 1, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5266] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5280] Action: 2, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5294] Action: 1, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5308] Action: 0, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5322] Action: 0, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5332] Action: 1, Phase: 0, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5346] Action: 1, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5356] Action: 2, Phase: 2, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5370] Action: 2, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5380] Action: 3, Phase: 4, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
-[Step 5394] Action: 0, Phase: 6, Halts: [0. 0. 0. 0.], Waiting: [0. 0. 0. 0.]
+[Step 0] Action: 2
+[Step 10] Action: 2
+[Step 20] Action: 2
+[Step 30] Action: 2
+[Step 40] Action: 2
+[Step 50] Action: 1
+[Step 64] Action: 2
+[Step 78] Action: 2
+[Step 88] Action: 2
+[Step 98] Action: 2
+[Step 108] Action: 2
+[Step 118] Action: 2
+[Step 128] Action: 2
+[Step 138] Action: 2
+[Step 148] Action: 2
+[Step 158] Action: 3
+[Step 172] Action: 2
+[Step 186] Action: 2
+[Step 196] Action: 2
+[Step 206] Action: 2
+[Step 216] Action: 2
+[Step 226] Action: 2
+[Step 236] Action: 2
+[Step 246] Action: 2
+[Step 256] Action: 2
+[Step 266] Action: 2
+[Step 276] Action: 2
+[Step 286] Action: 2
+[Step 296] Action: 1
+[Step 310] Action: 2
+[Step 324] Action: 0
+[Step 338] Action: 2
+[Step 352] Action: 2
+[Step 362] Action: 2
+[Step 372] Action: 2
+[Step 382] Action: 2
+[Step 392] Action: 2
+[Step 402] Action: 2
+[Step 412] Action: 2
+[Step 422] Action: 2
+[Step 432] Action: 2
+[Step 442] Action: 2
+[Step 452] Action: 2
+[Step 462] Action: 2
+[Step 472] Action: 2
+[Step 482] Action: 1
+[Step 496] Action: 0
+[Step 510] Action: 2
+[Step 524] Action: 2
+[Step 534] Action: 2
+[Step 544] Action: 1
+[Step 558] Action: 2
+[Step 572] Action: 0
+[Step 586] Action: 2
+[Step 600] Action: 2
+[Step 610] Action: 2
+[Step 620] Action: 2
+[Step 630] Action: 2
+[Step 640] Action: 2
+[Step 650] Action: 2
+[Step 660] Action: 2
+[Step 670] Action: 2
+[Step 680] Action: 2
+[Step 690] Action: 2
+[Step 700] Action: 2
+[Step 710] Action: 0
+[Step 724] Action: 0
+[Step 734] Action: 2
+[Step 748] Action: 0
+[Step 762] Action: 3
+[Step 776] Action: 2
+[Step 790] Action: 2
+[Step 800] Action: 2
+[Step 810] Action: 2
+[Step 820] Action: 2
+[Step 830] Action: 3
+[Step 844] Action: 3
+[Step 854] Action: 3
+[Step 864] Action: 2
+[Step 878] Action: 0
+[Step 892] Action: 2
+[Step 906] Action: 0
+[Step 920] Action: 0
+[Step 930] Action: 2
+[Step 944] Action: 2
+[Step 954] Action: 2
+[Step 964] Action: 0
+[Step 978] Action: 3
+[Step 992] Action: 2
+[Step 1006] Action: 0
+[Step 1020] Action: 3
+[Step 1034] Action: 0
+[Step 1048] Action: 3
+[Step 1062] Action: 0
+[Step 1076] Action: 3
+[Step 1090] Action: 0
+[Step 1104] Action: 3
+[Step 1118] Action: 0
+[Step 1132] Action: 3
+[Step 1146] Action: 0
+[Step 1160] Action: 2
+[Step 1174] Action: 0
+[Step 1188] Action: 3
+[Step 1202] Action: 0
+[Step 1216] Action: 3
+[Step 1230] Action: 2
+[Step 1244] Action: 3
+[Step 1258] Action: 1
+[Step 1272] Action: 2
+[Step 1286] Action: 2
+[Step 1296] Action: 1
+[Step 1310] Action: 2
+[Step 1324] Action: 2
+[Step 1334] Action: 2
+[Step 1344] Action: 2
+[Step 1354] Action: 2
+[Step 1364] Action: 2
+[Step 1374] Action: 2
+[Step 1384] Action: 2
+[Step 1394] Action: 0
+[Step 1408] Action: 2
+[Step 1422] Action: 2
+[Step 1432] Action: 2
+[Step 1442] Action: 2
+[Step 1452] Action: 3
+[Step 1466] Action: 2
+[Step 1480] Action: 2
+[Step 1490] Action: 2
+[Step 1500] Action: 2
+[Step 1510] Action: 2
+[Step 1520] Action: 2
+[Step 1530] Action: 2
+[Step 1540] Action: 0
+[Step 1554] Action: 2
+[Step 1568] Action: 2
+[Step 1578] Action: 2
+[Step 1588] Action: 2
+[Step 1598] Action: 2
+[Step 1608] Action: 2
+[Step 1618] Action: 2
+[Step 1628] Action: 2
+[Step 1638] Action: 2
+[Step 1648] Action: 2
+[Step 1658] Action: 1
+[Step 1672] Action: 2
+[Step 1686] Action: 2
+[Step 1696] Action: 2
+[Step 1706] Action: 2
+[Step 1716] Action: 0
+[Step 1730] Action: 2
+[Step 1744] Action: 2
+[Step 1754] Action: 2
+[Step 1764] Action: 2
+[Step 1774] Action: 2
+[Step 1784] Action: 2
+[Step 1794] Action: 2
+[Step 1804] Action: 2
+[Step 1814] Action: 2
+[Step 1824] Action: 2
+[Step 1834] Action: 0
+[Step 1848] Action: 3
+[Step 1862] Action: 2
+[Step 1876] Action: 2
+[Step 1886] Action: 0
+[Step 1900] Action: 3
+[Step 1914] Action: 0
+[Step 1928] Action: 3
+[Step 1942] Action: 0
+[Step 1956] Action: 3
+[Step 1970] Action: 0
+[Step 1984] Action: 3
+[Step 1998] Action: 2
+[Step 2012] Action: 3
+[Step 2026] Action: 3
+[Step 2036] Action: 3
+[Step 2046] Action: 3
+[Step 2056] Action: 0
+[Step 2070] Action: 3
+[Step 2084] Action: 0
+[Step 2098] Action: 2
+[Step 2112] Action: 0
+[Step 2126] Action: 0
+[Step 2136] Action: 0
+[Step 2146] Action: 1
+[Step 2160] Action: 2
+[Step 2174] Action: 2
+[Step 2184] Action: 2
+[Step 2194] Action: 2
+[Step 2204] Action: 3
+[Step 2218] Action: 2
+[Step 2232] Action: 0
+[Step 2246] Action: 2
+[Step 2260] Action: 2
+[Step 2270] Action: 0
+[Step 2284] Action: 1
+[Step 2298] Action: 2
+[Step 2312] Action: 2
+[Step 2322] Action: 2
+[Step 2332] Action: 2
+[Step 2342] Action: 2
+[Step 2352] Action: 0
+[Step 2366] Action: 2
+[Step 2380] Action: 2
+[Step 2390] Action: 2
+[Step 2400] Action: 2
+[Step 2410] Action: 2
+[Step 2420] Action: 2
+[Step 2430] Action: 2
+[Step 2440] Action: 2
+[Step 2450] Action: 1
+[Step 2464] Action: 2
+[Step 2478] Action: 2
+[Step 2488] Action: 2
+[Step 2498] Action: 3
+[Step 2512] Action: 2
+[Step 2526] Action: 2
+[Step 2536] Action: 0
+[Step 2550] Action: 2
+[Step 2564] Action: 2
+[Step 2574] Action: 2
+[Step 2584] Action: 2
+[Step 2594] Action: 2
+[Step 2604] Action: 2
+[Step 2614] Action: 2
+[Step 2624] Action: 2
+[Step 2634] Action: 2
+[Step 2644] Action: 2
+[Step 2654] Action: 0
+[Step 2668] Action: 2
+[Step 2682] Action: 2
+[Step 2692] Action: 1
+[Step 2706] Action: 2
+[Step 2720] Action: 2
+[Step 2730] Action: 2
+[Step 2740] Action: 2
+[Step 2750] Action: 2
+[Step 2760] Action: 2
+[Step 2770] Action: 2
+[Step 2780] Action: 2
+[Step 2790] Action: 3
+[Step 2804] Action: 2
+[Step 2818] Action: 2
+[Step 2828] Action: 2
+[Step 2838] Action: 2
+[Step 2848] Action: 0
+[Step 2862] Action: 1
+[Step 2876] Action: 2
+[Step 2890] Action: 2
+[Step 2900] Action: 2
+[Step 2910] Action: 2
+[Step 2920] Action: 2
+[Step 2930] Action: 2
+[Step 2940] Action: 2
+[Step 2950] Action: 2
+[Step 2960] Action: 2
+[Step 2970] Action: 2
+[Step 2980] Action: 1
+[Step 2994] Action: 2
+[Step 3008] Action: 2
+[Step 3018] Action: 2
+[Step 3028] Action: 2
+[Step 3038] Action: 2
+[Step 3048] Action: 2
+[Step 3058] Action: 2
+[Step 3068] Action: 2
+[Step 3078] Action: 0
+[Step 3092] Action: 2
+[Step 3106] Action: 2
+[Step 3116] Action: 2
+[Step 3126] Action: 2
+[Step 3136] Action: 2
+[Step 3146] Action: 2
+[Step 3156] Action: 2
+[Step 3166] Action: 3
+[Step 3180] Action: 2
+[Step 3194] Action: 2
+[Step 3204] Action: 2
+[Step 3214] Action: 2
+[Step 3224] Action: 2
+[Step 3234] Action: 2
+[Step 3244] Action: 2
+[Step 3254] Action: 2
+[Step 3264] Action: 2
+[Step 3274] Action: 0
+[Step 3288] Action: 2
+[Step 3302] Action: 0
+[Step 3316] Action: 2
+[Step 3330] Action: 2
+[Step 3340] Action: 2
+[Step 3350] Action: 2
+[Step 3360] Action: 2
+[Step 3370] Action: 2
+[Step 3380] Action: 2
+[Step 3390] Action: 2
+[Step 3400] Action: 1
+[Step 3414] Action: 2
+[Step 3428] Action: 2
+[Step 3438] Action: 3
+[Step 3452] Action: 2
+[Step 3466] Action: 2
+[Step 3476] Action: 2
+[Step 3486] Action: 0
+[Step 3500] Action: 2
+[Step 3514] Action: 2
+[Step 3524] Action: 3
+[Step 3538] Action: 0
+[Step 3552] Action: 0
+[Step 3562] Action: 2
+[Step 3576] Action: 2
+[Step 3586] Action: 2
+[Step 3596] Action: 2
+[Step 3606] Action: 2
+[Step 3616] Action: 2
+[Step 3626] Action: 2
+[Step 3636] Action: 1
+[Step 3650] Action: 2
+[Step 3664] Action: 2
+[Step 3674] Action: 1
+[Step 3688] Action: 2
+[Step 3702] Action: 2
+[Step 3712] Action: 2
+[Step 3722] Action: 2
+[Step 3732] Action: 2
+[Step 3742] Action: 2
+[Step 3752] Action: 2
+[Step 3762] Action: 2
+[Step 3772] Action: 2
+[Step 3782] Action: 2
+[Step 3792] Action: 2
+[Step 3802] Action: 2
+[Step 3812] Action: 2
+[Step 3822] Action: 2
+[Step 3832] Action: 2
+[Step 3842] Action: 2
+[Step 3852] Action: 0
+[Step 3866] Action: 2
+[Step 3880] Action: 2
+[Step 3890] Action: 2
+[Step 3900] Action: 2
+[Step 3910] Action: 1
+[Step 3924] Action: 2
+[Step 3938] Action: 2
+[Step 3948] Action: 2
+[Step 3958] Action: 2
+[Step 3968] Action: 1
+[Step 3982] Action: 2
+[Step 3996] Action: 2
+[Step 4006] Action: 2
+[Step 4016] Action: 3
+[Step 4030] Action: 1
+[Step 4044] Action: 2
+[Step 4058] Action: 2
+[Step 4068] Action: 2
+[Step 4078] Action: 2
+[Step 4088] Action: 2
+[Step 4098] Action: 2
+[Step 4108] Action: 2
+[Step 4118] Action: 2
+[Step 4128] Action: 2
+[Step 4138] Action: 2
+[Step 4148] Action: 0
+[Step 4162] Action: 2
+[Step 4176] Action: 2
+[Step 4186] Action: 2
+[Step 4196] Action: 3
+[Step 4210] Action: 2
+[Step 4224] Action: 2
+[Step 4234] Action: 2
+[Step 4244] Action: 2
+[Step 4254] Action: 2
+[Step 4264] Action: 1
+[Step 4278] Action: 1
+[Step 4288] Action: 2
+[Step 4302] Action: 2
+[Step 4312] Action: 2
+[Step 4322] Action: 2
+[Step 4332] Action: 2
+[Step 4342] Action: 2
+[Step 4352] Action: 2
+[Step 4362] Action: 2
+[Step 4372] Action: 1
+[Step 4386] Action: 0
+[Step 4400] Action: 2
+[Step 4414] Action: 2
+[Step 4424] Action: 2
+[Step 4434] Action: 2
+[Step 4444] Action: 2
+[Step 4454] Action: 1
+[Step 4468] Action: 2
+[Step 4482] Action: 2
+[Step 4492] Action: 0
+[Step 4506] Action: 0
+[Step 4516] Action: 0
+[Step 4526] Action: 0
+[Step 4536] Action: 0
+[Step 4546] Action: 0
+[Step 4556] Action: 0
+[Step 4566] Action: 0
+[Step 4576] Action: 0
+[Step 4586] Action: 3
+[Step 4600] Action: 1
+[Step 4614] Action: 2
+[Step 4628] Action: 0
+[Step 4642] Action: 0
+[Step 4652] Action: 2
+[Step 4666] Action: 1
+[Step 4680] Action: 0
+[Step 4694] Action: 0
+[Step 4704] Action: 3
+[Step 4718] Action: 3
+[Step 4728] Action: 3
+[Step 4738] Action: 3
+[Step 4748] Action: 0
+[Step 4762] Action: 3
+[Step 4776] Action: 2
+[Step 4790] Action: 3
+[Step 4804] Action: 3
+[Step 4814] Action: 0
+[Step 4828] Action: 3
+[Step 4842] Action: 3
+[Step 4852] Action: 3
+[Step 4862] Action: 3
+[Step 4872] Action: 3
+[Step 4882] Action: 3
+[Step 4892] Action: 3
+[Step 4902] Action: 0
+[Step 4916] Action: 2
+[Step 4930] Action: 3
+[Step 4944] Action: 0
+[Step 4958] Action: 3
+[Step 4972] Action: 3
+[Step 4982] Action: 3
+[Step 4992] Action: 3
+[Step 5002] Action: 3
+[Step 5012] Action: 3
+[Step 5022] Action: 3
+[Step 5032] Action: 3
+[Step 5042] Action: 3
+[Step 5052] Action: 3
+[Step 5062] Action: 3
+[Step 5072] Action: 3
+[Step 5082] Action: 2
+[Step 5096] Action: 3
+[Step 5110] Action: 3
+[Step 5120] Action: 3
+[Step 5130] Action: 3
+[Step 5140] Action: 3
+[Step 5150] Action: 3
+[Step 5160] Action: 3
+[Step 5170] Action: 0
+[Step 5184] Action: 3
+[Step 5198] Action: 3
+[Step 5208] Action: 3
+[Step 5218] Action: 3
+[Step 5228] Action: 3
+[Step 5238] Action: 3
+[Step 5248] Action: 3
+[Step 5258] Action: 3
+[Step 5268] Action: 3
+[Step 5278] Action: 3
+[Step 5288] Action: 0
+[Step 5302] Action: 3
+[Step 5316] Action: 3
+[Step 5326] Action: 3
+[Step 5336] Action: 3
+[Step 5346] Action: 3
+[Step 5356] Action: 3
+[Step 5366] Action: 3
+[Step 5376] Action: 3
+[Step 5386] Action: 3
+[Step 5396] Action: 3

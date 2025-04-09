@@ -1,167 +1,175 @@
-import timeit
-import time
-import numpy as np
-import traci
 import tensorflow as tf
-from tensorflow.keras import layers, models, optimizers
-from torch.utils.tensorboard import SummaryWriter
+import numpy as np
+import os
 
-# ================= PPO Model Definition =================
-class PPOModel:
-    def __init__(self, input_dim, output_dim, hidden_size=64, learning_rate=3e-4,
-                 clip_ratio=0.2, update_epochs=10, batch_size=32, entropy_coef=0.01):
-        self.input_dim = input_dim
-        self.output_dim = output_dim
+
+class PPOActorCritic(tf.keras.Model):
+    def __init__(self, lane_feature_dim, embedding_dim, final_hidden, num_actions):
+        """
+        Actor-Critic network for PPO.
+        Instead of flattening the input, we use GlobalAveragePooling1D to aggregate per-lane features.
+
+        Parameters:
+            lane_feature_dim: Number of features per lane (e.g., 9 to match your simulation _get_state())
+            embedding_dim: Unused in this basic implementation (reserved for further extension)
+            final_hidden: Number of hidden units in the common dense layer
+            num_actions: Number of available actions for the actor head
+        """
+        super(PPOActorCritic, self).__init__()
+        # Aggregate per-lane features into one fixed-size vector.
+        self.global_pool = tf.keras.layers.GlobalAveragePooling1D()
+        # Common dense layer.
+        self.dense1 = tf.keras.layers.Dense(final_hidden, activation='relu')
+        # Actor head: outputs logits.
+        self.actor_logits = tf.keras.layers.Dense(num_actions, activation=None)
+        # Critic head: outputs a scalar state value.
+        self.critic = tf.keras.layers.Dense(1, activation=None)
+
+    def call(self, inputs):
+        """
+        Forward pass.
+            inputs: Tensor of shape (batch_size, num_lanes, lane_feature_dim)
+        Returns:
+            logits: Tensor of shape (batch_size, num_actions)
+            value: Tensor of shape (batch_size, 1)
+        """
+        x = self.global_pool(inputs)
+        x = self.dense1(x)
+        logits = self.actor_logits(x)
+        value = self.critic(x)
+        return logits, value
+
+
+class TrainModelPPO:
+    def __init__(self,
+                 lane_feature_dim,
+                 embedding_dim,
+                 final_hidden,
+                 num_actions,
+                 batch_size,
+                 learning_rate,
+                 clip_ratio,
+                 update_epochs,
+                 gamma):
+        """
+        Wrapper for training PPO.
+
+        Parameters:
+            lane_feature_dim: Number of features per lane (e.g., 9)
+            embedding_dim: (Reserved for extended architectures)
+            final_hidden: Number of hidden units in the shared dense layer
+            num_actions: Number of available actions
+            batch_size: Mini-batch size for the PPO update
+            learning_rate: Learning rate for the optimizer
+            clip_ratio: Clipping ratio in PPO surrogate objective
+            update_epochs: Number of epochs over rollout data for updates
+            gamma: Discount factor
+        """
+        self.lane_feature_dim = lane_feature_dim
+        self.num_actions = num_actions
+        self.batch_size = batch_size
+        self.learning_rate = learning_rate
         self.clip_ratio = clip_ratio
         self.update_epochs = update_epochs
-        self.entropy_coef = entropy_coef
-
-        self.actor, self.critic = self.build_actor_critic(hidden_size)
-        self.optimizer = optimizers.Adam(learning_rate=learning_rate)
-
-    def build_actor_critic(self, hidden_size):
-        inputs = layers.Input(shape=(self.input_dim,))
-        common = layers.Dense(hidden_size, activation='relu')(inputs)
-
-        actor = models.Model(inputs, layers.Dense(self.output_dim, activation='softmax')(layers.Dense(hidden_size, activation='relu')(common)))
-        critic = models.Model(inputs, layers.Dense(1, activation='linear')(layers.Dense(hidden_size, activation='relu')(common)))
-
-        return actor, critic
-
-    def select_action(self, state):
-        state = state.reshape(1, -1)
-        probs = self.actor(state).numpy().flatten()
-        action = np.random.choice(self.output_dim, p=probs)
-        return action, probs[action]
-
-    def train(self, states, actions, advantages, returns, old_probs):
-        states = tf.convert_to_tensor(states, dtype=tf.float32)
-        actions = tf.convert_to_tensor(actions, dtype=tf.int32)
-        advantages = tf.convert_to_tensor(advantages, dtype=tf.float32)
-        returns = tf.convert_to_tensor(returns, dtype=tf.float32)
-        old_probs = tf.convert_to_tensor(old_probs, dtype=tf.float32)
-
-        total_loss = 0.0
-        for _ in range(self.update_epochs):
-            with tf.GradientTape() as tape:
-                new_probs = self.actor(states)
-                masks = tf.one_hot(actions, self.output_dim)
-                selected_new = tf.reduce_sum(new_probs * masks, axis=1)
-                ratio = selected_new / (old_probs + 1e-10)
-                clipped = tf.clip_by_value(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio)
-                actor_loss = -tf.reduce_mean(tf.minimum(ratio * advantages, clipped * advantages))
-                critic_loss = tf.reduce_mean(tf.square(returns - self.critic(states)))
-                entropy = -tf.reduce_mean(new_probs * tf.math.log(new_probs + 1e-10))
-                loss = actor_loss + 0.5 * critic_loss - self.entropy_coef * entropy
-
-            grads = tape.gradient(loss, self.actor.trainable_variables + self.critic.trainable_variables)
-            self.optimizer.apply_gradients(zip(grads, self.actor.trainable_variables + self.critic.trainable_variables))
-            total_loss = loss.numpy()
-
-        return total_loss
-
-# ================= PPO Simulation Loop =================
-class PPOSimulation:
-    def __init__(self, model, traffic_gen, sumo_cmd, gamma, max_steps,
-                 green_duration, yellow_duration, num_states, num_actions, training_epochs):
-        self.model = model
-        self.traffic_gen = traffic_gen
-        self.sumo_cmd = sumo_cmd
         self.gamma = gamma
-        self.max_steps = max_steps
-        self.green_duration = green_duration
-        self.yellow_duration = yellow_duration
-        self.num_states = num_states
-        self.num_actions = num_actions
-        self.training_epochs = training_epochs
-        self.episode_rewards = []
-        self.writer = SummaryWriter()
 
-    def run_episode(self, episode):
-        sim_start = timeit.default_timer()
-        self.traffic_gen.generate_routefile(seed=episode)
-        traci.start(self.sumo_cmd)
+        self.model = PPOActorCritic(lane_feature_dim, embedding_dim, final_hidden, num_actions)
+        # Optionally, call self.model.build(...) to force weight initialization.
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
-        state = get_state(self.num_states)
-        ep_reward, steps, prev_action = 0.0, 0, None
-        traj_states, traj_actions, traj_rewards = [], [], []
-        old_wait = get_total_wait()
+    def predict(self, states):
+        """
+        Predict action probabilities and state values.
 
-        while steps < self.max_steps:
-            action, _ = self.model.select_action(state)
-            switch = 1 if prev_action is not None and action != prev_action else 0
-            set_green_phase(action)
-            for _ in range(self.green_duration):
-                traci.simulationStep()
-                steps += 1
+        Parameters:
+            states: Tensor with shape (batch_size, num_lanes, lane_feature_dim)
+        Returns:
+            action_probs: Softmax probabilities; shape (batch_size, num_actions)
+            values: State-value estimates; shape (batch_size, 1)
+        """
+        logits, values = self.model(states)
+        action_probs = tf.nn.softmax(logits)
+        return action_probs, values
 
-            next_state = get_state(self.num_states)
-            new_wait = get_total_wait()
-            queue_len = get_queue_length()
-            emergency_penalty = sum(1 for v in traci.vehicle.getIDList() if traci.vehicle.getTypeID(v) == "emergency")
-            reward = compute_reward(old_wait, new_wait, queue_len, switch, emergency_penalty)
-            ep_reward += reward
+    def act(self, state):
+        """
+        Sample an action from the current policy.
 
-            traj_states.append(state)
-            traj_actions.append(action)
-            traj_rewards.append(reward)
+        Parameters:
+            state: Numpy array with shape (num_lanes, lane_feature_dim)
+        Returns:
+            action: An integer representing the selected action.
+            log_prob: Log probability of the action.
+            value: State value estimate.
+        """
+        state = np.expand_dims(state, axis=0)  # Create a batch of size 1.
+        logits, value = self.model(state)
+        action_probs = tf.nn.softmax(logits)
+        # Sample action.
+        action_dist = tf.random.categorical(logits, num_samples=1)
+        action = int(action_dist.numpy()[0, 0])
+        log_probs = tf.nn.log_softmax(logits)
+        log_prob = log_probs[0, action].numpy()
+        return action, log_prob, value.numpy()[0, 0]
 
-            state, old_wait, prev_action = next_state, new_wait, action
+    def ppo_update(self, states, actions, old_log_probs, advantages, returns):
+        """
+        Perform a PPO update using mini-batch gradient descent.
 
-        traci.close()
-        sim_time = round(timeit.default_timer() - sim_start, 2)
-        self.episode_rewards.append(ep_reward)
-        return traj_states, traj_actions, traj_rewards, ep_reward, sim_time
+        Parameters:
+            states: Array with shape (N, num_lanes, lane_feature_dim)
+            actions: Array with shape (N,)
+            old_log_probs: Array with shape (N,)
+            advantages: Array with shape (N,) (should be normalized beforehand)
+            returns: Array with shape (N,)
+        """
+        # Create a dataset and shuffle it.
+        dataset = tf.data.Dataset.from_tensor_slices(
+            (states, actions, old_log_probs, advantages, returns)
+        )
+        dataset = dataset.shuffle(buffer_size=1024).batch(self.batch_size)
 
-    def update(self, states, actions, rewards):
-        returns = self.compute_returns(rewards)
-        advantages = self.compute_advantages(returns, states)
-        train_start = timeit.default_timer()
-        loss = self.model.train(np.array(states), np.array(actions), advantages, returns, old_probs=np.ones(len(actions)))
-        train_time = round(timeit.default_timer() - train_start, 2)
+        for epoch in range(self.update_epochs):
+            for batch in dataset:
+                s_batch, a_batch, old_logp_batch, adv_batch, ret_batch = batch
+                with tf.GradientTape() as tape:
+                    logits, values = self.model(s_batch)
+                    values = tf.squeeze(values, axis=1)
+                    log_probs_all = tf.nn.log_softmax(logits)
+                    # Gather the log probabilities corresponding to chosen actions.
+                    indices = tf.stack([tf.range(tf.shape(a_batch)[0]), a_batch], axis=1)
+                    new_logp = tf.gather_nd(log_probs_all, indices)
+                    # Compute probability ratio.
+                    ratio = tf.exp(new_logp - old_logp_batch)
+                    clipped_ratio = tf.clip_by_value(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio)
+                    surrogate_loss = -tf.reduce_mean(tf.minimum(ratio * adv_batch, clipped_ratio * adv_batch))
+                    value_loss = tf.reduce_mean(tf.square(ret_batch - values))
+                    probs = tf.nn.softmax(logits)
+                    entropy = -tf.reduce_mean(tf.reduce_sum(probs * log_probs_all, axis=1))
+                    loss = surrogate_loss + 0.5 * value_loss - 0.01 * entropy
+                grads = tape.gradient(loss, self.model.trainable_variables)
+                self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
 
-        # Logging
-        self.writer.add_scalar("Loss/Total", loss, len(self.episode_rewards))
-        return train_time
+    def save_model(self, path):
+        """
+        Save the trained PPO model.
+        """
+        self.model.save(os.path.join(path, 'trained_model_ppo.h5'))
 
-    def compute_returns(self, rewards):
-        returns, G = [], 0.0
-        for r in reversed(rewards):
-            G = r + self.gamma * G
-            returns.insert(0, G)
-        return np.array(returns)
 
-    def compute_advantages(self, returns, states):
-        values = np.squeeze(self.model.critic.predict(np.array(states), verbose=0))
-        return returns - values
+def compute_discounted_returns(rewards, gamma):
+    """
+    Compute cumulative discounted returns.
 
-# ================= Environment Utilities =================
-def get_state(num_states):
-    state = np.zeros(num_states)
-    for car in traci.vehicle.getIDList():
-        pos = 750 - traci.vehicle.getLanePosition(car)
-        idx = min(int(pos // 7), 9)
-        group = lane_group(traci.vehicle.getLaneID(car))
-        if group >= 0:
-            state[group * 10 + idx] = 1
-    return state
-
-def lane_group(lane_id):
-    mapping = {"W2TL_0":0, "W2TL_1":0, "W2TL_2":0, "W2TL_3":1,
-               "N2TL_0":2, "N2TL_1":2, "N2TL_2":2, "N2TL_3":3,
-               "E2TL_0":4, "E2TL_1":4, "E2TL_2":4, "E2TL_3":5,
-               "S2TL_0":6, "S2TL_1":6, "S2TL_2":6, "S2TL_3":7}
-    return mapping.get(lane_id, -1)
-
-def set_green_phase(action):
-    traci.trafficlight.setPhase("TL", action*2)
-
-def compute_reward(old_wait, new_wait, queue_len, switch, emergency):
-    return (old_wait - new_wait) + 0.5*(old_wait - new_wait - queue_len) - 0.01*queue_len - 0.1*switch - 5*emergency
-
-def get_total_wait():
-    return sum(traci.vehicle.getAccumulatedWaitingTime(v) for v in traci.vehicle.getIDList()
-               if traci.vehicle.getRoadID(v) in ["E2TL","N2TL","W2TL","S2TL"])
-
-def get_queue_length():
-    return sum(traci.edge.getLastStepHaltingNumber(edge) for edge in ["N2TL","S2TL","E2TL","W2TL"])
+    Parameters:
+        rewards: List or NumPy array of rewards.
+        gamma: Discount factor.
+    Returns:
+        discounted_returns: NumPy array of the same shape as rewards.
+    """
+    discounted_returns = np.zeros_like(rewards, dtype=np.float32)
+    running_return = 0.0
+    for t in reversed(range(len(rewards))):
+        running_return = rewards[t] + gamma * running_return
+        discounted_returns[t] = running_return
+    return discounted_returns

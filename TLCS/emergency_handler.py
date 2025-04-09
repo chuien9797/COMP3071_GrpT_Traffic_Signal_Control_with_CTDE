@@ -34,3 +34,4 @@ def handle_emergency_vehicle(simulation, veh_id):
     print("Setting emergency phase:", emergency_action, "for vehicle:", veh_id)
     simulation._set_green_phase(emergency_action)
     simulation._simulate(simulation._green_duration)
+    simulation._emergency_q_logs.append((simulation._step, veh_id))

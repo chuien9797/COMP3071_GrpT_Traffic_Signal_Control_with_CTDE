@@ -24,7 +24,7 @@ class Simulation:
         num_actions,
         training_epochs,
         intersection_type="cross",
-        signal_fault_prob=0.01,
+        signal_fault_prob=0.1,
     ):
         self._Model = Model
         self._TargetModel = TargetModel
@@ -47,6 +47,7 @@ class Simulation:
         self.signal_fault_prob = signal_fault_prob  # Probability a 'G' flips to 'r'
         self.manual_override = False 
         self.recovery_queue = {}  # { (tlid, phase): { 'step': recover_at, 'original': 'GGG...r' } }
+        self._emergency_wait_log = 0.0
 
         self.intersection_type = intersection_type
         if self.intersection_type not in int_config.INTERSECTION_CONFIGS:
@@ -54,8 +55,8 @@ class Simulation:
         self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
 
     def run(self, episode, epsilon):
-        os.makedirs("logs8", exist_ok=True)
-        log_file = open(f"logs8/episode_{episode}.log", "w")
+        os.makedirs("logs10", exist_ok=True)
+        log_file = open(f"logs10/episode_{episode}.log", "w")
 
         start_time = timeit.default_timer()
         self._TrafficGen.generate_routefile(seed=episode)
@@ -71,19 +72,20 @@ class Simulation:
         old_state = None
         old_action = None
         self.faulty_lights = set()
+        self.fault_injected_this_episode = False
+
+        # === NEW: Randomly disable fault injection for generalization ===
+        self.skip_fault_this_episode = random.random() < 0.5  # 50% episodes are clean
 
         while self._step < self._max_steps:
             if check_emergency(self):
                 continue
 
             current_state = self._get_state()
-
             current_total_wait = self._collect_waiting_times()
             reward = 0.0
             if self._step != 0:
                 reward = float(old_total_wait - current_total_wait)
-
-            if self._step != 0:
                 self._Memory.add_sample((old_state, old_action, reward, current_state))
 
             action = self._choose_action(current_state, epsilon)
@@ -108,10 +110,8 @@ class Simulation:
         traci.close()
         simulation_time = round(timeit.default_timer() - start_time, 1)
 
-                # Write summary log 
-        with open(f"logs8/episode_{episode}_summary.log", "w") as f:
-            f.write(f"""Intersection Type: {self.intersection_type} \nTotal reward: {self._sum_neg_reward} - Epsilon: {round(epsilon, 2)}
-            """)
+        with open(f"logs10/episode_{episode}_summary.log", "w") as f:
+            f.write(f"""Intersection Type: {self.intersection_type} \nTotal reward: {self._sum_neg_reward} - Epsilon: {round(epsilon, 2)}\n""")
 
         print("Training...")
         start_time = timeit.default_timer()
@@ -136,47 +136,34 @@ class Simulation:
 
     def _inject_signal_faults(self):
         self.manual_override = False
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        if self.skip_fault_this_episode or self.fault_injected_this_episode:
+            return  # Skip if clean episode or already injected
 
-        # Inject faults
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
         for tlid in tl_ids:
             logic = traci.trafficlight.getCompleteRedYellowGreenDefinition(tlid)[0]
             current_phase = traci.trafficlight.getPhase(tlid)
             current_state = logic.phases[current_phase].state
 
-            # Schedule recovery if it's time
-            key = (tlid, current_phase)
-            if key in self.recovery_queue and self._step >= self.recovery_queue[key]["step"]:
-                recovered_state = self.recovery_queue[key]["original"]
-                traci.trafficlight.setRedYellowGreenState(tlid, recovered_state)
-                print(f"[Step {self._step}] ✅ Signal recovered at TL={tlid}, phase={current_phase}")
-                print(f"    Recovered state: {recovered_state}")
-                del self.recovery_queue[key]
-                continue  # Skip fault injection this step
-
-            # Inject new faults
             new_state = list(current_state)
             flipped_indices = []
-            for i, signal in enumerate(current_state):
-                if signal == 'G' and random.random() < self.signal_fault_prob:
-                    new_state[i] = 'r'
-                    flipped_indices.append(i)
+
+            g_indices = [i for i, s in enumerate(current_state) if s == 'G']
+            if g_indices:
+                flip_idx = random.choice(g_indices)
+                new_state[flip_idx] = 'r'
+                flipped_indices.append(flip_idx)
 
             new_state_str = ''.join(new_state)
             if new_state_str != current_state:
                 traci.trafficlight.setRedYellowGreenState(tlid, new_state_str)
                 self.manual_override = True
-                recover_after = random.randint(20, 50)  # N steps to recover
-                self.recovery_queue[(tlid, current_phase)] = {
-                    "step": self._step + recover_after,
-                    "original": current_state,
-                }
+                self.fault_injected_this_episode = True
                 print(f"[Step {self._step}] ❌ Signal fault injected at TL={tlid}, phase={current_phase}")
                 print(f"    Original state: {current_state}")
                 print(f"    Modified state: {new_state_str}")
                 print(f"    Flipped indices: {flipped_indices}")
-                print(f"    Scheduled recovery at step {self._step + recover_after}")
-
+                return
 
     def _collect_waiting_times(self):
         incoming_lane_ids = []
@@ -184,21 +171,39 @@ class Simulation:
             incoming_lane_ids.extend(lanes)
 
         car_list = traci.vehicle.getIDList()
+        self._waiting_times = {}
+        emergency_wait_time = 0.0
+        normal_wait_time = 0.0
+
         for car_id in car_list:
             lane_id = traci.vehicle.getLaneID(car_id)
             if lane_id in incoming_lane_ids:
-                self._waiting_times[car_id] = traci.vehicle.getAccumulatedWaitingTime(car_id)
+                wait_time = traci.vehicle.getAccumulatedWaitingTime(car_id)
+                self._waiting_times[car_id] = wait_time
+                if traci.vehicle.getTypeID(car_id) == "emergency":
+                    emergency_wait_time += wait_time
+                else:
+                    normal_wait_time += wait_time
             else:
                 if car_id in self._waiting_times:
                     del self._waiting_times[car_id]
-        return float(sum(self._waiting_times.values()))
+
+        self._emergency_wait_log = emergency_wait_time
+        return normal_wait_time + (10.0 * emergency_wait_time)
+
 
     def _choose_action(self, state, epsilon):
         if random.random() < epsilon:
             return random.randint(0, self._num_actions - 1)
         else:
             q_vals = self._Model.predict_one(state)
-            return int(np.argmax(q_vals[0]))
+            action = int(np.argmax(q_vals[0]))
+
+        # Check if any lane has emergency_flag == 1.0
+        if np.any(state[:, 2] == 1.0):
+            print(f"[Step {self._step}] 🚨 Emergency flag detected in state. Chosen action: {action}")
+
+        return action
 
     def _set_green_phase(self, action_number):
         if hasattr(self, "manual_override") and self.manual_override:
@@ -216,8 +221,6 @@ class Simulation:
                     traci.trafficlight.setPhase(tlid, green_phase)
                 except traci.exceptions.TraCIException as e:
                     print(f"⚠️ Failed to set green phase {green_phase} for {tlid}: {e}")
-
-
 
     def _set_yellow_phase(self, action_number):
         if "phase_mapping" not in self.int_conf:
@@ -237,9 +240,6 @@ class Simulation:
                 traci.trafficlight.setPhase(tlid, yellow_phase)
             else:
                 print(f"⚠️ Skipping invalid yellow phase {yellow_phase} for {tlid} (only {num_phases} phases)")
-
-
-
 
     def _get_queue_length(self):
         incoming_lane_ids = []
@@ -278,7 +278,25 @@ class Simulation:
             if tl_ids:
                 phase_val = float(traci.trafficlight.getPhase(tl_ids[0]))
             lane_features[i, 4] = phase_val
-            lane_features[i, 5] = 1.0 if tl_ids and tl_ids[0] in self.faulty_lights else 0.0
+            controlled_by_faulty_signal = 0.0
+            if tl_ids:
+                logic = traci.trafficlight.getCompleteRedYellowGreenDefinition(tl_ids[0])[0]
+                current_phase = traci.trafficlight.getPhase(tl_ids[0])
+                phase_state = logic.phases[current_phase].state
+
+                # Try to find which signal index controls this lane
+                link_index = -1
+                try:
+                    connections = traci.trafficlight.getControlledLanes(tl_ids[0])
+                    if lane_id in connections:
+                        link_index = connections.index(lane_id)
+                except:
+                    pass
+
+                if link_index >= 0 and phase_state[link_index] == 'r':
+                    controlled_by_faulty_signal = 1.0
+
+            lane_features[i, 5] = controlled_by_faulty_signal
             # print(f"Lane {i} faulty light status: {lane_features[i,5]}")
 
         return lane_features
@@ -335,28 +353,35 @@ class Simulation:
         self._reward_store.append(self._sum_neg_reward)
         self._cumulative_wait_store.append(self._sum_waiting_time)
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)
+        self._emergency_q_logs.append(self._emergency_wait_log)
 
 
     def analyze_results(self):
-        plt.figure(figsize=(15, 5))
+        plt.figure(figsize=(20, 5))
 
-        plt.subplot(1, 3, 1)
+        plt.subplot(1, 4, 1)
         plt.plot(self.reward_store)
         plt.title("Reward per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Reward")
 
-        plt.subplot(1, 3, 2)
+        plt.subplot(1, 4, 2)
         plt.plot(self.avg_queue_length_store)
         plt.title("Average Queue Length per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Average Queue Length")
 
-        plt.subplot(1, 3, 3)
+        plt.subplot(1, 4, 3)
         plt.plot(self.cumulative_wait_store)
         plt.title("Cumulative Waiting Time per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Cumulative Waiting Time")
+
+        plt.subplot(1, 4, 4)
+        plt.plot(self._emergency_q_logs)
+        plt.title("Emergency Vehicle Waiting Time")
+        plt.xlabel("Episode")
+        plt.ylabel("Emergency Wait")
 
         plt.show()
 

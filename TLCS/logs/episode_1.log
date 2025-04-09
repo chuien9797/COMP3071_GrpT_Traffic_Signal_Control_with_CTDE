@@ -1,826 +1,422 @@
-[Step 0] Faulty lights: []
 [Step 0] Action: 1
-[Step 10] Faulty lights: []
-[Step 10] Action: 2
-[Step 24] Faulty lights: []
-[Step 24] Action: 2
-[Step 34] Faulty lights: []
-[Step 34] Action: 3
-[Step 48] Faulty lights: []
-[Step 48] Action: 0
-[Step 62] Faulty lights: []
-[Step 62] Action: 1
-[Step 76] Faulty lights: []
-[Step 76] Action: 0
-[Step 90] Faulty lights: []
-[Step 90] Action: 0
-[Step 100] Faulty lights: []
-[Step 100] Action: 3
-[Step 114] Faulty lights: []
-[Step 114] Action: 2
-[Step 128] Faulty lights: []
-[Step 128] Action: 2
-[Step 138] Faulty lights: []
-[Step 138] Action: 2
-[Step 148] Faulty lights: []
-[Step 148] Action: 3
-[Step 162] Faulty lights: []
-[Step 162] Action: 1
-[Step 176] Faulty lights: []
-[Step 176] Action: 3
-[Step 190] Faulty lights: []
-[Step 190] Action: 2
-[Step 204] Faulty lights: []
-[Step 204] Action: 2
-[Step 214] Faulty lights: []
-[Step 214] Action: 1
-[Step 228] Faulty lights: []
-[Step 228] Action: 3
-[Step 242] Faulty lights: []
-[Step 242] Action: 0
-[Step 256] Faulty lights: []
-[Step 256] Action: 1
-[Step 270] Faulty lights: []
-[Step 270] Action: 2
-[Step 284] Faulty lights: []
-[Step 284] Action: 1
-[Step 298] Faulty lights: []
-[Step 298] Action: 3
-[Step 312] Faulty lights: []
-[Step 312] Action: 2
-[Step 326] Faulty lights: []
-[Step 326] Action: 0
-[Step 340] Faulty lights: []
-[Step 340] Action: 3
-[Step 354] Faulty lights: []
-[Step 354] Action: 3
-[Step 364] Faulty lights: []
-[Step 364] Action: 0
-[Step 378] Faulty lights: []
-[Step 378] Action: 0
-[Step 388] Faulty lights: []
-[Step 388] Action: 3
-[Step 402] Faulty lights: []
-[Step 402] Action: 1
-[Step 416] Faulty lights: []
-[Step 416] Action: 0
-[Step 430] Faulty lights: []
-[Step 430] Action: 2
-[Step 444] Faulty lights: []
-[Step 444] Action: 2
-[Step 454] Faulty lights: []
-[Step 454] Action: 1
-[Step 468] Faulty lights: []
-[Step 468] Action: 0
-[Step 482] Faulty lights: []
-[Step 482] Action: 1
-[Step 496] Faulty lights: []
-[Step 496] Action: 3
-[Step 510] Faulty lights: []
-[Step 510] Action: 3
-[Step 520] Faulty lights: []
-[Step 520] Action: 0
-[Step 534] Faulty lights: []
-[Step 534] Action: 2
-[Step 548] Faulty lights: []
-[Step 548] Action: 3
-[Step 562] Faulty lights: []
-[Step 562] Action: 2
-[Step 576] Faulty lights: []
-[Step 576] Action: 0
-[Step 590] Faulty lights: []
-[Step 590] Action: 3
-[Step 604] Faulty lights: []
-[Step 604] Action: 2
-[Step 618] Faulty lights: []
-[Step 618] Action: 2
-[Step 628] Faulty lights: []
-[Step 628] Action: 2
-[Step 638] Faulty lights: []
-[Step 638] Action: 0
-[Step 652] Faulty lights: []
-[Step 652] Action: 0
-[Step 662] Faulty lights: []
-[Step 662] Action: 1
-[Step 676] Faulty lights: []
-[Step 676] Action: 2
-[Step 690] Faulty lights: []
-[Step 690] Action: 2
-[Step 700] Faulty lights: []
-[Step 700] Action: 0
-[Step 714] Faulty lights: []
-[Step 714] Action: 2
-[Step 728] Faulty lights: []
-[Step 728] Action: 1
-[Step 742] Faulty lights: []
-[Step 742] Action: 3
-[Step 756] Faulty lights: []
-[Step 756] Action: 0
-[Step 770] Faulty lights: []
-[Step 770] Action: 1
-[Step 784] Faulty lights: []
-[Step 784] Action: 3
-[Step 798] Faulty lights: []
-[Step 798] Action: 2
-[Step 812] Faulty lights: []
-[Step 812] Action: 1
-[Step 826] Faulty lights: []
-[Step 826] Action: 2
-[Step 840] Faulty lights: []
-[Step 840] Action: 2
-[Step 850] Faulty lights: []
-[Step 850] Action: 1
-[Step 864] Faulty lights: []
-[Step 864] Action: 2
-[Step 878] Faulty lights: []
-[Step 878] Action: 0
-[Step 892] Faulty lights: []
-[Step 892] Action: 3
-[Step 906] Faulty lights: []
-[Step 906] Action: 1
-[Step 920] Faulty lights: []
-[Step 920] Action: 3
-[Step 934] Faulty lights: []
-[Step 934] Action: 3
-[Step 944] Faulty lights: []
-[Step 944] Action: 1
-[Step 958] Faulty lights: []
-[Step 958] Action: 0
-[Step 972] Faulty lights: []
-[Step 972] Action: 2
-[Step 986] Faulty lights: []
-[Step 986] Action: 3
-[Step 1000] Faulty lights: []
-[Step 1000] Action: 0
-[Step 1014] Faulty lights: []
-[Step 1014] Action: 1
-[Step 1028] Faulty lights: []
-[Step 1028] Action: 0
-[Step 1042] Faulty lights: []
-[Step 1042] Action: 0
-[Step 1052] Faulty lights: []
-[Step 1052] Action: 2
-[Step 1066] Faulty lights: []
-[Step 1066] Action: 2
-[Step 1076] Faulty lights: []
-[Step 1076] Action: 2
-[Step 1086] Faulty lights: []
-[Step 1086] Action: 3
-[Step 1100] Faulty lights: []
+[Step 10] Action: 1
+[Step 20] Action: 3
+[Step 34] Action: 0
+[Step 48] Action: 2
+[Step 62] Action: 2
+[Step 72] Action: 3
+[Step 86] Action: 3
+[Step 96] Action: 3
+[Step 106] Action: 2
+[Step 120] Action: 2
+[Step 130] Action: 2
+[Step 140] Action: 0
+[Step 154] Action: 1
+[Step 168] Action: 0
+[Step 182] Action: 1
+[Step 196] Action: 2
+[Step 210] Action: 3
+[Step 224] Action: 3
+[Step 234] Action: 3
+[Step 244] Action: 1
+[Step 258] Action: 2
+[Step 272] Action: 0
+[Step 286] Action: 2
+[Step 300] Action: 2
+[Step 310] Action: 2
+[Step 320] Action: 2
+[Step 330] Action: 0
+[Step 344] Action: 1
+[Step 358] Action: 0
+[Step 372] Action: 0
+[Step 382] Action: 0
+[Step 392] Action: 0
+[Step 402] Action: 0
+[Step 412] Action: 2
+[Step 426] Action: 3
+[Step 440] Action: 2
+[Step 454] Action: 2
+[Step 464] Action: 2
+[Step 474] Action: 1
+[Step 488] Action: 0
+[Step 502] Action: 3
+[Step 516] Action: 3
+[Step 526] Action: 2
+[Step 540] Action: 2
+[Step 550] Action: 0
+[Step 564] Action: 0
+[Step 574] Action: 1
+[Step 588] Action: 2
+[Step 602] Action: 0
+[Step 616] Action: 1
+[Step 630] Action: 2
+[Step 644] Action: 0
+[Step 658] Action: 0
+[Step 668] Action: 0
+[Step 678] Action: 3
+[Step 692] Action: 0
+[Step 706] Action: 3
+[Step 720] Action: 1
+[Step 734] Action: 3
+[Step 748] Action: 2
+[Step 762] Action: 1
+[Step 776] Action: 1
+[Step 786] Action: 3
+[Step 800] Action: 1
+[Step 814] Action: 0
+[Step 828] Action: 2
+[Step 842] Action: 1
+[Step 856] Action: 3
+[Step 870] Action: 2
+[Step 884] Action: 2
+[Step 894] Action: 1
+[Step 908] Action: 3
+[Step 922] Action: 3
+[Step 932] Action: 0
+[Step 946] Action: 2
+[Step 960] Action: 1
+[Step 974] Action: 3
+[Step 988] Action: 2
+[Step 1002] Action: 1
+[Step 1016] Action: 0
+[Step 1030] Action: 1
+[Step 1044] Action: 0
+[Step 1058] Action: 2
+[Step 1072] Action: 3
+[Step 1086] Action: 0
 [Step 1100] Action: 0
-[Step 1114] Faulty lights: []
-[Step 1114] Action: 1
-[Step 1128] Faulty lights: []
-[Step 1128] Action: 2
-[Step 1142] Faulty lights: []
-[Step 1142] Action: 2
-[Step 1152] Faulty lights: []
-[Step 1152] Action: 3
-[Step 1166] Faulty lights: []
-[Step 1166] Action: 3
-[Step 1176] Faulty lights: []
+[Step 1110] Action: 0
+[Step 1120] Action: 2
+[Step 1134] Action: 3
+[Step 1148] Action: 1
+[Step 1162] Action: 2
 [Step 1176] Action: 2
-[Step 1190] Faulty lights: []
-[Step 1190] Action: 3
-[Step 1204] Faulty lights: []
-[Step 1204] Action: 2
-[Step 1218] Faulty lights: []
-[Step 1218] Action: 3
-[Step 1232] Faulty lights: []
-[Step 1232] Action: 0
-[Step 1246] Faulty lights: []
-[Step 1246] Action: 1
-[Step 1260] Faulty lights: []
-[Step 1260] Action: 0
-[Step 1274] Faulty lights: []
-[Step 1274] Action: 2
-[Step 1288] Faulty lights: []
-[Step 1288] Action: 3
-[Step 1302] Faulty lights: []
-[Step 1302] Action: 0
-[Step 1316] Faulty lights: []
-[Step 1316] Action: 0
-[Step 1326] Faulty lights: []
-[Step 1326] Action: 1
-[Step 1340] Faulty lights: []
-[Step 1340] Action: 3
-[Step 1354] Faulty lights: []
-[Step 1354] Action: 1
-[Step 1368] Faulty lights: []
-[Step 1368] Action: 3
-[Step 1382] Faulty lights: []
-[Step 1382] Action: 2
-[Step 1396] Faulty lights: []
-[Step 1396] Action: 2
-[Step 1406] Faulty lights: []
-[Step 1406] Action: 0
-[Step 1420] Faulty lights: []
-[Step 1420] Action: 3
-[Step 1434] Faulty lights: []
-[Step 1434] Action: 3
-[Step 1444] Faulty lights: []
-[Step 1444] Action: 0
-[Step 1458] Faulty lights: []
-[Step 1458] Action: 1
-[Step 1472] Faulty lights: []
-[Step 1472] Action: 0
-[Step 1486] Faulty lights: []
-[Step 1486] Action: 2
-[Step 1500] Faulty lights: []
-[Step 1500] Action: 3
-[Step 1514] Faulty lights: []
-[Step 1514] Action: 1
-[Step 1528] Faulty lights: []
-[Step 1528] Action: 2
-[Step 1542] Faulty lights: []
-[Step 1542] Action: 1
-[Step 1556] Faulty lights: []
-[Step 1556] Action: 0
-[Step 1570] Faulty lights: []
-[Step 1570] Action: 1
-[Step 1584] Faulty lights: []
-[Step 1584] Action: 3
-[Step 1598] Faulty lights: []
-[Step 1598] Action: 0
-[Step 1612] Faulty lights: []
-[Step 1612] Action: 2
-[Step 1626] Faulty lights: []
-[Step 1626] Action: 2
-[Step 1636] Faulty lights: []
-[Step 1636] Action: 0
-[Step 1650] Faulty lights: []
-[Step 1650] Action: 3
-[Step 1664] Faulty lights: []
-[Step 1664] Action: 3
-[Step 1674] Faulty lights: ['TL']
-[Step 1674] Action: 3
-[Step 1684] Faulty lights: ['TL']
-[Step 1684] Action: 1
-[Step 1698] Faulty lights: ['TL']
-[Step 1698] Action: 2
-[Step 1712] Faulty lights: ['TL']
-[Step 1712] Action: 2
-[Step 1722] Faulty lights: ['TL']
-[Step 1722] Action: 2
-[Step 1732] Faulty lights: ['TL']
-[Step 1732] Action: 0
-[Step 1746] Faulty lights: ['TL']
-[Step 1746] Action: 1
-[Step 1760] Faulty lights: ['TL']
+[Step 1186] Action: 2
+[Step 1196] Action: 2
+[Step 1206] Action: 2
+[Step 1216] Action: 1
+[Step 1230] Action: 0
+[Step 1244] Action: 0
+[Step 1254] Action: 1
+[Step 1268] Action: 3
+[Step 1282] Action: 0
+[Step 1296] Action: 0
+[Step 1306] Action: 1
+[Step 1320] Action: 0
+[Step 1334] Action: 3
+[Step 1348] Action: 0
+[Step 1362] Action: 0
+[Step 1372] Action: 1
+[Step 1386] Action: 2
+[Step 1400] Action: 2
+[Step 1410] Action: 2
+[Step 1420] Action: 2
+[Step 1430] Action: 2
+[Step 1440] Action: 2
+[Step 1450] Action: 0
+[Step 1464] Action: 0
+[Step 1474] Action: 2
+[Step 1488] Action: 0
+[Step 1502] Action: 2
+[Step 1516] Action: 2
+[Step 1526] Action: 3
+[Step 1540] Action: 2
+[Step 1554] Action: 2
+[Step 1564] Action: 2
+[Step 1574] Action: 3
+[Step 1588] Action: 1
+[Step 1602] Action: 3
+[Step 1616] Action: 1
+[Step 1630] Action: 1
+[Step 1640] Action: 2
+[Step 1654] Action: 1
+[Step 1668] Action: 0
+[Step 1682] Action: 0
+[Step 1692] Action: 3
+[Step 1706] Action: 3
+[Step 1716] Action: 3
+[Step 1726] Action: 3
+[Step 1736] Action: 3
+[Step 1746] Action: 2
 [Step 1760] Action: 2
-[Step 1774] Faulty lights: ['TL']
-[Step 1774] Action: 0
-[Step 1788] Faulty lights: ['TL']
-[Step 1788] Action: 1
-[Step 1802] Faulty lights: ['TL']
-[Step 1802] Action: 1
-[Step 1812] Faulty lights: ['TL']
-[Step 1812] Action: 3
-[Step 1826] Faulty lights: ['TL']
-[Step 1826] Action: 3
-[Step 1836] Faulty lights: ['TL']
-[Step 1836] Action: 0
-[Step 1850] Faulty lights: ['TL']
-[Step 1850] Action: 0
-[Step 1860] Faulty lights: ['TL']
-[Step 1860] Action: 0
-[Step 1870] Faulty lights: ['TL']
-[Step 1870] Action: 3
-[Step 1884] Faulty lights: ['TL']
-[Step 1884] Action: 3
-[Step 1894] Faulty lights: ['TL']
-[Step 1894] Action: 1
-[Step 1908] Faulty lights: ['TL']
-[Step 1908] Action: 0
-[Step 1922] Faulty lights: ['TL']
-[Step 1922] Action: 2
-[Step 1936] Faulty lights: ['TL']
-[Step 1936] Action: 2
-[Step 1946] Faulty lights: ['TL']
-[Step 1946] Action: 3
-[Step 1960] Faulty lights: ['TL']
-[Step 1960] Action: 2
-[Step 1974] Faulty lights: ['TL']
-[Step 1974] Action: 2
-[Step 1984] Faulty lights: ['TL']
-[Step 1984] Action: 2
-[Step 1994] Faulty lights: ['TL']
-[Step 1994] Action: 0
-[Step 2008] Faulty lights: ['TL']
-[Step 2008] Action: 0
-[Step 2018] Faulty lights: ['TL']
-[Step 2018] Action: 2
-[Step 2032] Faulty lights: ['TL']
-[Step 2032] Action: 3
-[Step 2046] Faulty lights: ['TL']
-[Step 2046] Action: 0
-[Step 2060] Faulty lights: ['TL']
-[Step 2060] Action: 2
-[Step 2074] Faulty lights: ['TL']
-[Step 2074] Action: 1
-[Step 2088] Faulty lights: ['TL']
-[Step 2088] Action: 1
-[Step 2098] Faulty lights: ['TL']
-[Step 2098] Action: 3
-[Step 2112] Faulty lights: ['TL']
-[Step 2112] Action: 2
-[Step 2126] Faulty lights: ['TL']
-[Step 2126] Action: 0
-[Step 2140] Faulty lights: ['TL']
-[Step 2140] Action: 2
-[Step 2154] Faulty lights: ['TL']
-[Step 2154] Action: 2
-[Step 2164] Faulty lights: ['TL']
-[Step 2164] Action: 2
-[Step 2174] Faulty lights: ['TL']
-[Step 2174] Action: 2
-[Step 2184] Faulty lights: ['TL']
-[Step 2184] Action: 1
-[Step 2198] Faulty lights: ['TL']
-[Step 2198] Action: 3
-[Step 2212] Faulty lights: ['TL']
-[Step 2212] Action: 1
-[Step 2226] Faulty lights: ['TL']
-[Step 2226] Action: 3
-[Step 2240] Faulty lights: ['TL']
-[Step 2240] Action: 2
-[Step 2254] Faulty lights: ['TL']
-[Step 2254] Action: 2
-[Step 2264] Faulty lights: ['TL']
-[Step 2264] Action: 3
-[Step 2278] Faulty lights: ['TL']
-[Step 2278] Action: 3
-[Step 2288] Faulty lights: ['TL']
-[Step 2288] Action: 1
-[Step 2302] Faulty lights: ['TL']
-[Step 2302] Action: 3
-[Step 2316] Faulty lights: ['TL']
-[Step 2316] Action: 3
-[Step 2326] Faulty lights: ['TL']
-[Step 2326] Action: 0
-[Step 2340] Faulty lights: ['TL']
-[Step 2340] Action: 0
-[Step 2350] Faulty lights: ['TL']
-[Step 2350] Action: 2
-[Step 2364] Faulty lights: ['TL']
-[Step 2364] Action: 2
-[Step 2374] Faulty lights: ['TL']
-[Step 2374] Action: 1
-[Step 2388] Faulty lights: ['TL']
-[Step 2388] Action: 1
-[Step 2398] Faulty lights: ['TL']
-[Step 2398] Action: 0
-[Step 2412] Faulty lights: ['TL']
-[Step 2412] Action: 0
-[Step 2422] Faulty lights: ['TL']
-[Step 2422] Action: 2
-[Step 2436] Faulty lights: ['TL']
-[Step 2436] Action: 0
-[Step 2450] Faulty lights: ['TL']
-[Step 2450] Action: 0
-[Step 2460] Faulty lights: ['TL']
-[Step 2460] Action: 3
-[Step 2474] Faulty lights: ['TL']
-[Step 2474] Action: 0
-[Step 2488] Faulty lights: ['TL']
-[Step 2488] Action: 3
-[Step 2502] Faulty lights: ['TL']
-[Step 2502] Action: 3
-[Step 2512] Faulty lights: ['TL']
-[Step 2512] Action: 0
-[Step 2526] Faulty lights: ['TL']
-[Step 2526] Action: 3
-[Step 2540] Faulty lights: ['TL']
-[Step 2540] Action: 0
-[Step 2554] Faulty lights: ['TL']
-[Step 2554] Action: 0
-[Step 2564] Faulty lights: ['TL']
-[Step 2564] Action: 2
-[Step 2578] Faulty lights: ['TL']
-[Step 2578] Action: 0
-[Step 2592] Faulty lights: ['TL']
-[Step 2592] Action: 2
-[Step 2606] Faulty lights: ['TL']
-[Step 2606] Action: 2
-[Step 2616] Faulty lights: ['TL']
-[Step 2616] Action: 2
-[Step 2626] Faulty lights: ['TL']
-[Step 2626] Action: 0
-[Step 2640] Faulty lights: ['TL']
-[Step 2640] Action: 1
-[Step 2654] Faulty lights: ['TL']
-[Step 2654] Action: 3
-[Step 2668] Faulty lights: ['TL']
-[Step 2668] Action: 2
-[Step 2682] Faulty lights: ['TL']
-[Step 2682] Action: 3
-[Step 2696] Faulty lights: ['TL']
-[Step 2696] Action: 0
-[Step 2710] Faulty lights: ['TL']
-[Step 2710] Action: 0
-[Step 2720] Faulty lights: ['TL']
-[Step 2720] Action: 1
-[Step 2734] Faulty lights: ['TL']
-[Step 2734] Action: 0
-[Step 2748] Faulty lights: ['TL']
-[Step 2748] Action: 2
-[Step 2762] Faulty lights: ['TL']
-[Step 2762] Action: 0
-[Step 2776] Faulty lights: ['TL']
-[Step 2776] Action: 0
-[Step 2786] Faulty lights: ['TL']
-[Step 2786] Action: 1
-[Step 2800] Faulty lights: ['TL']
-[Step 2800] Action: 1
-[Step 2810] Faulty lights: ['TL']
-[Step 2810] Action: 3
-[Step 2824] Faulty lights: ['TL']
-[Step 2824] Action: 1
-[Step 2838] Faulty lights: ['TL']
-[Step 2838] Action: 3
-[Step 2852] Faulty lights: ['TL']
-[Step 2852] Action: 2
-[Step 2866] Faulty lights: ['TL']
-[Step 2866] Action: 1
-[Step 2880] Faulty lights: ['TL']
+[Step 1770] Action: 1
+[Step 1784] Action: 1
+[Step 1794] Action: 0
+[Step 1808] Action: 2
+[Step 1822] Action: 0
+[Step 1836] Action: 3
+[Step 1850] Action: 1
+[Step 1864] Action: 1
+[Step 1874] Action: 2
+[Step 1888] Action: 1
+[Step 1902] Action: 3
+[Step 1916] Action: 1
+[Step 1930] Action: 3
+[Step 1944] Action: 3
+[Step 1954] Action: 2
+[Step 1968] Action: 2
+[Step 1978] Action: 1
+[Step 1992] Action: 0
+[Step 2006] Action: 2
+[Step 2020] Action: 3
+[Step 2034] Action: 2
+[Step 2048] Action: 2
+[Step 2058] Action: 0
+[Step 2072] Action: 2
+[Step 2086] Action: 2
+[Step 2096] Action: 1
+[Step 2110] Action: 3
+[Step 2124] Action: 0
+[Step 2138] Action: 3
+[Step 2152] Action: 3
+[Step 2162] Action: 1
+[Step 2176] Action: 2
+[Step 2190] Action: 3
+[Step 2204] Action: 3
+[Step 2214] Action: 3
+[Step 2224] Action: 1
+[Step 2238] Action: 2
+[Step 2252] Action: 0
+[Step 2266] Action: 0
+[Step 2276] Action: 1
+[Step 2290] Action: 3
+[Step 2304] Action: 1
+[Step 2318] Action: 2
+[Step 2332] Action: 1
+[Step 2346] Action: 1
+[Step 2356] Action: 3
+[Step 2370] Action: 0
+[Step 2384] Action: 3
+[Step 2398] Action: 3
+[Step 2408] Action: 0
+[Step 2422] Action: 3
+[Step 2436] Action: 3
+[Step 2446] Action: 3
+[Step 2456] Action: 1
+[Step 2470] Action: 3
+[Step 2484] Action: 3
+[Step 2494] Action: 0
+[Step 2508] Action: 0
+[Step 2518] Action: 2
+[Step 2532] Action: 0
+[Step 2546] Action: 2
+[Step 2560] Action: 2
+[Step 2570] Action: 0
+[Step 2584] Action: 0
+[Step 2594] Action: 1
+[Step 2608] Action: 3
+[Step 2622] Action: 2
+[Step 2636] Action: 2
+[Step 2646] Action: 2
+[Step 2656] Action: 2
+[Step 2666] Action: 0
+[Step 2680] Action: 3
+[Step 2694] Action: 1
+[Step 2708] Action: 1
+[Step 2718] Action: 2
+[Step 2732] Action: 1
+[Step 2746] Action: 1
+[Step 2756] Action: 1
+[Step 2766] Action: 2
+[Step 2780] Action: 2
+[Step 2790] Action: 1
+[Step 2804] Action: 2
+[Step 2818] Action: 0
+[Step 2832] Action: 0
+[Step 2842] Action: 0
+[Step 2852] Action: 1
+[Step 2866] Action: 2
 [Step 2880] Action: 2
-[Step 2894] Faulty lights: ['TL']
-[Step 2894] Action: 1
-[Step 2908] Faulty lights: ['TL']
-[Step 2908] Action: 0
-[Step 2922] Faulty lights: ['TL']
-[Step 2922] Action: 2
-[Step 2936] Faulty lights: ['TL']
-[Step 2936] Action: 2
-[Step 2946] Faulty lights: ['TL']
-[Step 2946] Action: 3
-[Step 2960] Faulty lights: ['TL']
-[Step 2960] Action: 2
-[Step 2974] Faulty lights: ['TL']
-[Step 2974] Action: 1
-[Step 2988] Faulty lights: ['TL']
-[Step 2988] Action: 3
-[Step 3002] Faulty lights: ['TL']
-[Step 3002] Action: 2
-[Step 3016] Faulty lights: ['TL']
-[Step 3016] Action: 1
-[Step 3030] Faulty lights: ['TL']
-[Step 3030] Action: 3
-[Step 3044] Faulty lights: ['TL']
-[Step 3044] Action: 1
-[Step 3058] Faulty lights: ['TL']
-[Step 3058] Action: 1
-[Step 3068] Faulty lights: ['TL']
-[Step 3068] Action: 0
-[Step 3082] Faulty lights: ['TL']
-[Step 3082] Action: 3
-[Step 3096] Faulty lights: ['TL']
-[Step 3096] Action: 0
-[Step 3110] Faulty lights: ['TL']
-[Step 3110] Action: 2
-[Step 3124] Faulty lights: ['TL']
-[Step 3124] Action: 2
-[Step 3134] Faulty lights: ['TL']
-[Step 3134] Action: 1
-[Step 3148] Faulty lights: ['TL']
-[Step 3148] Action: 2
-[Step 3162] Faulty lights: ['TL']
-[Step 3162] Action: 2
-[Step 3172] Faulty lights: ['TL']
-[Step 3172] Action: 3
-[Step 3186] Faulty lights: ['TL']
-[Step 3186] Action: 2
-[Step 3200] Faulty lights: ['TL']
-[Step 3200] Action: 0
-[Step 3214] Faulty lights: ['TL']
-[Step 3214] Action: 2
-[Step 3228] Faulty lights: ['TL']
-[Step 3228] Action: 2
-[Step 3238] Faulty lights: ['TL']
-[Step 3238] Action: 0
-[Step 3252] Faulty lights: ['TL']
-[Step 3252] Action: 2
-[Step 3266] Faulty lights: ['TL']
-[Step 3266] Action: 1
-[Step 3280] Faulty lights: ['TL']
-[Step 3280] Action: 2
-[Step 3294] Faulty lights: ['TL']
-[Step 3294] Action: 2
-[Step 3304] Faulty lights: ['TL']
-[Step 3304] Action: 3
-[Step 3318] Faulty lights: ['TL']
-[Step 3318] Action: 2
-[Step 3332] Faulty lights: ['TL']
-[Step 3332] Action: 3
-[Step 3346] Faulty lights: ['TL']
-[Step 3346] Action: 0
-[Step 3360] Faulty lights: ['TL']
-[Step 3360] Action: 1
-[Step 3374] Faulty lights: ['TL']
-[Step 3374] Action: 0
-[Step 3388] Faulty lights: ['TL']
-[Step 3388] Action: 1
-[Step 3402] Faulty lights: ['TL']
-[Step 3402] Action: 1
-[Step 3412] Faulty lights: ['TL']
-[Step 3412] Action: 3
-[Step 3426] Faulty lights: ['TL']
-[Step 3426] Action: 0
-[Step 3440] Faulty lights: ['TL']
-[Step 3440] Action: 3
-[Step 3454] Faulty lights: ['TL']
+[Step 2890] Action: 2
+[Step 2900] Action: 1
+[Step 2914] Action: 0
+[Step 2928] Action: 1
+[Step 2942] Action: 1
+[Step 2952] Action: 1
+[Step 2962] Action: 2
+[Step 2976] Action: 3
+[Step 2990] Action: 3
+[Step 3000] Action: 2
+[Step 3014] Action: 0
+[Step 3028] Action: 0
+[Step 3038] Action: 2
+[Step 3052] Action: 1
+[Step 3066] Action: 0
+[Step 3080] Action: 1
+[Step 3094] Action: 1
+[Step 3104] Action: 3
+[Step 3118] Action: 1
+[Step 3132] Action: 2
+[Step 3146] Action: 2
+[Step 3156] Action: 0
+[Step 3170] Action: 2
+[Step 3184] Action: 0
+[Step 3198] Action: 2
+[Step 3212] Action: 3
+[Step 3226] Action: 0
+[Step 3240] Action: 3
+[Step 3254] Action: 0
+[Step 3268] Action: 0
+[Step 3278] Action: 2
+[Step 3292] Action: 0
+[Step 3306] Action: 1
+[Step 3320] Action: 2
+[Step 3334] Action: 2
+[Step 3344] Action: 0
+[Step 3358] Action: 0
+[Step 3368] Action: 3
+[Step 3382] Action: 3
+[Step 3392] Action: 2
+[Step 3406] Action: 3
+[Step 3420] Action: 3
+[Step 3430] Action: 2
+[Step 3444] Action: 2
 [Step 3454] Action: 0
-[Step 3468] Faulty lights: ['TL']
 [Step 3468] Action: 2
-[Step 3482] Faulty lights: ['TL']
-[Step 3482] Action: 1
-[Step 3496] Faulty lights: ['TL']
-[Step 3496] Action: 3
-[Step 3510] Faulty lights: ['TL']
-[Step 3510] Action: 2
-[Step 3524] Faulty lights: ['TL']
-[Step 3524] Action: 0
-[Step 3538] Faulty lights: ['TL']
+[Step 3482] Action: 0
+[Step 3496] Action: 1
+[Step 3510] Action: 0
+[Step 3524] Action: 2
 [Step 3538] Action: 2
-[Step 3552] Faulty lights: ['TL']
-[Step 3552] Action: 1
-[Step 3566] Faulty lights: ['TL']
-[Step 3566] Action: 0
-[Step 3580] Faulty lights: ['TL']
-[Step 3580] Action: 3
-[Step 3594] Faulty lights: ['TL']
-[Step 3594] Action: 2
-[Step 3608] Faulty lights: ['TL']
-[Step 3608] Action: 0
-[Step 3622] Faulty lights: ['TL']
-[Step 3622] Action: 3
-[Step 3636] Faulty lights: ['TL']
-[Step 3636] Action: 1
-[Step 3650] Faulty lights: ['TL']
-[Step 3650] Action: 2
-[Step 3664] Faulty lights: ['TL']
-[Step 3664] Action: 2
-[Step 3674] Faulty lights: ['TL']
-[Step 3674] Action: 1
-[Step 3688] Faulty lights: ['TL']
-[Step 3688] Action: 1
-[Step 3698] Faulty lights: ['TL']
-[Step 3698] Action: 0
-[Step 3712] Faulty lights: ['TL']
-[Step 3712] Action: 3
-[Step 3726] Faulty lights: ['TL']
-[Step 3726] Action: 3
-[Step 3736] Faulty lights: ['TL']
-[Step 3736] Action: 1
-[Step 3750] Faulty lights: ['TL']
-[Step 3750] Action: 0
-[Step 3764] Faulty lights: ['TL']
-[Step 3764] Action: 1
-[Step 3778] Faulty lights: ['TL']
-[Step 3778] Action: 3
-[Step 3792] Faulty lights: ['TL']
-[Step 3792] Action: 2
-[Step 3806] Faulty lights: ['TL']
-[Step 3806] Action: 2
-[Step 3816] Faulty lights: ['TL']
-[Step 3816] Action: 2
-[Step 3826] Faulty lights: ['TL']
-[Step 3826] Action: 3
-[Step 3840] Faulty lights: ['TL']
-[Step 3840] Action: 3
-[Step 3850] Faulty lights: ['TL']
-[Step 3850] Action: 1
-[Step 3864] Faulty lights: ['TL']
-[Step 3864] Action: 1
-[Step 3874] Faulty lights: ['TL']
+[Step 3548] Action: 0
+[Step 3562] Action: 1
+[Step 3576] Action: 1
+[Step 3586] Action: 2
+[Step 3600] Action: 3
+[Step 3614] Action: 0
+[Step 3628] Action: 1
+[Step 3642] Action: 3
+[Step 3656] Action: 3
+[Step 3666] Action: 0
+[Step 3680] Action: 0
+[Step 3690] Action: 0
+[Step 3700] Action: 0
+[Step 3710] Action: 3
+[Step 3724] Action: 3
+[Step 3734] Action: 2
+[Step 3748] Action: 3
+[Step 3762] Action: 2
+[Step 3776] Action: 0
+[Step 3790] Action: 3
+[Step 3804] Action: 1
+[Step 3818] Action: 3
+[Step 3832] Action: 2
+[Step 3846] Action: 3
+[Step 3860] Action: 1
 [Step 3874] Action: 2
-[Step 3888] Faulty lights: ['TL']
-[Step 3888] Action: 2
-[Step 3898] Faulty lights: ['TL']
-[Step 3898] Action: 0
-[Step 3912] Faulty lights: ['TL']
-[Step 3912] Action: 2
-[Step 3926] Faulty lights: ['TL']
-[Step 3926] Action: 0
-[Step 3940] Faulty lights: ['TL']
-[Step 3940] Action: 3
-[Step 3954] Faulty lights: ['TL']
+[Step 3888] Action: 1
+[Step 3902] Action: 1
+[Step 3912] Action: 0
+[Step 3926] Action: 1
+[Step 3940] Action: 0
 [Step 3954] Action: 2
-[Step 3968] Faulty lights: ['TL']
-[Step 3968] Action: 3
-[Step 3982] Faulty lights: ['TL']
-[Step 3982] Action: 1
-[Step 3996] Faulty lights: ['TL']
-[Step 3996] Action: 2
-[Step 4010] Faulty lights: ['TL']
+[Step 3968] Action: 0
+[Step 3982] Action: 3
+[Step 3996] Action: 0
 [Step 4010] Action: 0
-[Step 4024] Faulty lights: ['TL']
-[Step 4024] Action: 1
-[Step 4038] Faulty lights: ['TL']
-[Step 4038] Action: 2
-[Step 4052] Faulty lights: ['TL']
-[Step 4052] Action: 2
-[Step 4062] Faulty lights: ['TL']
-[Step 4062] Action: 3
-[Step 4076] Faulty lights: ['TL']
-[Step 4076] Action: 0
-[Step 4090] Faulty lights: ['TL']
-[Step 4090] Action: 0
-[Step 4100] Faulty lights: ['TL']
-[Step 4100] Action: 3
-[Step 4114] Faulty lights: ['TL']
-[Step 4114] Action: 0
-[Step 4128] Faulty lights: ['TL']
-[Step 4128] Action: 3
-[Step 4142] Faulty lights: ['TL']
-[Step 4142] Action: 1
-[Step 4156] Faulty lights: ['TL']
-[Step 4156] Action: 3
-[Step 4170] Faulty lights: ['TL']
-[Step 4170] Action: 1
-[Step 4184] Faulty lights: ['TL']
-[Step 4184] Action: 2
-[Step 4198] Faulty lights: ['TL']
-[Step 4198] Action: 2
-[Step 4208] Faulty lights: ['TL']
-[Step 4208] Action: 1
-[Step 4222] Faulty lights: ['TL']
-[Step 4222] Action: 2
-[Step 4236] Faulty lights: ['TL']
-[Step 4236] Action: 0
-[Step 4250] Faulty lights: ['TL']
-[Step 4250] Action: 1
-[Step 4264] Faulty lights: ['TL']
-[Step 4264] Action: 0
-[Step 4278] Faulty lights: ['TL']
-[Step 4278] Action: 1
-[Step 4292] Faulty lights: ['TL']
-[Step 4292] Action: 2
-[Step 4306] Faulty lights: ['TL']
-[Step 4306] Action: 3
-[Step 4320] Faulty lights: ['TL']
-[Step 4320] Action: 2
-[Step 4334] Faulty lights: ['TL']
-[Step 4334] Action: 0
-[Step 4348] Faulty lights: ['TL']
-[Step 4348] Action: 2
-[Step 4362] Faulty lights: ['TL']
-[Step 4362] Action: 3
-[Step 4376] Faulty lights: ['TL']
-[Step 4376] Action: 3
-[Step 4386] Faulty lights: ['TL']
-[Step 4386] Action: 3
-[Step 4396] Faulty lights: ['TL']
-[Step 4396] Action: 1
-[Step 4410] Faulty lights: ['TL']
-[Step 4410] Action: 1
-[Step 4420] Faulty lights: ['TL']
-[Step 4420] Action: 2
-[Step 4434] Faulty lights: ['TL']
-[Step 4434] Action: 1
-[Step 4448] Faulty lights: ['TL']
-[Step 4448] Action: 0
-[Step 4462] Faulty lights: ['TL']
-[Step 4462] Action: 0
-[Step 4472] Faulty lights: ['TL']
-[Step 4472] Action: 2
-[Step 4486] Faulty lights: ['TL']
-[Step 4486] Action: 3
-[Step 4500] Faulty lights: ['TL']
-[Step 4500] Action: 2
-[Step 4514] Faulty lights: ['TL']
-[Step 4514] Action: 2
-[Step 4524] Faulty lights: ['TL']
-[Step 4524] Action: 3
-[Step 4538] Faulty lights: ['TL']
-[Step 4538] Action: 1
-[Step 4552] Faulty lights: ['TL']
-[Step 4552] Action: 2
-[Step 4566] Faulty lights: ['TL']
-[Step 4566] Action: 0
-[Step 4580] Faulty lights: ['TL']
-[Step 4580] Action: 0
-[Step 4590] Faulty lights: ['TL']
-[Step 4590] Action: 2
-[Step 4604] Faulty lights: ['TL']
-[Step 4604] Action: 0
-[Step 4618] Faulty lights: ['TL']
-[Step 4618] Action: 0
-[Step 4628] Faulty lights: ['TL']
-[Step 4628] Action: 3
-[Step 4642] Faulty lights: ['TL']
-[Step 4642] Action: 0
-[Step 4656] Faulty lights: ['TL']
-[Step 4656] Action: 2
-[Step 4670] Faulty lights: ['TL']
-[Step 4670] Action: 0
-[Step 4684] Faulty lights: ['TL']
-[Step 4684] Action: 3
-[Step 4698] Faulty lights: ['TL']
-[Step 4698] Action: 2
-[Step 4712] Faulty lights: ['TL']
-[Step 4712] Action: 0
-[Step 4726] Faulty lights: ['TL']
-[Step 4726] Action: 1
-[Step 4740] Faulty lights: ['TL']
-[Step 4740] Action: 3
-[Step 4754] Faulty lights: ['TL']
-[Step 4754] Action: 3
-[Step 4764] Faulty lights: ['TL']
-[Step 4764] Action: 0
-[Step 4778] Faulty lights: ['TL']
-[Step 4778] Action: 2
-[Step 4792] Faulty lights: ['TL']
-[Step 4792] Action: 3
-[Step 4806] Faulty lights: ['TL']
-[Step 4806] Action: 1
-[Step 4820] Faulty lights: ['TL']
-[Step 4820] Action: 1
-[Step 4830] Faulty lights: ['TL']
-[Step 4830] Action: 2
-[Step 4844] Faulty lights: ['TL']
-[Step 4844] Action: 2
-[Step 4854] Faulty lights: ['TL']
-[Step 4854] Action: 1
-[Step 4868] Faulty lights: ['TL']
-[Step 4868] Action: 1
-[Step 4878] Faulty lights: ['TL']
-[Step 4878] Action: 3
-[Step 4892] Faulty lights: ['TL']
-[Step 4892] Action: 1
-[Step 4906] Faulty lights: ['TL']
-[Step 4906] Action: 3
-[Step 4920] Faulty lights: ['TL']
-[Step 4920] Action: 0
-[Step 4934] Faulty lights: ['TL']
-[Step 4934] Action: 1
-[Step 4948] Faulty lights: ['TL']
-[Step 4948] Action: 0
-[Step 4962] Faulty lights: ['TL']
-[Step 4962] Action: 0
-[Step 4972] Faulty lights: ['TL']
-[Step 4972] Action: 1
-[Step 4986] Faulty lights: ['TL']
-[Step 4986] Action: 2
-[Step 5000] Faulty lights: ['TL']
-[Step 5000] Action: 2
-[Step 5010] Faulty lights: ['TL']
-[Step 5010] Action: 2
-[Step 5020] Faulty lights: ['TL']
-[Step 5020] Action: 1
-[Step 5034] Faulty lights: ['TL']
-[Step 5034] Action: 0
-[Step 5048] Faulty lights: ['TL']
-[Step 5048] Action: 3
-[Step 5062] Faulty lights: ['TL']
-[Step 5062] Action: 2
-[Step 5076] Faulty lights: ['TL']
-[Step 5076] Action: 0
-[Step 5090] Faulty lights: ['TL']
-[Step 5090] Action: 0
-[Step 5100] Faulty lights: ['TL']
-[Step 5100] Action: 1
-[Step 5114] Faulty lights: ['TL']
-[Step 5114] Action: 0
-[Step 5128] Faulty lights: ['TL']
-[Step 5128] Action: 2
-[Step 5142] Faulty lights: ['TL']
-[Step 5142] Action: 3
-[Step 5156] Faulty lights: ['TL']
-[Step 5156] Action: 0
-[Step 5170] Faulty lights: ['TL']
-[Step 5170] Action: 3
-[Step 5184] Faulty lights: ['TL']
-[Step 5184] Action: 0
-[Step 5198] Faulty lights: ['TL']
-[Step 5198] Action: 1
-[Step 5212] Faulty lights: ['TL']
-[Step 5212] Action: 2
-[Step 5226] Faulty lights: ['TL']
-[Step 5226] Action: 0
-[Step 5240] Faulty lights: ['TL']
-[Step 5240] Action: 2
-[Step 5254] Faulty lights: ['TL']
-[Step 5254] Action: 0
-[Step 5268] Faulty lights: ['TL']
-[Step 5268] Action: 1
-[Step 5282] Faulty lights: ['TL']
-[Step 5282] Action: 1
-[Step 5292] Faulty lights: ['TL']
-[Step 5292] Action: 3
-[Step 5306] Faulty lights: ['TL']
-[Step 5306] Action: 2
-[Step 5320] Faulty lights: ['TL']
-[Step 5320] Action: 3
-[Step 5334] Faulty lights: ['TL']
-[Step 5334] Action: 3
-[Step 5344] Faulty lights: ['TL']
-[Step 5344] Action: 1
-[Step 5358] Faulty lights: ['TL']
-[Step 5358] Action: 2
-[Step 5372] Faulty lights: ['TL']
-[Step 5372] Action: 2
-[Step 5382] Faulty lights: ['TL']
-[Step 5382] Action: 1
-[Step 5396] Faulty lights: ['TL']
-[Step 5396] Action: 3
+[Step 4020] Action: 0
+[Step 4030] Action: 2
+[Step 4044] Action: 0
+[Step 4058] Action: 3
+[Step 4072] Action: 3
+[Step 4082] Action: 1
+[Step 4096] Action: 3
+[Step 4110] Action: 3
+[Step 4120] Action: 2
+[Step 4134] Action: 3
+[Step 4148] Action: 0
+[Step 4162] Action: 0
+[Step 4172] Action: 1
+[Step 4186] Action: 1
+[Step 4196] Action: 2
+[Step 4210] Action: 2
+[Step 4220] Action: 1
+[Step 4234] Action: 0
+[Step 4248] Action: 3
+[Step 4262] Action: 2
+[Step 4276] Action: 1
+[Step 4290] Action: 3
+[Step 4304] Action: 2
+[Step 4318] Action: 0
+[Step 4332] Action: 3
+[Step 4346] Action: 2
+[Step 4360] Action: 3
+[Step 4374] Action: 1
+[Step 4388] Action: 1
+[Step 4398] Action: 1
+[Step 4408] Action: 0
+[Step 4422] Action: 0
+[Step 4432] Action: 3
+[Step 4446] Action: 1
+[Step 4460] Action: 2
+[Step 4474] Action: 1
+[Step 4488] Action: 3
+[Step 4502] Action: 1
+[Step 4516] Action: 2
+[Step 4530] Action: 0
+[Step 4544] Action: 1
+[Step 4558] Action: 0
+[Step 4572] Action: 2
+[Step 4586] Action: 0
+[Step 4600] Action: 0
+[Step 4610] Action: 1
+[Step 4624] Action: 3
+[Step 4638] Action: 0
+[Step 4652] Action: 3
+[Step 4666] Action: 2
+[Step 4680] Action: 2
+[Step 4690] Action: 2
+[Step 4700] Action: 3
+[Step 4714] Action: 0
+[Step 4728] Action: 3
+[Step 4742] Action: 0
+[Step 4756] Action: 2
+[Step 4770] Action: 0
+[Step 4784] Action: 0
+[Step 4794] Action: 2
+[Step 4808] Action: 0
+[Step 4822] Action: 2
+[Step 4836] Action: 2
+[Step 4846] Action: 1
+[Step 4860] Action: 2
+[Step 4874] Action: 0
+[Step 4888] Action: 1
+[Step 4902] Action: 0
+[Step 4916] Action: 0
+[Step 4926] Action: 0
+[Step 4936] Action: 3
+[Step 4950] Action: 0
+[Step 4964] Action: 0
+[Step 4974] Action: 1
+[Step 4988] Action: 2
+[Step 5002] Action: 3
+[Step 5016] Action: 3
+[Step 5026] Action: 0
+[Step 5040] Action: 2
+[Step 5054] Action: 2
+[Step 5064] Action: 3
+[Step 5078] Action: 1
+[Step 5092] Action: 1
+[Step 5102] Action: 1
+[Step 5112] Action: 0
+[Step 5126] Action: 2
+[Step 5140] Action: 0
+[Step 5154] Action: 2
+[Step 5168] Action: 1
+[Step 5182] Action: 2
+[Step 5196] Action: 3
+[Step 5210] Action: 0
+[Step 5224] Action: 0
+[Step 5234] Action: 1
+[Step 5248] Action: 1
+[Step 5258] Action: 3
+[Step 5272] Action: 2
+[Step 5286] Action: 0
+[Step 5300] Action: 0
+[Step 5310] Action: 1
+[Step 5324] Action: 2
+[Step 5338] Action: 1
+[Step 5352] Action: 2
+[Step 5366] Action: 3
+[Step 5380] Action: 2
+[Step 5394] Action: 1

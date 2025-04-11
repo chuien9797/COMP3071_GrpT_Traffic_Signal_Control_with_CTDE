@@ -21,13 +21,13 @@ from model import TrainModelAggregator
 def main():
     """
     Multi-environment training loop using a per-lane embedding + aggregator approach.
-    This version supports both DQN and a refined adaptive PPO algorithm.
+    Supports both DQN and a refined adaptive PPO algorithm with additional reward scaling and prioritized updates.
     """
     # 1) Load configuration from .ini file.
     config = import_train_configuration("training_settings.ini")
     algorithm = config.get('algorithm', 'PPO').upper()
 
-    # The intersection types you want to train on in one run:
+    # The intersection types to train in one run:
     possible_envs = ["cross", "roundabout", "T_intersection"]
 
     # 2) Determine maximum number of actions across environments.
@@ -64,35 +64,34 @@ def main():
         TargetModel.set_weights(Model.get_weights())  # Initial synchronization
 
     elif algorithm == "PPO":
-        # Retrieve PPO parameters with default fallbacks.
-        ppo_hidden_size = config.get('ppo_hidden_size', 64)
+        # Retrieve PPO hyperparameters with defaults.
+        ppo_hidden_size   = config.get('ppo_hidden_size', 64)
         ppo_learning_rate = config.get('ppo_learning_rate', 0.0003)
         if ppo_learning_rate is None:
             ppo_learning_rate = 0.0003
-        ppo_clip_ratio = config.get('ppo_clip_ratio', 0.2)
+        ppo_clip_ratio    = config.get('ppo_clip_ratio', 0.2)
         ppo_update_epochs = config.get('ppo_update_epochs', 10)
         ppo_training_epochs = config.get('ppo_training_epochs', 10)
 
-        # For PPO, we use lane_feature_dim = 9 (to match _get_state()),
-        # and the model is adaptive so we don't need to force a fixed padding at build-time.
+        # For PPO, use lane_feature_dim = 9 (to match _get_state()).
+        # The model is adaptive, so we do not force an explicit build with fixed dimensions.
         Model = TrainModelPPO(
-            lane_feature_dim=9,  # Should match the state feature dimension from _get_state()
+            lane_feature_dim=9,             # Should match _get_state() output dimension.
             hidden_size=ppo_hidden_size,
             learning_rate=ppo_learning_rate,
             clip_ratio=ppo_clip_ratio,
             update_epochs=ppo_update_epochs,
             training_epochs=ppo_training_epochs,
             num_actions=max_num_actions,
-            use_priority = True,
-            reward_scale = 2.0
+            use_priority=True,              # Enable prioritized update (if desired)
+            reward_scale=5.0                # Amplify reward signal to improve differentiation.
         )
-        # NOTE: Remove the explicit Model.build(...) call; the model now adapts to the input shape.
-        TargetModel = None  # PPO does not need a separate target network.
+        TargetModel = None  # PPO does not use a target network.
 
     else:
         raise ValueError(f"Unsupported algorithm: {algorithm}")
 
-    # 4) Create a replay Memory instance (only needed for DQN).
+    # 4) Create a replay Memory instance (only needed for DQN)
     MemoryInstance = None
     if algorithm == "DQN":
         MemoryInstance = Memory(
@@ -100,7 +99,7 @@ def main():
             config['memory_size_min']
         )
 
-    # 5) Build a Simulation object per environment.
+    # 5) Build a Simulation object for each environment.
     simulations = {}
     for env_name in possible_envs:
         local_conf = config.copy()
@@ -123,7 +122,7 @@ def main():
             max_steps=local_conf['max_steps'],
             green_duration=local_conf['green_duration'],
             yellow_duration=local_conf['yellow_duration'],
-            num_states=9999,  # Not used by aggregator or PPO.
+            num_states=9999,      # Not used by aggregator or PPO.
             num_actions=max_num_actions,
             training_epochs=local_conf['training_epochs'],
             intersection_type=env_name,
@@ -141,6 +140,7 @@ def main():
         chosen_env = random.choice(possible_envs)
         sim = simulations[chosen_env]
         print(f"----- Episode {ep + 1} of {total_episodes} on environment '{chosen_env}' -----")
+        # For DQN use epsilon-greedy; PPO does not use epsilon.
         epsilon = 1.0 - (ep / total_episodes) if algorithm == "DQN" else None
         sim_time, train_time = sim.run(episode=ep, epsilon=epsilon)
         print(f"Episode {ep + 1} done | env={chosen_env} | sim time={sim_time}s | train time={train_time}s\n")
@@ -156,14 +156,21 @@ def main():
     # 8) Visualization (example using the "cross" environment).
     cross_sim = simulations["cross"]
     viz = Visualization(path, dpi=96)
-    viz.save_data_and_plot(data=cross_sim.reward_store, filename="reward",
-                           xlabel="Episode", ylabel="Cumulative negative reward")
-    viz.save_data_and_plot(data=cross_sim.cumulative_wait_store, filename="delay",
-                           xlabel="Episode", ylabel="Cumulative delay (s)")
-    viz.save_data_and_plot(data=cross_sim.avg_queue_length_store, filename="queue",
-                           xlabel="Episode", ylabel="Avg queue length (vehicles)")
+    viz.save_data_and_plot(
+        data=cross_sim.reward_store, filename="reward",
+        xlabel="Episode", ylabel="Cumulative negative reward"
+    )
+    viz.save_data_and_plot(
+        data=cross_sim.cumulative_wait_store, filename="delay",
+        xlabel="Episode", ylabel="Cumulative delay (s)"
+    )
+    viz.save_data_and_plot(
+        data=cross_sim.avg_queue_length_store, filename="queue",
+        xlabel="Episode", ylabel="Avg queue length (vehicles)"
+    )
 
     print("All done! Model + plots saved at:", path)
+
 
 if __name__ == "__main__":
     main()

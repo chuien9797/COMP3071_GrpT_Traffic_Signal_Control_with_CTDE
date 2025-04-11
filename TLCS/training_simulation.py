@@ -26,7 +26,7 @@ class Simulation:
             training_epochs,
             intersection_type="cross",
             signal_fault_prob=0.1,
-            algorithm="DQN"  # "DQN" or "PPO"
+            algorithm="PPO"  # "DQN" or "PPO"
     ):
         self._Model = Model
         self._TargetModel = TargetModel
@@ -42,7 +42,7 @@ class Simulation:
         self._num_actions = num_actions
         self._training_epochs = training_epochs
 
-        # For plotting statistics:
+        # For plotting statistics
         self._reward_store = []
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
@@ -78,10 +78,11 @@ class Simulation:
         old_state = None
         old_action = None
 
+        # For PPO, record the waiting time and current monitored vehicle IDs.
         if self.algorithm == "PPO":
-            # For PPO, initialize waiting time measurement from initial state
             old_wait = self._collect_waiting_times()
-            trajectory = []  # To store tuples: (state, action, reward, log_prob, value)
+            prev_vehicle_ids = self._get_monitored_vehicle_ids()
+            trajectory = []  # For storing (state, action, reward, log_prob, value)
             total_reward = 0.0
         else:
             old_total_wait = 0
@@ -117,10 +118,8 @@ class Simulation:
             while self._step < self._max_steps:
                 if check_emergency(self):
                     continue
-                # Obtain the current state. It may have a variable number of lanes.
+                # Get the current state. Note that the number of lanes can vary.
                 state = self._get_state()
-                # Do NOT pad here—let the PPO model (designed with adaptive pooling) process variable lengths.
-                # Get action, log probability, and value estimate from the PPO model.
                 action, log_prob, value = self._Model.act(state)
                 log_file.write(f"[Step {self._step}] Action: {action}\n")
                 if self._step != 0 and old_action is not None and old_action != action:
@@ -131,8 +130,15 @@ class Simulation:
                 new_wait = self._collect_waiting_times()
                 queue_len = self._get_queue_length()
                 switch = 1 if (old_action is not None and old_action != action) else 0
-                emergency = int(np.sum(state[:, 2]))  # sum of emergency flags (assumed stored in column index 2)
-                reward = compute_reward(old_wait, new_wait, queue_len, switch, emergency)
+                emergency = int(np.sum(state[:, 2]))
+                # Calculate vehicles cleared since last step.
+                new_vehicle_ids = self._get_monitored_vehicle_ids()
+                vehicles_cleared = self._compute_vehicles_cleared(prev_vehicle_ids, new_vehicle_ids)
+                prev_vehicle_ids = new_vehicle_ids  # update for the next step
+
+                # Compute reward with the new metric.
+                reward = compute_reward(old_wait, new_wait, queue_len, switch, emergency, vehicles_cleared,
+                                        reward_scale=5.0)
                 old_wait = new_wait
 
                 trajectory.append((state, action, reward, log_prob, value))
@@ -142,9 +148,9 @@ class Simulation:
 
         self._save_episode_stats()
         if self.algorithm == "DQN":
-            print("Total reward:", self._sum_neg_reward, "- Epsilon:", round(epsilon, 2))
+            print("DQN Total reward:", self._sum_neg_reward, "- Epsilon:", round(epsilon, 2))
         elif self.algorithm == "PPO":
-            print("Total reward:", total_reward)
+            print("PPO Total reward:", total_reward)
         traci.close()
         simulation_time = round(timeit.default_timer() - start_time, 1)
 
@@ -154,17 +160,13 @@ class Simulation:
             for _ in range(self._training_epochs):
                 self._replay()
         elif self.algorithm == "PPO" and trajectory:
-            # Unpack the rollout.
             states, actions, rewards, log_probs, values = zip(*trajectory)
-            # Pad the states in the batch to the maximum lane number of this batch.
-            states = self._pad_states(states)  # result shape: (batch, max_lanes_in_batch, lane_feature_dim)
+            states = self._pad_states(states)  # shape: (batch, max_lanes, lane_feature_dim)
             actions = np.array(actions, dtype=np.int32)
             rewards = np.array(rewards, dtype=np.float32)
             log_probs = np.array(log_probs, dtype=np.float32)
             values = np.array(values, dtype=np.float32)
-            # Compute discounted returns.
             returns = compute_discounted_returns(rewards, self._gamma)
-            # Compute advantages as (returns - value estimates).
             advantages = returns - values
             advantages = (advantages - np.mean(advantages)) / (np.std(advantages) + 1e-8)
             self._Model.ppo_update(
@@ -175,21 +177,9 @@ class Simulation:
                 returns=returns
             )
         train_time = round(timeit.default_timer() - start_train, 1)
-
         return simulation_time, train_time
 
     def _pad_states(self, state_list):
-        """
-        Pad a list of state matrices so that each state has the same number of lanes.
-        This is used during training to allow batching of PPO rollouts.
-
-        Parameters:
-            state_list (list of np.array): Each array has shape (num_lanes, lane_feature_dim),
-                                           where num_lanes may differ between samples.
-
-        Returns:
-            np.array: Array of shape (batch_size, max_num_lanes, lane_feature_dim).
-        """
         lane_feature_dim = state_list[0].shape[1]
         max_lanes = max(state.shape[0] for state in state_list)
         padded = []
@@ -213,7 +203,7 @@ class Simulation:
             steps_todo -= 1
             q_len = self._get_queue_length()
             self._sum_queue_length += q_len
-            self._sum_waiting_time += q_len  # Adjust if desired.
+            self._sum_waiting_time += q_len  # adjust if desired
 
     def _inject_signal_faults(self):
         self.manual_override = False
@@ -267,56 +257,6 @@ class Simulation:
                     del self._waiting_times[car_id]
         self._emergency_wait_log = emergency_wait_time
         return normal_wait_time + (10.0 * emergency_wait_time)
-
-    def _choose_action(self, state, epsilon):
-        if random.random() < epsilon:
-            return random.randint(0, self._num_actions - 1)
-        else:
-            # For DQN, we expect a method predict_one; for PPO, act() is used.
-            q_vals = self._Model.predict_one(state) if hasattr(self._Model, "predict_one") else None
-            if q_vals is not None:
-                action = int(np.argmax(q_vals[0]))
-            else:
-                # If not available, fall back to sampling using act() (this case should only occur for PPO in run()).
-                action, _, _ = self._Model.act(state)
-            if np.any(state[:, 2] == 1.0):
-                print(f"[Step {self._step}] 🚨 Emergency flag detected in state. Chosen action: {action}")
-            return action
-
-    def _set_green_phase(self, action_number):
-        if hasattr(self, "manual_override") and self.manual_override:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        green_phase = phase_map[action_number]["green"]
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        for tlid in tl_ids:
-            if tlid not in self.faulty_lights:
-                try:
-                    traci.trafficlight.setProgram(tlid, "0")
-                    traci.trafficlight.setPhase(tlid, green_phase)
-                except traci.exceptions.TraCIException as e:
-                    print(f"⚠️ Failed to set green phase {green_phase} for {tlid}: {e}")
-
-    def _set_yellow_phase(self, action_number):
-        if "phase_mapping" not in self.int_conf:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        yellow_phase = phase_map[action_number]["yellow"]
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        for tlid in tl_ids:
-            logics = traci.trafficlight.getAllProgramLogics(tlid)
-            if not logics:
-                continue
-            num_phases = len(logics[0].phases)
-            if yellow_phase < num_phases:
-                traci.trafficlight.setProgram(tlid, "0")
-                traci.trafficlight.setPhase(tlid, yellow_phase)
-            else:
-                print(f"⚠️ Skipping invalid yellow phase {yellow_phase} for {tlid} (only {num_phases} phases)")
 
     def _get_queue_length(self):
         incoming_lane_ids = []
@@ -374,6 +314,16 @@ class Simulation:
                         controlled_by_faulty_signal = 1.0
             lane_features[i, 5] = controlled_by_faulty_signal
         return lane_features
+
+    def _get_monitored_vehicle_ids(self):
+        incoming_lane_ids = []
+        for lanes in self.int_conf["incoming_lanes"].values():
+            incoming_lane_ids.extend(lanes)
+        return [vid for vid in traci.vehicle.getIDList() if traci.vehicle.getLaneID(vid) in incoming_lane_ids]
+
+    def _compute_vehicles_cleared(self, prev_ids, current_ids):
+        cleared = set(prev_ids) - set(current_ids)
+        return len(cleared)
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]
@@ -458,6 +408,47 @@ class Simulation:
     def avg_queue_length_store(self):
         return self._avg_queue_length_store
 
+    # --- New or re-added methods ---
+
+    def _set_green_phase(self, action_number):
+        """Set the traffic light to the green phase corresponding to the chosen action."""
+        if hasattr(self, "manual_override") and self.manual_override:
+            return
+        phase_map = self.int_conf["phase_mapping"]
+        if action_number not in phase_map:
+            return
+        green_phase = phase_map[action_number]["green"]
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        for tlid in tl_ids:
+            if tlid not in self.faulty_lights:
+                try:
+                    traci.trafficlight.setProgram(tlid, "0")
+                    traci.trafficlight.setPhase(tlid, green_phase)
+                except traci.exceptions.TraCIException as e:
+                    print(f"⚠️ Failed to set green phase {green_phase} for {tlid}: {e}")
+
+    def _set_yellow_phase(self, action_number):
+        """Set the traffic light to the yellow phase corresponding to the previous action."""
+        if "phase_mapping" not in self.int_conf:
+            return
+        phase_map = self.int_conf["phase_mapping"]
+        if action_number not in phase_map:
+            return
+        yellow_phase = phase_map[action_number]["yellow"]
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        for tlid in tl_ids:
+            logics = traci.trafficlight.getAllProgramLogics(tlid)
+            if not logics:
+                continue
+            num_phases = len(logics[0].phases)
+            if yellow_phase < num_phases:
+                traci.trafficlight.setProgram(tlid, "0")
+                traci.trafficlight.setPhase(tlid, yellow_phase)
+            else:
+                print(f"⚠️ Skipping invalid yellow phase {yellow_phase} for {tlid} (only {num_phases} phases)")
+
+
+# --- Helper functions outside the class ---
 
 def compute_discounted_returns(rewards, gamma):
     discounted_returns = np.zeros_like(rewards, dtype=np.float32)
@@ -468,26 +459,50 @@ def compute_discounted_returns(rewards, gamma):
     return discounted_returns
 
 
-def compute_reward(old_wait, new_wait, queue_len, switch, emergency, reward_scale=1.0):
+def compute_reward(old_wait, new_wait, queue_len, switch, emergency, vehicles_cleared, reward_scale=1.0):
     """
-    Compute a reward that reflects delay reduction, queue length, phase switching cost, and emergency penalties.
+    Compute a reward that reflects delay reduction, queue length, phase switching cost,
+    emergency penalties, and a throughput bonus for vehicles cleared.
 
     Parameters:
         old_wait (float): Total waiting time before the phase.
         new_wait (float): Total waiting time after the phase.
         queue_len (float): Current queue length.
-        switch (int): 1 if phase switched, else 0.
-        emergency (int): Sum of emergency flags (e.g., 1 if emergency vehicle present).
-        reward_scale (float): A multiplicative factor to adjust the magnitude of the reward.
+        switch (int): 1 if phase switched; else 0.
+        emergency (int): Sum of emergency flags (e.g., 1 if any emergency vehicle is present).
+        vehicles_cleared (int): Number of monitored vehicles that have left since the previous step.
+        reward_scale (float): A multiplicative factor to adjust the overall reward.
 
     Returns:
-        float: The computed reward (clipped within a range).
+        float: The computed reward, clipped between -100 and 100.
     """
-    scaling_factor = 5000.0  # Scale down the differences.
-    # Waiting time difference: positive if waiting time decreases.
-    diff = (old_wait - new_wait) / scaling_factor
+    scaling_factor = 5000.0  # Normalize the differences.
+
+    # Calculate the reduction in waiting time (positive if wait decreases).
+    diff = (old_wait - new_wait) / scaling_factor  # (e.g., if wait decreases, diff > 0)
+    # Normalize the current queue length.
     q_scaled = queue_len / scaling_factor
 
-    # Adjust the reward computation: you can experiment with the coefficients.
-    raw_reward = reward_scale * (diff + 0.4 * (diff - q_scaled) - 0.005 * q_scaled - 0.05 * switch - 2 * emergency)
+    # Throughput bonus: reward if more than 'threshold' vehicles have been cleared.
+    threshold = 5
+    throughput_bonus = 0.0
+    if vehicles_cleared > threshold:
+        throughput_bonus = 0.05 * (vehicles_cleared - threshold)  # increased bonus per extra vehicle
+
+    # Compose the raw reward.
+    # - Delay reduction is given extra weight (multiplied by 1.2).
+    # - Queue penalty and emergency penalty are increased.
+    # - A small cost is applied for phase switching.
+    raw_reward = reward_scale * (
+            1.2 * diff
+            - 0.01 * q_scaled
+            - 0.05 * switch
+            - 2.0 * emergency
+            + throughput_bonus
+    )
+
+    # Optionally, you could add a constant offset to shift the baseline upward.
+    # For example:
+    # raw_reward += 5.0
+
     return np.clip(raw_reward, -100.0, 100.0)

@@ -5,7 +5,6 @@ import datetime
 import numpy as np
 import tensorflow as tf
 
-# Your existing imports:
 from utils import import_train_configuration, set_sumo, set_train_path
 from intersection_config import INTERSECTION_CONFIGS
 from generator import TrafficGenerator
@@ -13,8 +12,6 @@ from training_simulation import Simulation
 from memory import Memory
 from visualization import Visualization
 
-# 1) Instead of your old "TrainModel" or "build_dynamic_model",
-#    import our new aggregator class:
 from model import TrainModelAggregator
 
 
@@ -67,16 +64,6 @@ def main():
         learning_rate    = config['learning_rate']
     )
 
-    TargetModel = TrainModelAggregator(
-        lane_feature_dim    = lane_feature_dim,
-        embedding_dim       = aggregator_embedding_dim,
-        final_hidden        = aggregator_final_hidden,
-        num_actions         = max_num_actions,
-        batch_size          = config['batch_size'],
-        learning_rate       = config['learning_rate']
-    )
-    TargetModel.set_weights(Model.get_weights())  # Initial sync
-
     # 4) Create a single replay Memory instance
     MemoryInstance = Memory(
         config['memory_size_max'],
@@ -105,7 +92,7 @@ def main():
         # Create the Simulation, referencing aggregator Model and shared Memory
         sim = Simulation(
             Model           = Model,
-            TargetModel=TargetModel,
+            TargetModel     = Model,  # or a separate target model if you use on
             Memory          = MemoryInstance,
             TrafficGen      = TrafficGen,
             sumo_cmd        = sumo_cmd,
@@ -127,6 +114,9 @@ def main():
     print("Num GPUs Available:", len(tf.config.list_physical_devices('GPU')))
     print("Physical devices:", tf.config.list_physical_devices())
 
+    # Track combined rewards across all environments
+    combined_rewards = []
+
     for ep in range(total_episodes):
         # pick environment type randomly
         chosen_env = random.choice(possible_envs)
@@ -136,6 +126,8 @@ def main():
         epsilon = 1.0 - (ep / total_episodes)  # naive linear decay
         sim_time, train_time = sim.run(episode=ep, epsilon=epsilon)
         print(f"Episode {ep + 1} done | env={chosen_env} | sim time={sim_time}s | train time={train_time}s\n")
+        
+        combined_rewards.append(sim.reward_store[-1])
 
     end_time = datetime.datetime.now()
     print("\n----- Start time:", start_time)
@@ -145,15 +137,20 @@ def main():
     path = set_train_path(config['models_path_name'])
     Model.save_model(path)
 
-    # 8) (Optional) Visualization. We'll pick "cross" as an example
-    cross_sim = simulations["cross"]
+    # Plot per-environment and combined reward
     viz = Visualization(path, dpi=96)
-    viz.save_data_and_plot(data=cross_sim.reward_store, filename="reward",
-                           xlabel="Episode", ylabel="Cumulative negative reward")
-    viz.save_data_and_plot(data=cross_sim.cumulative_wait_store, filename="delay",
-                           xlabel="Episode", ylabel="Cumulative delay (s)")
-    viz.save_data_and_plot(data=cross_sim.avg_queue_length_store, filename="queue",
-                           xlabel="Episode", ylabel="Avg queue length (vehicles)")
+
+    for env_name, sim in simulations.items():
+        viz.save_data_and_plot(data=sim.reward_store, filename=f"{env_name}_reward",
+                               xlabel="Episode", ylabel="Cumulative negative reward")
+        viz.save_data_and_plot(data=sim.cumulative_wait_store, filename=f"{env_name}_delay",
+                               xlabel="Episode", ylabel="Cumulative delay (s)")
+        viz.save_data_and_plot(data=sim.avg_queue_length_store, filename=f"{env_name}_queue",
+                               xlabel="Episode", ylabel="Avg queue length (vehicles)")
+
+    # Combined reward plot
+    viz.save_data_and_plot(data=combined_rewards, filename="reward_all_envs",
+                           xlabel="Episode", ylabel="Reward (all environments)")
 
     print("All done! Model + plots saved at:", path)
 

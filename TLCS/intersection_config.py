@@ -79,7 +79,11 @@ INTERSECTION_CONFIGS = {
             "e4": ["e4_0", "e4_1"]
         },
         "phase_mapping": {
-            0: {"green": 0, "yellow": 1}  # If you have only 1 action for the roundabout
+           0: {"green": 0, "yellow": 1},
+           1: {"green": 1, "yellow": 2},
+           2: {"green": 2, "yellow": 3},
+           3: {"green": 3, "yellow": 0}# You must ensure that these indices are valid given the TL logic
+
         },
         "occupancy_grid": {
             "cells_per_lane": 8,

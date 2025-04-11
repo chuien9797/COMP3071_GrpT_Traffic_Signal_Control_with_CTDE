@@ -1,3 +1,4 @@
+
 import os
 import tensorflow as tf
 import numpy as np
@@ -93,7 +94,7 @@ class TrainModelPPO(tf.keras.Model):
             states: np.array of shape (batch, num_lanes, lane_feature_dim)
             actions: np.array of shape (batch,)
             old_log_probs: np.array of shape (batch,)
-            advantages: np.array of shape (batch,)  -- will be scaled.
+            advantages: np.array of shape (batch,) -- will be scaled by self.reward_scale
             returns: np.array of shape (batch,)
 
         Returns:
@@ -120,12 +121,13 @@ class TrainModelPPO(tf.keras.Model):
                 policy_loss = -tf.reduce_mean(tf.minimum(surrogate1, surrogate2))
                 value_loss = tf.reduce_mean(tf.square(returns - value))
                 loss = policy_loss + 0.5 * value_loss
+
                 # If prioritized update is enabled, weight each sample by its TD error.
                 if self.use_priority:
                     td_error = tf.abs(returns - value)
-                    # Define weights: for example, use 1 + td_error.
+                    # Define weights: for example, use (1 + td_error).
                     weights = 1.0 + td_error
-                    # Compute weighted losses.
+                    # Compute weighted losses:
                     policy_loss = -tf.reduce_mean(weights * tf.minimum(surrogate1, surrogate2))
                     value_loss = tf.reduce_mean(weights * tf.square(returns - value))
                     loss = policy_loss + 0.5 * value_loss

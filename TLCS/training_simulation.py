@@ -9,6 +9,62 @@ from emergency_handler import check_emergency
 import intersection_config as int_config
 
 
+def compute_discounted_returns(rewards, gamma):
+    discounted_returns = np.zeros_like(rewards, dtype=np.float32)
+    running_return = 0.0
+    for t in reversed(range(len(rewards))):
+        running_return = rewards[t] + gamma * running_return
+        discounted_returns[t] = running_return
+    return discounted_returns
+
+
+def compute_reward(old_wait, new_wait, old_queue, new_queue, old_emerg_wait, new_emerg_wait, action_switched,
+                   vehicles_cleared, reward_scale=1.0):
+    """
+    Enhanced reward function for complex intersections.
+    Balances:
+      - Reduction in waiting time (all vehicles),
+      - Reduction in queue length,
+      - Reduction in emergency waiting time (heavily weighted),
+      - Throughput bonus for vehicles cleared,
+      - Small penalty for switching phases.
+
+    Parameters:
+      old_wait, new_wait             : Total waiting time before and after the phase.
+      old_queue, new_queue           : Total queue length before and after the phase.
+      old_emerg_wait, new_emerg_wait : Total emergency waiting time before and after the phase.
+      action_switched                : 1 if the agent switched phases, else 0.
+      vehicles_cleared               : Number of vehicles cleared during the phase.
+      reward_scale (float, optional) : Multiplicative scaling factor (default 1.0).
+
+    Returns:
+      float: The computed reward, clipped to the range [-100, 100].
+    """
+    # Normalization factors for raw values:
+    wait_scaling = 5000.0
+    queue_scaling = 250.0
+
+    # Compute differences.
+    wait_diff = (old_wait - new_wait) / wait_scaling  # Positive if waiting time decreases.
+    queue_diff = (old_queue - new_queue) / queue_scaling  # Positive if queue length decreases.
+    emerg_diff = old_emerg_wait - new_emerg_wait  # Positive if emergency wait decreases.
+
+    # Throughput bonus: reward extra if vehicles cleared exceeds threshold.
+    threshold = 5
+    throughput_bonus = 0.1 * max(vehicles_cleared - threshold, 0)
+
+    # Penalty for switching phases.
+    switch_cost = -0.05 * action_switched
+
+    # Combine all terms.
+    raw_reward = reward_scale * (1.4 * wait_diff + 1.0 * queue_diff + 0.5 * emerg_diff + switch_cost) + throughput_bonus
+
+    # Optional constant offset.
+    raw_reward += 1.0
+
+    return float(np.clip(raw_reward, -100.0, 100.0))
+
+
 class Simulation:
     def __init__(
             self,
@@ -26,7 +82,11 @@ class Simulation:
             training_epochs,
             intersection_type="cross",
             signal_fault_prob=0.1,
-            algorithm="PPO"  # "DQN" or "PPO"
+            algorithm="PPO",
+            fault_injection_enabled=False,
+            fault_start_episode=10,  # No faults injected before this episode.
+            fault_max_episode=30,  # Fault injection probability increases until this episode.
+            max_fault_prob=0.5  # Maximum fault injection probability (50%).
     ):
         self._Model = Model
         self._TargetModel = TargetModel
@@ -42,12 +102,13 @@ class Simulation:
         self._num_actions = num_actions
         self._training_epochs = training_epochs
 
-        # For plotting statistics
+        # Statistics for plotting.
         self._reward_store = []
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
         self._emergency_q_logs = []
         self._waiting_times = {}
+
         self.signal_fault_prob = signal_fault_prob
         self.manual_override = False
         self.recovery_queue = {}
@@ -58,8 +119,13 @@ class Simulation:
             raise ValueError(f"Intersection type '{self.intersection_type}' not found in config.")
         self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
 
-        # Save the algorithm ("DQN" or "PPO")
         self.algorithm = algorithm
+
+        # Store fault injection curriculum parameters.
+        self.fault_injection_enabled = fault_injection_enabled
+        self.fault_start_episode = fault_start_episode
+        self.fault_max_episode = fault_max_episode
+        self.max_fault_prob = max_fault_prob
 
     def run(self, episode, epsilon):
         os.makedirs("logs10", exist_ok=True)
@@ -78,20 +144,35 @@ class Simulation:
         old_state = None
         old_action = None
 
-        # For PPO, record the waiting time and current monitored vehicle IDs.
         if self.algorithm == "PPO":
             old_wait = self._collect_waiting_times()
+            old_queue = self._get_queue_length()
+            old_emerg_wait = self._emergency_wait_log
             prev_vehicle_ids = self._get_monitored_vehicle_ids()
-            trajectory = []  # For storing (state, action, reward, log_prob, value)
+            trajectory = []  # To store (state, action, reward, log_prob, value)
             total_reward = 0.0
         else:
             old_total_wait = 0
 
+        # Compute fault injection probability based on episode number.
+        if self.fault_injection_enabled:
+            if episode < self.fault_start_episode:
+                injection_prob = 0.0
+            elif episode < self.fault_max_episode:
+                injection_prob = self.max_fault_prob * (
+                            (episode - self.fault_start_episode) / (self.fault_max_episode - self.fault_start_episode))
+            else:
+                injection_prob = self.max_fault_prob
+        else:
+            injection_prob = 0.0
+        # Decide whether to skip fault injection this episode.
+        self.skip_fault_this_episode = (random.random() >= injection_prob)
+
         self.faulty_lights = set()
         self.fault_injected_this_episode = False
-        self.skip_fault_this_episode = random.random() < 0.5  # 50% episodes are clean
 
         if self.algorithm == "DQN":
+            # DQN branch (not updated here; similar to earlier code).
             while self._step < self._max_steps:
                 if check_emergency(self):
                     continue
@@ -118,29 +199,39 @@ class Simulation:
             while self._step < self._max_steps:
                 if check_emergency(self):
                     continue
-                # Get the current state. Note that the number of lanes can vary.
+
                 state = self._get_state()
                 action, log_prob, value = self._Model.act(state)
                 log_file.write(f"[Step {self._step}] Action: {action}\n")
-                if self._step != 0 and old_action is not None and old_action != action:
+                action_switched = 1 if (old_action is not None and old_action != action) else 0
+
+                # Record old metrics before the phase change.
+                old_wait = self._collect_waiting_times()
+                old_queue = self._get_queue_length()
+                old_emerg_wait = self._emergency_wait_log
+
+                if self._step != 0 and action_switched:
                     self._set_yellow_phase(old_action)
                     self._simulate(self._yellow_duration)
                 self._set_green_phase(action)
                 self._simulate(self._green_duration)
+
+                # Record new metrics after the phase.
                 new_wait = self._collect_waiting_times()
-                queue_len = self._get_queue_length()
-                switch = 1 if (old_action is not None and old_action != action) else 0
-                emergency = int(np.sum(state[:, 2]))
-                # Calculate vehicles cleared since last step.
+                new_queue = self._get_queue_length()
+                new_emerg_wait = self._emergency_wait_log
                 new_vehicle_ids = self._get_monitored_vehicle_ids()
                 vehicles_cleared = self._compute_vehicles_cleared(prev_vehicle_ids, new_vehicle_ids)
-                prev_vehicle_ids = new_vehicle_ids  # update for the next step
+                prev_vehicle_ids = new_vehicle_ids
 
-                # Compute reward with the new metric.
-                reward = compute_reward(old_wait, new_wait, queue_len, switch, emergency, vehicles_cleared,
-                                        reward_scale=5.0)
-                old_wait = new_wait
-
+                # Call reward function with eight positional arguments.
+                reward = compute_reward(
+                    old_wait, new_wait,
+                    old_queue, new_queue,
+                    old_emerg_wait, new_emerg_wait,
+                    action_switched,
+                    vehicles_cleared
+                )
                 trajectory.append((state, action, reward, log_prob, value))
                 total_reward += reward
                 old_state = state
@@ -161,7 +252,7 @@ class Simulation:
                 self._replay()
         elif self.algorithm == "PPO" and trajectory:
             states, actions, rewards, log_probs, values = zip(*trajectory)
-            states = self._pad_states(states)  # shape: (batch, max_lanes, lane_feature_dim)
+            states = self._pad_states(states)
             actions = np.array(actions, dtype=np.int32)
             rewards = np.array(rewards, dtype=np.float32)
             log_probs = np.array(log_probs, dtype=np.float32)
@@ -178,6 +269,43 @@ class Simulation:
             )
         train_time = round(timeit.default_timer() - start_train, 1)
         return simulation_time, train_time
+
+    # ------------- Helper Methods -------------
+    def _set_green_phase(self, action_number):
+        if self.manual_override:
+            return
+        phase_map = self.int_conf["phase_mapping"]
+        if action_number not in phase_map:
+            return
+        green_phase = phase_map[action_number]["green"]
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        for tlid in tl_ids:
+            if tlid not in self.faulty_lights:
+                try:
+                    traci.trafficlight.setProgram(tlid, "0")
+                    traci.trafficlight.setPhase(tlid, green_phase)
+                except traci.exceptions.TraCIException as e:
+                    print(f"⚠️ Failed to set green phase {green_phase} for {tlid}: {e}")
+
+    def _set_yellow_phase(self, action_number):
+        phase_map = self.int_conf.get("phase_mapping", {})
+        if action_number not in phase_map:
+            return
+        yellow_phase = phase_map[action_number]["yellow"]
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        for tlid in tl_ids:
+            logics = traci.trafficlight.getAllProgramLogics(tlid)
+            if not logics:
+                continue
+            num_phases = len(logics[0].phases)
+            if yellow_phase < num_phases:
+                try:
+                    traci.trafficlight.setProgram(tlid, "0")
+                    traci.trafficlight.setPhase(tlid, yellow_phase)
+                except traci.exceptions.TraCIException as e:
+                    print(f"⚠️ Failed to set yellow phase {yellow_phase} for {tlid}: {e}")
+            else:
+                print(f"⚠️ Skipping invalid yellow phase {yellow_phase} for {tlid} (only {num_phases} phases)")
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]
@@ -203,7 +331,7 @@ class Simulation:
             steps_todo -= 1
             q_len = self._get_queue_length()
             self._sum_queue_length += q_len
-            self._sum_waiting_time += q_len  # adjust if desired
+            self._sum_waiting_time += q_len
 
     def _inject_signal_faults(self):
         self.manual_override = False
@@ -226,7 +354,10 @@ class Simulation:
                 flipped_indices.append(flip_idx)
             new_state_str = ''.join(new_state)
             if new_state_str != current_state:
-                traci.trafficlight.setRedYellowGreenState(tlid, new_state_str)
+                try:
+                    traci.trafficlight.setRedYellowGreenState(tlid, new_state_str)
+                except traci.exceptions.TraCIException as e:
+                    print(f"⚠️ Failed to inject fault for {tlid}: {e}")
                 self.manual_override = True
                 self.fault_injected_this_episode = True
                 print(f"[Step {self._step}] ❌ Signal fault injected at TL={tlid}, phase={current_phase}")
@@ -253,8 +384,7 @@ class Simulation:
                 else:
                     normal_wait_time += wait_time
             else:
-                if car_id in self._waiting_times:
-                    del self._waiting_times[car_id]
+                self._waiting_times.pop(car_id, None)
         self._emergency_wait_log = emergency_wait_time
         return normal_wait_time + (10.0 * emergency_wait_time)
 
@@ -322,22 +452,7 @@ class Simulation:
         return [vid for vid in traci.vehicle.getIDList() if traci.vehicle.getLaneID(vid) in incoming_lane_ids]
 
     def _compute_vehicles_cleared(self, prev_ids, current_ids):
-        cleared = set(prev_ids) - set(current_ids)
-        return len(cleared)
-
-    def _pad_states(self, state_list):
-        lane_feature_dim = state_list[0].shape[1]
-        max_lanes = max(state.shape[0] for state in state_list)
-        padded = []
-        for state in state_list:
-            pad_size = max_lanes - state.shape[0]
-            if pad_size > 0:
-                pad_width = ((0, pad_size), (0, 0))
-                padded_state = np.pad(state, pad_width=pad_width, mode='constant')
-            else:
-                padded_state = state
-            padded.append(padded_state)
-        return np.array(padded, dtype=np.float32)
+        return len(set(prev_ids) - set(current_ids))
 
     def _replay(self):
         batch = self._Memory.get_samples(self._Model.batch_size)
@@ -407,102 +522,3 @@ class Simulation:
     @property
     def avg_queue_length_store(self):
         return self._avg_queue_length_store
-
-    # --- New or re-added methods ---
-
-    def _set_green_phase(self, action_number):
-        """Set the traffic light to the green phase corresponding to the chosen action."""
-        if hasattr(self, "manual_override") and self.manual_override:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        green_phase = phase_map[action_number]["green"]
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        for tlid in tl_ids:
-            if tlid not in self.faulty_lights:
-                try:
-                    traci.trafficlight.setProgram(tlid, "0")
-                    traci.trafficlight.setPhase(tlid, green_phase)
-                except traci.exceptions.TraCIException as e:
-                    print(f"⚠️ Failed to set green phase {green_phase} for {tlid}: {e}")
-
-    def _set_yellow_phase(self, action_number):
-        """Set the traffic light to the yellow phase corresponding to the previous action."""
-        if "phase_mapping" not in self.int_conf:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        yellow_phase = phase_map[action_number]["yellow"]
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        for tlid in tl_ids:
-            logics = traci.trafficlight.getAllProgramLogics(tlid)
-            if not logics:
-                continue
-            num_phases = len(logics[0].phases)
-            if yellow_phase < num_phases:
-                traci.trafficlight.setProgram(tlid, "0")
-                traci.trafficlight.setPhase(tlid, yellow_phase)
-            else:
-                print(f"⚠️ Skipping invalid yellow phase {yellow_phase} for {tlid} (only {num_phases} phases)")
-
-
-# --- Helper functions outside the class ---
-
-def compute_discounted_returns(rewards, gamma):
-    discounted_returns = np.zeros_like(rewards, dtype=np.float32)
-    running_return = 0.0
-    for t in reversed(range(len(rewards))):
-        running_return = rewards[t] + gamma * running_return
-        discounted_returns[t] = running_return
-    return discounted_returns
-
-
-def compute_reward(old_wait, new_wait, queue_len, switch, emergency, vehicles_cleared, reward_scale=1.0):
-    """
-    Compute a reward that reflects delay reduction, queue length, phase switching cost,
-    emergency penalties, and a throughput bonus for vehicles cleared.
-
-    Parameters:
-        old_wait (float): Total waiting time before the phase.
-        new_wait (float): Total waiting time after the phase.
-        queue_len (float): Current queue length.
-        switch (int): 1 if phase switched; else 0.
-        emergency (int): Sum of emergency flags (e.g., 1 if any emergency vehicle is present).
-        vehicles_cleared (int): Number of monitored vehicles that have left since the previous step.
-        reward_scale (float): A multiplicative factor to adjust the overall reward.
-
-    Returns:
-        float: The computed reward, clipped between -100 and 100.
-    """
-    scaling_factor = 5000.0  # Normalize the differences.
-
-    # Calculate the reduction in waiting time (positive if wait decreases).
-    diff = (old_wait - new_wait) / scaling_factor  # (e.g., if wait decreases, diff > 0)
-    # Normalize the current queue length.
-    q_scaled = queue_len / scaling_factor
-
-    # Throughput bonus: reward if more than 'threshold' vehicles have been cleared.
-    threshold = 5
-    throughput_bonus = 0.0
-    if vehicles_cleared > threshold:
-        throughput_bonus = 0.05 * (vehicles_cleared - threshold)  # increased bonus per extra vehicle
-
-    # Compose the raw reward.
-    # - Delay reduction is given extra weight (multiplied by 1.2).
-    # - Queue penalty and emergency penalty are increased.
-    # - A small cost is applied for phase switching.
-    raw_reward = reward_scale * (
-            1.2 * diff
-            - 0.01 * q_scaled
-            - 0.05 * switch
-            - 2.0 * emergency
-            + throughput_bonus
-    )
-
-    # Optionally, you could add a constant offset to shift the baseline upward.
-    # For example:
-    # raw_reward += 5.0
-
-    return np.clip(raw_reward, -100.0, 100.0)

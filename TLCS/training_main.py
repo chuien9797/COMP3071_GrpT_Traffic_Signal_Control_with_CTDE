@@ -18,10 +18,12 @@ from visualization import Visualization
 # Instead of only DQN, import both DQN and PPO model wrappers.
 from model import TrainModelAggregator
 
+
 def main():
     """
     Multi-environment training loop using a per-lane embedding + aggregator approach.
-    Supports both DQN and a refined adaptive PPO algorithm with additional reward scaling and prioritized updates.
+    Supports both DQN and a refined adaptive PPO algorithm with additional reward shaping.
+    Fault injection is introduced gradually so that the PPO learns to handle traffic faults.
     """
     # 1) Load configuration from .ini file.
     config = import_train_configuration("training_settings.ini")
@@ -30,7 +32,7 @@ def main():
     # The intersection types to train in one run:
     possible_envs = ["cross", "roundabout", "T_intersection"]
 
-    # 2) Determine maximum number of actions across environments.
+    # 2) Determine the maximum number of actions across all intersection configurations.
     max_num_actions = 0
     for env_name in possible_envs:
         env_conf = INTERSECTION_CONFIGS[env_name]
@@ -39,9 +41,9 @@ def main():
             max_num_actions = nA
     config['num_actions'] = max_num_actions
 
-    # 3) Build our model(s)
+    # 3) Build your model(s)
     if algorithm == "DQN":
-        lane_feature_dim = 5      # used for DQN
+        lane_feature_dim = 5  # Used for DQN.
         aggregator_embedding_dim = 32
         aggregator_final_hidden = 64
 
@@ -61,30 +63,29 @@ def main():
             batch_size=config['batch_size'],
             learning_rate=config['learning_rate']
         )
-        TargetModel.set_weights(Model.get_weights())  # Initial synchronization
+        TargetModel.set_weights(Model.get_weights())  # Initial synchronization.
 
     elif algorithm == "PPO":
         # Retrieve PPO hyperparameters with defaults.
-        ppo_hidden_size   = config.get('ppo_hidden_size', 64)
+        ppo_hidden_size = config.get('ppo_hidden_size', 64)
         ppo_learning_rate = config.get('ppo_learning_rate', 0.0003)
         if ppo_learning_rate is None:
             ppo_learning_rate = 0.0003
-        ppo_clip_ratio    = config.get('ppo_clip_ratio', 0.2)
+        ppo_clip_ratio = config.get('ppo_clip_ratio', 0.2)
         ppo_update_epochs = config.get('ppo_update_epochs', 10)
         ppo_training_epochs = config.get('ppo_training_epochs', 10)
 
         # For PPO, use lane_feature_dim = 9 (to match _get_state()).
-        # The model is adaptive, so we do not force an explicit build with fixed dimensions.
         Model = TrainModelPPO(
-            lane_feature_dim=9,             # Should match _get_state() output dimension.
+            lane_feature_dim=9,  # Must match _get_state() output dimension.
             hidden_size=ppo_hidden_size,
             learning_rate=ppo_learning_rate,
             clip_ratio=ppo_clip_ratio,
             update_epochs=ppo_update_epochs,
             training_epochs=ppo_training_epochs,
             num_actions=max_num_actions,
-            use_priority=True,              # Enable prioritized update (if desired)
-            reward_scale=5.0                # Amplify reward signal to improve differentiation.
+            use_priority=True,
+            reward_scale=5.0  # This reward_scale is used to amplify the reward signal.
         )
         TargetModel = None  # PPO does not use a target network.
 
@@ -112,6 +113,13 @@ def main():
             n_cars_generated=local_conf['n_cars_generated'],
             intersection_type=env_name
         )
+        # For gradual fault injection, we now pass additional parameters.
+        # (You can also adjust these values or read from your config file.)
+        fault_injection_enabled = True
+        fault_start_episode = 20  # No faults in episodes 0-9.
+        fault_max_episode = 100  # Fault probability increases linearly until episode 30.
+        max_fault_prob = 0.4  # Maximum injection probability is 50%.
+
         sim = Simulation(
             Model=Model,
             TargetModel=TargetModel,
@@ -122,11 +130,16 @@ def main():
             max_steps=local_conf['max_steps'],
             green_duration=local_conf['green_duration'],
             yellow_duration=local_conf['yellow_duration'],
-            num_states=9999,      # Not used by aggregator or PPO.
+            num_states=9999,  # Not used by aggregator or PPO.
             num_actions=max_num_actions,
             training_epochs=local_conf['training_epochs'],
             intersection_type=env_name,
-            algorithm=algorithm
+            algorithm=algorithm,
+            # Pass our fault injection parameters.
+            fault_injection_enabled=fault_injection_enabled,
+            fault_start_episode=fault_start_episode,
+            fault_max_episode=fault_max_episode,
+            max_fault_prob=max_fault_prob
         )
         simulations[env_name] = sim
 

@@ -1,175 +1,142 @@
+import os
 import tensorflow as tf
 import numpy as np
-import os
 
 
-class PPOActorCritic(tf.keras.Model):
-    def __init__(self, lane_feature_dim, embedding_dim, final_hidden, num_actions):
+class TrainModelPPO(tf.keras.Model):
+    def __init__(self, lane_feature_dim, hidden_size, learning_rate, clip_ratio,
+                 update_epochs, training_epochs, num_actions, use_priority=False, reward_scale=1.0):
         """
-        Actor-Critic network for PPO.
-        Instead of flattening the input, we use GlobalAveragePooling1D to aggregate per-lane features.
+        Initialize the adaptive PPO model with optional reward scaling and prioritized update.
 
         Parameters:
-            lane_feature_dim: Number of features per lane (e.g., 9 to match your simulation _get_state())
-            embedding_dim: Unused in this basic implementation (reserved for further extension)
-            final_hidden: Number of hidden units in the common dense layer
-            num_actions: Number of available actions for the actor head
+            lane_feature_dim (int): Dimensionality of each lane feature vector (e.g. 9).
+            hidden_size (int): Number of neurons for the per-lane processing.
+            learning_rate (float): Learning rate for the optimizer.
+            clip_ratio (float): The PPO clip ratio.
+            update_epochs (int): Number of update epochs for each batch of rollouts.
+            training_epochs (int): (Optional) Training epochs parameter for bookkeeping.
+            num_actions (int): Number of actions (output units) for the policy head.
+            use_priority (bool): If True, weight sample losses by TD error (prioritized update).
+            reward_scale (float): Scaling factor to amplify the reward signal (applied to advantages).
         """
-        super(PPOActorCritic, self).__init__()
-        # Aggregate per-lane features into one fixed-size vector.
-        self.global_pool = tf.keras.layers.GlobalAveragePooling1D()
-        # Common dense layer.
-        self.dense1 = tf.keras.layers.Dense(final_hidden, activation='relu')
-        # Actor head: outputs logits.
-        self.actor_logits = tf.keras.layers.Dense(num_actions, activation=None)
-        # Critic head: outputs a scalar state value.
-        self.critic = tf.keras.layers.Dense(1, activation=None)
+        super(TrainModelPPO, self).__init__()
+        self.lane_feature_dim = lane_feature_dim
+        self.hidden_size = hidden_size
+        self.num_actions = num_actions
+        self.clip_ratio = clip_ratio
+        self.update_epochs = update_epochs
+        self.training_epochs = training_epochs
+        self.use_priority = use_priority
+        self.reward_scale = reward_scale
 
+        # Process each lane using TimeDistributed layers.
+        self.shared_dense1 = tf.keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(self.hidden_size, activation='relu')
+        )
+        self.shared_dense2 = tf.keras.layers.TimeDistributed(
+            tf.keras.layers.Dense(self.hidden_size, activation='relu')
+        )
+        # Global average pooling makes the network adaptive to a variable number of lanes.
+        self.global_pool = tf.keras.layers.GlobalAveragePooling1D()
+
+        # Policy head: outputs logits for each action.
+        self.policy_logits = tf.keras.layers.Dense(self.num_actions, activation=None)
+        # Value head: outputs a single state value.
+        self.value = tf.keras.layers.Dense(1, activation=None)
+        # Optimizer.
+        self.optimizer = tf.keras.optimizers.Adam(learning_rate)
+
+    @tf.function
     def call(self, inputs):
         """
         Forward pass.
-            inputs: Tensor of shape (batch_size, num_lanes, lane_feature_dim)
+
+        Parameters:
+            inputs: Tensor of shape (batch_size, num_lanes, lane_feature_dim).
+
         Returns:
-            logits: Tensor of shape (batch_size, num_actions)
-            value: Tensor of shape (batch_size, 1)
+            logits: Shape (batch_size, num_actions)
+            value: Shape (batch_size, 1)
         """
-        x = self.global_pool(inputs)
-        x = self.dense1(x)
-        logits = self.actor_logits(x)
-        value = self.critic(x)
+        # Process each lane independently.
+        x = self.shared_dense1(inputs)
+        x = self.shared_dense2(x)
+        # Global pooling over lanes.
+        x = self.global_pool(x)  # (batch_size, hidden_size)
+        logits = self.policy_logits(x)
+        value = self.value(x)
         return logits, value
-
-
-class TrainModelPPO:
-    def __init__(self,
-                 lane_feature_dim,
-                 embedding_dim,
-                 final_hidden,
-                 num_actions,
-                 batch_size,
-                 learning_rate,
-                 clip_ratio,
-                 update_epochs,
-                 gamma):
-        """
-        Wrapper for training PPO.
-
-        Parameters:
-            lane_feature_dim: Number of features per lane (e.g., 9)
-            embedding_dim: (Reserved for extended architectures)
-            final_hidden: Number of hidden units in the shared dense layer
-            num_actions: Number of available actions
-            batch_size: Mini-batch size for the PPO update
-            learning_rate: Learning rate for the optimizer
-            clip_ratio: Clipping ratio in PPO surrogate objective
-            update_epochs: Number of epochs over rollout data for updates
-            gamma: Discount factor
-        """
-        self.lane_feature_dim = lane_feature_dim
-        self.num_actions = num_actions
-        self.batch_size = batch_size
-        self.learning_rate = learning_rate
-        self.clip_ratio = clip_ratio
-        self.update_epochs = update_epochs
-        self.gamma = gamma
-
-        self.model = PPOActorCritic(lane_feature_dim, embedding_dim, final_hidden, num_actions)
-        # Optionally, call self.model.build(...) to force weight initialization.
-        self.optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
-
-    def predict(self, states):
-        """
-        Predict action probabilities and state values.
-
-        Parameters:
-            states: Tensor with shape (batch_size, num_lanes, lane_feature_dim)
-        Returns:
-            action_probs: Softmax probabilities; shape (batch_size, num_actions)
-            values: State-value estimates; shape (batch_size, 1)
-        """
-        logits, values = self.model(states)
-        action_probs = tf.nn.softmax(logits)
-        return action_probs, values
 
     def act(self, state):
         """
-        Sample an action from the current policy.
+        Given a single state (shape: (num_lanes, lane_feature_dim)), sample an action.
 
-        Parameters:
-            state: Numpy array with shape (num_lanes, lane_feature_dim)
         Returns:
-            action: An integer representing the selected action.
-            log_prob: Log probability of the action.
-            value: State value estimate.
+            action (int), log_prob (tf.Tensor), value_est (tf.Tensor)
         """
-        state = np.expand_dims(state, axis=0)  # Create a batch of size 1.
-        logits, value = self.model(state)
-        action_probs = tf.nn.softmax(logits)
-        # Sample action.
+        state = tf.expand_dims(state, axis=0)  # (1, num_lanes, lane_feature_dim)
+        logits, value = self.call(state)
         action_dist = tf.random.categorical(logits, num_samples=1)
-        action = int(action_dist.numpy()[0, 0])
-        log_probs = tf.nn.log_softmax(logits)
-        log_prob = log_probs[0, action].numpy()
-        return action, log_prob, value.numpy()[0, 0]
+        action = tf.squeeze(action_dist, axis=1)[0]
+        probs = tf.nn.softmax(logits)
+        selected_prob = probs[0, action]
+        log_prob = tf.math.log(selected_prob + 1e-8)
+        value_est = tf.squeeze(value, axis=1)[0]
+        return int(action.numpy()), log_prob, value_est
 
     def ppo_update(self, states, actions, old_log_probs, advantages, returns):
         """
-        Perform a PPO update using mini-batch gradient descent.
+        Perform PPO update using the provided rollout batch.
 
         Parameters:
-            states: Array with shape (N, num_lanes, lane_feature_dim)
-            actions: Array with shape (N,)
-            old_log_probs: Array with shape (N,)
-            advantages: Array with shape (N,) (should be normalized beforehand)
-            returns: Array with shape (N,)
+            states: np.array of shape (batch, num_lanes, lane_feature_dim)
+            actions: np.array of shape (batch,)
+            old_log_probs: np.array of shape (batch,)
+            advantages: np.array of shape (batch,)  -- will be scaled.
+            returns: np.array of shape (batch,)
+
+        Returns:
+            total_loss: final loss on batch.
         """
-        # Create a dataset and shuffle it.
-        dataset = tf.data.Dataset.from_tensor_slices(
-            (states, actions, old_log_probs, advantages, returns)
-        )
-        dataset = dataset.shuffle(buffer_size=1024).batch(self.batch_size)
+        states = tf.convert_to_tensor(states, dtype=tf.float32)
+        actions = tf.convert_to_tensor(actions, dtype=tf.int32)
+        old_log_probs = tf.convert_to_tensor(old_log_probs, dtype=tf.float32)
+        # Scale the advantages by the reward_scale factor.
+        advantages = tf.convert_to_tensor(advantages * self.reward_scale, dtype=tf.float32)
+        returns = tf.convert_to_tensor(returns, dtype=tf.float32)
 
         for epoch in range(self.update_epochs):
-            for batch in dataset:
-                s_batch, a_batch, old_logp_batch, adv_batch, ret_batch = batch
-                with tf.GradientTape() as tape:
-                    logits, values = self.model(s_batch)
-                    values = tf.squeeze(values, axis=1)
-                    log_probs_all = tf.nn.log_softmax(logits)
-                    # Gather the log probabilities corresponding to chosen actions.
-                    indices = tf.stack([tf.range(tf.shape(a_batch)[0]), a_batch], axis=1)
-                    new_logp = tf.gather_nd(log_probs_all, indices)
-                    # Compute probability ratio.
-                    ratio = tf.exp(new_logp - old_logp_batch)
-                    clipped_ratio = tf.clip_by_value(ratio, 1 - self.clip_ratio, 1 + self.clip_ratio)
-                    surrogate_loss = -tf.reduce_mean(tf.minimum(ratio * adv_batch, clipped_ratio * adv_batch))
-                    value_loss = tf.reduce_mean(tf.square(ret_batch - values))
-                    probs = tf.nn.softmax(logits)
-                    entropy = -tf.reduce_mean(tf.reduce_sum(probs * log_probs_all, axis=1))
-                    loss = surrogate_loss + 0.5 * value_loss - 0.01 * entropy
-                grads = tape.gradient(loss, self.model.trainable_variables)
-                self.optimizer.apply_gradients(zip(grads, self.model.trainable_variables))
+            with tf.GradientTape() as tape:
+                logits, value = self.call(states)
+                value = tf.squeeze(value, axis=1)
+                # Compute log probabilities for the selected actions.
+                action_masks = tf.one_hot(actions, self.num_actions)
+                log_probs = tf.reduce_sum(action_masks * tf.nn.log_softmax(logits), axis=1)
+                # Calculate probability ratio.
+                ratio = tf.exp(log_probs - old_log_probs)
+                surrogate1 = ratio * advantages
+                surrogate2 = tf.clip_by_value(ratio, 1.0 - self.clip_ratio, 1.0 + self.clip_ratio) * advantages
+                policy_loss = -tf.reduce_mean(tf.minimum(surrogate1, surrogate2))
+                value_loss = tf.reduce_mean(tf.square(returns - value))
+                loss = policy_loss + 0.5 * value_loss
+                # If prioritized update is enabled, weight each sample by its TD error.
+                if self.use_priority:
+                    td_error = tf.abs(returns - value)
+                    # Define weights: for example, use 1 + td_error.
+                    weights = 1.0 + td_error
+                    # Compute weighted losses.
+                    policy_loss = -tf.reduce_mean(weights * tf.minimum(surrogate1, surrogate2))
+                    value_loss = tf.reduce_mean(weights * tf.square(returns - value))
+                    loss = policy_loss + 0.5 * value_loss
+
+            grads = tape.gradient(loss, self.trainable_variables)
+            self.optimizer.apply_gradients(zip(grads, self.trainable_variables))
+        return loss
 
     def save_model(self, path):
-        """
-        Save the trained PPO model.
-        """
-        self.model.save(os.path.join(path, 'trained_model_ppo.h5'))
+        os.makedirs(path, exist_ok=True)
+        self.save_weights(os.path.join(path, "ppo_weights.h5"))
 
-
-def compute_discounted_returns(rewards, gamma):
-    """
-    Compute cumulative discounted returns.
-
-    Parameters:
-        rewards: List or NumPy array of rewards.
-        gamma: Discount factor.
-    Returns:
-        discounted_returns: NumPy array of the same shape as rewards.
-    """
-    discounted_returns = np.zeros_like(rewards, dtype=np.float32)
-    running_return = 0.0
-    for t in reversed(range(len(rewards))):
-        running_return = rewards[t] + gamma * running_return
-        discounted_returns[t] = running_return
-    return discounted_returns
+    def load_model(self, path):
+        self.load_weights(os.path.join(path, "ppo_weights.h5"))

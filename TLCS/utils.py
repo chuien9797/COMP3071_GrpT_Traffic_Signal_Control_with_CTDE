@@ -88,32 +88,25 @@ def import_test_configuration(config_file):
 
 
 def set_sumo(gui, sumocfg_file_name, max_steps):
-    """
-    Configure various parameters of SUMO.
-    If you're using multi-env training, sumocfg_file_name typically
-    comes from intersection_config.py, not the .ini.
-    """
-    # sumo environment variable
+    # Ensure SUMO_HOME is set
     if 'SUMO_HOME' in os.environ:
         tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
         sys.path.append(tools)
     else:
         sys.exit("please declare environment variable 'SUMO_HOME'")
 
-    # either sumo (CMD) or sumo-gui
-    if not gui:
-        sumoBinary = checkBinary('sumo')
-    else:
-        sumoBinary = checkBinary('sumo-gui')
+    # Choose sumo or sumo-gui binary based on gui flag.
+    sumoBinary = checkBinary('sumo-gui' if gui else 'sumo')
 
-    # build the command
     sumo_cmd = [
         sumoBinary,
         "-c", os.path.join('intersection', sumocfg_file_name),
         "--no-step-log", "true",
-        "--waiting-time-memory", str(max_steps)
+        "--waiting-time-memory", str(max_steps),
+        "--time-to-teleport", "7200"
     ]
     return sumo_cmd
+
 
 
 def set_train_path(models_path_name):

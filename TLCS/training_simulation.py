@@ -42,7 +42,7 @@ class Simulation:
         self._num_actions = num_actions
         self._training_epochs = training_epochs
 
-        # For plotting statistics
+        # For plotting statistics:
         self._reward_store = []
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
@@ -78,19 +78,17 @@ class Simulation:
         old_state = None
         old_action = None
 
-        # For PPO, initialize waiting time measurement from initial state.
         if self.algorithm == "PPO":
+            # For PPO, initialize waiting time measurement from initial state
             old_wait = self._collect_waiting_times()
+            trajectory = []  # To store tuples: (state, action, reward, log_prob, value)
+            total_reward = 0.0
         else:
             old_total_wait = 0
 
         self.faulty_lights = set()
         self.fault_injected_this_episode = False
         self.skip_fault_this_episode = random.random() < 0.5  # 50% episodes are clean
-
-        # Prepare storage for PPO rollout:
-        total_reward = 0.0
-        trajectory = []  # Each element: (state, action, reward, log_prob, value)
 
         if self.algorithm == "DQN":
             while self._step < self._max_steps:
@@ -114,13 +112,15 @@ class Simulation:
                 old_total_wait = current_total_wait
                 if reward < 0:
                     self._sum_neg_reward += reward
+
         elif self.algorithm == "PPO":
-            # PPO rollout collection:
-            old_wait = self._collect_waiting_times()
             while self._step < self._max_steps:
                 if check_emergency(self):
                     continue
+                # Obtain the current state. It may have a variable number of lanes.
                 state = self._get_state()
+                # Do NOT pad here—let the PPO model (designed with adaptive pooling) process variable lengths.
+                # Get action, log probability, and value estimate from the PPO model.
                 action, log_prob, value = self._Model.act(state)
                 log_file.write(f"[Step {self._step}] Action: {action}\n")
                 if self._step != 0 and old_action is not None and old_action != action:
@@ -131,9 +131,7 @@ class Simulation:
                 new_wait = self._collect_waiting_times()
                 queue_len = self._get_queue_length()
                 switch = 1 if (old_action is not None and old_action != action) else 0
-                # Sum the emergency flags (state[:,2] holds that information)
-                emergency = int(np.sum(state[:, 2]))
-                # Compute immediate reward using your reward function.
+                emergency = int(np.sum(state[:, 2]))  # sum of emergency flags (assumed stored in column index 2)
                 reward = compute_reward(old_wait, new_wait, queue_len, switch, emergency)
                 old_wait = new_wait
 
@@ -156,18 +154,18 @@ class Simulation:
             for _ in range(self._training_epochs):
                 self._replay()
         elif self.algorithm == "PPO" and trajectory:
-            # Unpack rollout: extract states, actions, rewards, log_probs, and values.
+            # Unpack the rollout.
             states, actions, rewards, log_probs, values = zip(*trajectory)
-            states = np.array(states)      # Shape: (N, num_lanes, lane_feature_dim)
+            # Pad the states in the batch to the maximum lane number of this batch.
+            states = self._pad_states(states)  # result shape: (batch, max_lanes_in_batch, lane_feature_dim)
             actions = np.array(actions, dtype=np.int32)
             rewards = np.array(rewards, dtype=np.float32)
             log_probs = np.array(log_probs, dtype=np.float32)
             values = np.array(values, dtype=np.float32)
-            # Compute returns.
+            # Compute discounted returns.
             returns = compute_discounted_returns(rewards, self._gamma)
-            # Compute advantages as returns - value estimates.
+            # Compute advantages as (returns - value estimates).
             advantages = returns - values
-            # Normalize advantages.
             advantages = (advantages - np.mean(advantages)) / (np.std(advantages) + 1e-8)
             self._Model.ppo_update(
                 states=states,
@@ -180,6 +178,31 @@ class Simulation:
 
         return simulation_time, train_time
 
+    def _pad_states(self, state_list):
+        """
+        Pad a list of state matrices so that each state has the same number of lanes.
+        This is used during training to allow batching of PPO rollouts.
+
+        Parameters:
+            state_list (list of np.array): Each array has shape (num_lanes, lane_feature_dim),
+                                           where num_lanes may differ between samples.
+
+        Returns:
+            np.array: Array of shape (batch_size, max_num_lanes, lane_feature_dim).
+        """
+        lane_feature_dim = state_list[0].shape[1]
+        max_lanes = max(state.shape[0] for state in state_list)
+        padded = []
+        for state in state_list:
+            pad_size = max_lanes - state.shape[0]
+            if pad_size > 0:
+                pad_width = ((0, pad_size), (0, 0))
+                padded_state = np.pad(state, pad_width=pad_width, mode='constant')
+            else:
+                padded_state = state
+            padded.append(padded_state)
+        return np.array(padded, dtype=np.float32)
+
     def _simulate(self, steps_todo):
         if (self._step + steps_todo) >= self._max_steps:
             steps_todo = self._max_steps - self._step
@@ -190,7 +213,7 @@ class Simulation:
             steps_todo -= 1
             q_len = self._get_queue_length()
             self._sum_queue_length += q_len
-            self._sum_waiting_time += q_len  # You may adjust if desired.
+            self._sum_waiting_time += q_len  # Adjust if desired.
 
     def _inject_signal_faults(self):
         self.manual_override = False
@@ -249,11 +272,16 @@ class Simulation:
         if random.random() < epsilon:
             return random.randint(0, self._num_actions - 1)
         else:
-            q_vals = self._Model.predict_one(state)
-            action = int(np.argmax(q_vals[0]))
-        if np.any(state[:, 2] == 1.0):
-            print(f"[Step {self._step}] 🚨 Emergency flag detected in state. Chosen action: {action}")
-        return action
+            # For DQN, we expect a method predict_one; for PPO, act() is used.
+            q_vals = self._Model.predict_one(state) if hasattr(self._Model, "predict_one") else None
+            if q_vals is not None:
+                action = int(np.argmax(q_vals[0]))
+            else:
+                # If not available, fall back to sampling using act() (this case should only occur for PPO in run()).
+                action, _, _ = self._Model.act(state)
+            if np.any(state[:, 2] == 1.0):
+                print(f"[Step {self._step}] 🚨 Emergency flag detected in state. Chosen action: {action}")
+            return action
 
     def _set_green_phase(self, action_number):
         if hasattr(self, "manual_override") and self.manual_override:
@@ -396,17 +424,17 @@ class Simulation:
     def analyze_results(self):
         plt.figure(figsize=(20, 5))
         plt.subplot(1, 4, 1)
-        plt.plot(self.reward_store)
+        plt.plot(self._reward_store)
         plt.title("Reward per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Reward")
         plt.subplot(1, 4, 2)
-        plt.plot(self.avg_queue_length_store)
+        plt.plot(self._avg_queue_length_store)
         plt.title("Average Queue Length per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Average Queue Length")
         plt.subplot(1, 4, 3)
-        plt.plot(self.cumulative_wait_store)
+        plt.plot(self._cumulative_wait_store)
         plt.title("Cumulative Waiting Time per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Cumulative Waiting Time")
@@ -431,7 +459,6 @@ class Simulation:
         return self._avg_queue_length_store
 
 
-# Helper function for PPO: compute discounted returns.
 def compute_discounted_returns(rewards, gamma):
     discounted_returns = np.zeros_like(rewards, dtype=np.float32)
     running_return = 0.0
@@ -441,17 +468,26 @@ def compute_discounted_returns(rewards, gamma):
     return discounted_returns
 
 
-# NEW: Revised Helper function to compute immediate reward.
-def compute_reward(old_wait, new_wait, queue_len, switch, emergency):
+def compute_reward(old_wait, new_wait, queue_len, switch, emergency, reward_scale=1.0):
     """
-    Compute a reward that reflects delay reduction, queue length, phase switching and emergencies.
-    The waiting time difference is scaled to reduce variance and then penalized by queue and emergency factors.
-    The output is clipped to a fixed range.
+    Compute a reward that reflects delay reduction, queue length, phase switching cost, and emergency penalties.
+
+    Parameters:
+        old_wait (float): Total waiting time before the phase.
+        new_wait (float): Total waiting time after the phase.
+        queue_len (float): Current queue length.
+        switch (int): 1 if phase switched, else 0.
+        emergency (int): Sum of emergency flags (e.g., 1 if emergency vehicle present).
+        reward_scale (float): A multiplicative factor to adjust the magnitude of the reward.
+
+    Returns:
+        float: The computed reward (clipped within a range).
     """
-    scaling_factor = 5000.0  # Scale down raw waiting time differences.
-    diff = (old_wait - new_wait) / scaling_factor  # Positive if waiting time decreases.
+    scaling_factor = 5000.0  # Scale down the differences.
+    # Waiting time difference: positive if waiting time decreases.
+    diff = (old_wait - new_wait) / scaling_factor
     q_scaled = queue_len / scaling_factor
 
-    raw_reward = diff + 0.4 * (diff - q_scaled) - 0.005 * q_scaled - 0.05 * switch - 2 * emergency
-    reward = np.clip(raw_reward, -100.0, 100.0)
-    return reward
+    # Adjust the reward computation: you can experiment with the coefficients.
+    raw_reward = reward_scale * (diff + 0.4 * (diff - q_scaled) - 0.005 * q_scaled - 0.05 * switch - 2 * emergency)
+    return np.clip(raw_reward, -100.0, 100.0)

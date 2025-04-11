@@ -1,0 +1,836 @@
+[Step 0] Action: 2
+[Step 0] Adaptive green duration: 10
+[Step 10] Action: 2
+[Step 10] Adaptive green duration: 10
+[Step 20] Action: 2
+[Step 20] Adaptive green duration: 10
+[Step 30] Action: 2
+[Step 30] Adaptive green duration: 10
+[Step 40] Action: 2
+[Step 40] Adaptive green duration: 10
+[Step 50] Action: 2
+[Step 50] Adaptive green duration: 10
+[Step 60] Action: 1
+[Step 64] Adaptive green duration: 11
+[Step 75] Action: 2
+[Step 79] Adaptive green duration: 13
+[Step 92] Action: 2
+[Step 92] Adaptive green duration: 10
+[Step 102] Action: 2
+[Step 102] Adaptive green duration: 10
+[Step 112] Action: 2
+[Step 112] Adaptive green duration: 10
+[Step 122] Action: 2
+[Step 122] Adaptive green duration: 10
+[Step 132] Action: 1
+[Step 136] Adaptive green duration: 10
+[Step 146] Action: 1
+[Step 146] Adaptive green duration: 10
+[Step 156] Action: 2
+[Step 160] Adaptive green duration: 11
+[Step 171] Action: 2
+[Step 171] Adaptive green duration: 13
+[Step 184] Action: 2
+[Step 184] Adaptive green duration: 10
+[Step 194] Action: 1
+[Step 198] Adaptive green duration: 10
+[Step 208] Action: 1
+[Step 208] Adaptive green duration: 10
+[Step 218] Action: 2
+[Step 222] Adaptive green duration: 11
+[Step 233] Action: 2
+[Step 233] Adaptive green duration: 10
+[Step 243] Action: 2
+[Step 243] Adaptive green duration: 11
+[Step 254] Action: 2
+[Step 254] Adaptive green duration: 13
+[Step 267] Action: 3
+[Step 271] Adaptive green duration: 15
+[Step 286] Action: 2
+[Step 290] Adaptive green duration: 11
+[Step 301] Action: 2
+[Step 301] Adaptive green duration: 13
+[Step 314] Action: 3
+[Step 318] Adaptive green duration: 16
+[Step 334] Action: 0
+[Step 338] Adaptive green duration: 10
+[Step 348] Action: 0
+[Step 348] Adaptive green duration: 10
+[Step 358] Action: 2
+[Step 362] Adaptive green duration: 11
+[Step 373] Action: 3
+[Step 377] Adaptive green duration: 10
+[Step 387] Action: 0
+[Step 391] Adaptive green duration: 11
+[Step 402] Action: 2
+[Step 406] Adaptive green duration: 10
+[Step 416] Action: 3
+[Step 420] Adaptive green duration: 10
+[Step 430] Action: 0
+[Step 434] Adaptive green duration: 12
+[Step 446] Action: 0
+[Step 446] Adaptive green duration: 10
+[Step 456] Action: 2
+[Step 460] Adaptive green duration: 10
+[Step 470] Action: 3
+[Step 474] Adaptive green duration: 10
+[Step 484] Action: 0
+[Step 488] Adaptive green duration: 16
+[Step 504] Action: 2
+[Step 508] Adaptive green duration: 10
+[Step 518] Action: 3
+[Step 522] Adaptive green duration: 10
+[Step 532] Action: 2
+[Step 536] Adaptive green duration: 11
+[Step 547] Action: 0
+[Step 551] Adaptive green duration: 16
+[Step 567] Action: 0
+[Step 567] Adaptive green duration: 11
+[Step 578] Action: 1
+[Step 582] Adaptive green duration: 15
+[Step 597] Action: 3
+[Step 601] Adaptive green duration: 10
+[Step 611] Action: 0
+[Step 615] Adaptive green duration: 12
+[Step 627] Action: 0
+[Step 627] Adaptive green duration: 10
+[Step 637] Action: 1
+[Step 641] Adaptive green duration: 11
+[Step 652] Action: 0
+[Step 656] Adaptive green duration: 11
+[Step 667] Action: 0
+[Step 667] Adaptive green duration: 10
+[Step 677] Action: 0
+[Step 677] Adaptive green duration: 12
+[Step 689] Action: 1
+[Step 693] Adaptive green duration: 17
+[Step 710] Action: 0
+[Step 714] Adaptive green duration: 12
+[Step 726] Action: 1
+[Step 730] Adaptive green duration: 10
+[Step 740] Action: 0
+[Step 744] Adaptive green duration: 10
+[Step 754] Action: 0
+[Step 754] Adaptive green duration: 10
+[Step 764] Action: 0
+[Step 764] Adaptive green duration: 10
+[Step 774] Action: 1
+[Step 778] Adaptive green duration: 11
+[Step 789] Action: 0
+[Step 793] Adaptive green duration: 11
+[Step 804] Action: 0
+[Step 804] Adaptive green duration: 10
+[Step 814] Action: 0
+[Step 814] Adaptive green duration: 12
+[Step 826] Action: 2
+[Step 830] Adaptive green duration: 16
+[Step 846] Action: 1
+[Step 850] Adaptive green duration: 15
+[Step 865] Action: 0
+[Step 869] Adaptive green duration: 20
+[Step 889] Action: 0
+[Step 889] Adaptive green duration: 12
+[Step 901] Action: 3
+[Step 905] Adaptive green duration: 14
+[Step 919] Action: 0
+[Step 923] Adaptive green duration: 11
+[Step 934] Action: 0
+[Step 934] Adaptive green duration: 10
+[Step 944] Action: 0
+[Step 944] Adaptive green duration: 10
+[Step 954] Action: 1
+[Step 958] Adaptive green duration: 10
+[Step 968] Action: 0
+[Step 972] Adaptive green duration: 10
+[Step 982] Action: 0
+[Step 982] Adaptive green duration: 11
+[Step 993] Action: 3
+[Step 997] Adaptive green duration: 16
+[Step 1013] Action: 0
+[Step 1017] Adaptive green duration: 12
+[Step 1029] Action: 1
+[Step 1033] Adaptive green duration: 10
+[Step 1043] Action: 0
+[Step 1047] Adaptive green duration: 11
+[Step 1058] Action: 0
+[Step 1058] Adaptive green duration: 10
+[Step 1068] Action: 1
+[Step 1072] Adaptive green duration: 10
+[Step 1082] Action: 0
+[Step 1086] Adaptive green duration: 13
+[Step 1099] Action: 0
+[Step 1099] Adaptive green duration: 11
+[Step 1110] Action: 0
+[Step 1110] Adaptive green duration: 14
+[Step 1124] Action: 3
+[Step 1128] Adaptive green duration: 18
+[Step 1146] Action: 0
+[Step 1150] Adaptive green duration: 14
+[Step 1164] Action: 1
+[Step 1168] Adaptive green duration: 10
+[Step 1178] Action: 3
+[Step 1182] Adaptive green duration: 10
+[Step 1192] Action: 0
+[Step 1196] Adaptive green duration: 15
+[Step 1211] Action: 0
+[Step 1211] Adaptive green duration: 12
+[Step 1223] Action: 1
+[Step 1227] Adaptive green duration: 18
+[Step 1245] Action: 0
+[Step 1249] Adaptive green duration: 15
+[Step 1264] Action: 0
+[Step 1264] Adaptive green duration: 10
+[Step 1274] Action: 1
+[Step 1278] Adaptive green duration: 12
+[Step 1290] Action: 3
+[Step 1294] Adaptive green duration: 11
+[Step 1305] Action: 0
+[Step 1309] Adaptive green duration: 16
+[Step 1325] Action: 2
+[Step 1329] Adaptive green duration: 11
+[Step 1340] Action: 0
+[Step 1344] Adaptive green duration: 11
+[Step 1355] Action: 0
+[Step 1355] Adaptive green duration: 10
+[Step 1365] Action: 2
+[Step 1369] Adaptive green duration: 11
+[Step 1380] Action: 0
+[Step 1384] Adaptive green duration: 10
+[Step 1394] Action: 0
+[Step 1394] Adaptive green duration: 10
+[Step 1404] Action: 0
+[Step 1404] Adaptive green duration: 10
+[Step 1414] Action: 2
+[Step 1418] Adaptive green duration: 12
+[Step 1430] Action: 0
+[Step 1434] Adaptive green duration: 11
+[Step 1445] Action: 1
+[Step 1449] Adaptive green duration: 10
+[Step 1459] Action: 0
+[Step 1463] Adaptive green duration: 11
+[Step 1474] Action: 0
+[Step 1474] Adaptive green duration: 10
+[Step 1484] Action: 0
+[Step 1484] Adaptive green duration: 11
+[Step 1495] Action: 2
+[Step 1499] Adaptive green duration: 13
+[Step 1512] Action: 0
+[Step 1516] Adaptive green duration: 14
+[Step 1530] Action: 0
+[Step 1530] Adaptive green duration: 10
+[Step 1540] Action: 0
+[Step 1540] Adaptive green duration: 10
+[Step 1550] Action: 2
+[Step 1554] Adaptive green duration: 12
+[Step 1566] Action: 0
+[Step 1570] Adaptive green duration: 11
+[Step 1581] Action: 0
+[Step 1581] Adaptive green duration: 10
+[Step 1591] Action: 0
+[Step 1591] Adaptive green duration: 10
+[Step 1601] Action: 2
+[Step 1605] Adaptive green duration: 10
+[Step 1615] Action: 3
+[Step 1619] Adaptive green duration: 10
+[Step 1629] Action: 3
+[Step 1629] Adaptive green duration: 13
+[Step 1642] Action: 0
+[Step 1646] Adaptive green duration: 19
+[Step 1665] Action: 0
+[Step 1665] Adaptive green duration: 11
+[Step 1676] Action: 2
+[Step 1680] Adaptive green duration: 13
+[Step 1693] Action: 1
+[Step 1697] Adaptive green duration: 10
+[Step 1707] Action: 0
+[Step 1711] Adaptive green duration: 17
+[Step 1728] Action: 0
+[Step 1728] Adaptive green duration: 11
+[Step 1739] Action: 2
+[Step 1743] Adaptive green duration: 12
+[Step 1755] Action: 0
+[Step 1759] Adaptive green duration: 12
+[Step 1771] Action: 0
+[Step 1771] Adaptive green duration: 10
+[Step 1781] Action: 0
+[Step 1781] Adaptive green duration: 11
+[Step 1792] Action: 0
+[Step 1792] Adaptive green duration: 13
+[Step 1805] Action: 1
+[Step 1809] Adaptive green duration: 18
+[Step 1827] Action: 1
+[Step 1827] Adaptive green duration: 16
+[Step 1843] Action: 0
+[Step 1847] Adaptive green duration: 20
+[Step 1867] Action: 2
+[Step 1871] Adaptive green duration: 13
+[Step 1884] Action: 3
+[Step 1888] Adaptive green duration: 10
+[Step 1898] Action: 0
+[Step 1902] Adaptive green duration: 14
+[Step 1916] Action: 1
+[Step 1920] Adaptive green duration: 10
+[Step 1930] Action: 0
+[Step 1934] Adaptive green duration: 10
+[Step 1944] Action: 2
+[Step 1948] Adaptive green duration: 10
+[Step 1958] Action: 3
+[Step 1962] Adaptive green duration: 10
+[Step 1972] Action: 0
+[Step 1976] Adaptive green duration: 12
+[Step 1988] Action: 1
+[Step 1992] Adaptive green duration: 10
+[Step 2002] Action: 3
+[Step 2006] Adaptive green duration: 10
+[Step 2016] Action: 0
+[Step 2020] Adaptive green duration: 15
+[Step 2035] Action: 0
+[Step 2035] Adaptive green duration: 10
+[Step 2045] Action: 2
+[Step 2049] Adaptive green duration: 10
+[Step 2059] Action: 0
+[Step 2063] Adaptive green duration: 10
+[Step 2073] Action: 0
+[Step 2073] Adaptive green duration: 10
+[Step 2083] Action: 0
+[Step 2083] Adaptive green duration: 10
+[Step 2093] Action: 0
+[Step 2093] Adaptive green duration: 10
+[Step 2103] Action: 0
+[Step 2103] Adaptive green duration: 12
+[Step 2115] Action: 1
+[Step 2119] Adaptive green duration: 18
+[Step 2137] Action: 1
+[Step 2137] Adaptive green duration: 14
+[Step 2151] Action: 0
+[Step 2155] Adaptive green duration: 20
+[Step 2175] Action: 2
+[Step 2179] Adaptive green duration: 11
+[Step 2190] Action: 0
+[Step 2194] Adaptive green duration: 10
+[Step 2204] Action: 1
+[Step 2208] Adaptive green duration: 10
+[Step 2218] Action: 3
+[Step 2222] Adaptive green duration: 11
+[Step 2233] Action: 0
+[Step 2237] Adaptive green duration: 13
+[Step 2250] Action: 0
+[Step 2250] Adaptive green duration: 10
+[Step 2260] Action: 2
+[Step 2264] Adaptive green duration: 11
+[Step 2275] Action: 3
+[Step 2279] Adaptive green duration: 10
+[Step 2289] Action: 0
+[Step 2293] Adaptive green duration: 11
+[Step 2304] Action: 0
+[Step 2304] Adaptive green duration: 10
+[Step 2314] Action: 2
+[Step 2318] Adaptive green duration: 10
+[Step 2328] Action: 3
+[Step 2332] Adaptive green duration: 10
+[Step 2342] Action: 3
+[Step 2342] Adaptive green duration: 13
+[Step 2355] Action: 3
+[Step 2355] Adaptive green duration: 19
+[Step 2374] Action: 0
+[Step 2378] Adaptive green duration: 10
+[Step 2388] Action: 0
+[Step 2388] Adaptive green duration: 10
+[Step 2398] Action: 2
+[Step 2402] Adaptive green duration: 11
+[Step 2413] Action: 0
+[Step 2417] Adaptive green duration: 10
+[Step 2427] Action: 2
+[Step 2431] Adaptive green duration: 10
+[Step 2441] Action: 3
+[Step 2445] Adaptive green duration: 10
+[Step 2455] Action: 3
+[Step 2455] Adaptive green duration: 10
+[Step 2465] Action: 3
+[Step 2465] Adaptive green duration: 11
+[Step 2476] Action: 0
+[Step 2480] Adaptive green duration: 13
+[Step 2493] Action: 2
+[Step 2497] Adaptive green duration: 11
+[Step 2508] Action: 0
+[Step 2512] Adaptive green duration: 10
+[Step 2522] Action: 1
+[Step 2526] Adaptive green duration: 10
+[Step 2536] Action: 3
+[Step 2540] Adaptive green duration: 10
+[Step 2550] Action: 3
+[Step 2550] Adaptive green duration: 12
+[Step 2562] Action: 0
+[Step 2566] Adaptive green duration: 13
+[Step 2579] Action: 1
+[Step 2583] Adaptive green duration: 10
+[Step 2593] Action: 0
+[Step 2597] Adaptive green duration: 10
+[Step 2607] Action: 1
+[Step 2611] Adaptive green duration: 10
+[Step 2621] Action: 3
+[Step 2625] Adaptive green duration: 11
+[Step 2636] Action: 0
+[Step 2640] Adaptive green duration: 13
+[Step 2653] Action: 1
+[Step 2657] Adaptive green duration: 10
+[Step 2667] Action: 3
+[Step 2671] Adaptive green duration: 10
+[Step 2681] Action: 3
+[Step 2681] Adaptive green duration: 11
+[Step 2692] Action: 0
+[Step 2696] Adaptive green duration: 14
+[Step 2710] Action: 1
+[Step 2714] Adaptive green duration: 10
+[Step 2724] Action: 0
+[Step 2728] Adaptive green duration: 10
+[Step 2738] Action: 2
+[Step 2742] Adaptive green duration: 10
+[Step 2752] Action: 3
+[Step 2756] Adaptive green duration: 10
+[Step 2766] Action: 3
+[Step 2766] Adaptive green duration: 10
+[Step 2776] Action: 0
+[Step 2780] Adaptive green duration: 10
+[Step 2790] Action: 2
+[Step 2794] Adaptive green duration: 10
+[Step 2804] Action: 3
+[Step 2808] Adaptive green duration: 10
+[Step 2818] Action: 3
+[Step 2818] Adaptive green duration: 10
+[Step 2828] Action: 3
+[Step 2828] Adaptive green duration: 11
+[Step 2839] Action: 0
+[Step 2843] Adaptive green duration: 10
+[Step 2853] Action: 2
+[Step 2857] Adaptive green duration: 10
+[Step 2867] Action: 3
+[Step 2871] Adaptive green duration: 10
+[Step 2881] Action: 0
+[Step 2885] Adaptive green duration: 12
+[Step 2897] Action: 2
+[Step 2901] Adaptive green duration: 10
+[Step 2911] Action: 0
+[Step 2915] Adaptive green duration: 10
+[Step 2925] Action: 2
+[Step 2929] Adaptive green duration: 10
+[Step 2939] Action: 3
+[Step 2943] Adaptive green duration: 10
+[Step 2953] Action: 0
+[Step 2957] Adaptive green duration: 12
+[Step 2969] Action: 2
+[Step 2973] Adaptive green duration: 10
+[Step 2983] Action: 3
+[Step 2987] Adaptive green duration: 10
+[Step 2997] Action: 0
+[Step 3001] Adaptive green duration: 12
+[Step 3013] Action: 2
+[Step 3017] Adaptive green duration: 10
+[Step 3027] Action: 3
+[Step 3031] Adaptive green duration: 10
+[Step 3041] Action: 1
+[Step 3045] Adaptive green duration: 12
+[Step 3057] Action: 0
+[Step 3061] Adaptive green duration: 18
+[Step 3079] Action: 0
+[Step 3079] Adaptive green duration: 11
+[Step 3090] Action: 2
+[Step 3094] Adaptive green duration: 12
+[Step 3106] Action: 3
+[Step 3110] Adaptive green duration: 10
+[Step 3120] Action: 3
+[Step 3120] Adaptive green duration: 13
+[Step 3133] Action: 0
+[Step 3137] Adaptive green duration: 17
+[Step 3154] Action: 2
+[Step 3158] Adaptive green duration: 10
+[Step 3168] Action: 3
+[Step 3172] Adaptive green duration: 10
+[Step 3182] Action: 3
+[Step 3182] Adaptive green duration: 10
+[Step 3192] Action: 3
+[Step 3192] Adaptive green duration: 11
+[Step 3203] Action: 0
+[Step 3207] Adaptive green duration: 10
+[Step 3217] Action: 2
+[Step 3221] Adaptive green duration: 10
+[Step 3231] Action: 0
+[Step 3235] Adaptive green duration: 10
+[Step 3245] Action: 1
+[Step 3249] Adaptive green duration: 10
+[Step 3259] Action: 3
+[Step 3263] Adaptive green duration: 10
+[Step 3273] Action: 3
+[Step 3273] Adaptive green duration: 11
+[Step 3284] Action: 3
+[Step 3284] Adaptive green duration: 12
+[Step 3296] Action: 2
+[Step 3300] Adaptive green duration: 10
+[Step 3310] Action: 2
+[Step 3310] Adaptive green duration: 10
+[Step 3320] Action: 2
+[Step 3320] Adaptive green duration: 10
+[Step 3330] Action: 1
+[Step 3334] Adaptive green duration: 10
+[Step 3344] Action: 3
+[Step 3348] Adaptive green duration: 10
+[Step 3358] Action: 3
+[Step 3358] Adaptive green duration: 10
+[Step 3368] Action: 3
+[Step 3368] Adaptive green duration: 10
+[Step 3378] Action: 3
+[Step 3378] Adaptive green duration: 10
+[Step 3388] Action: 2
+[Step 3392] Adaptive green duration: 10
+[Step 3402] Action: 2
+[Step 3402] Adaptive green duration: 10
+[Step 3412] Action: 2
+[Step 3412] Adaptive green duration: 10
+[Step 3422] Action: 1
+[Step 3426] Adaptive green duration: 10
+[Step 3436] Action: 3
+[Step 3440] Adaptive green duration: 10
+[Step 3450] Action: 3
+[Step 3450] Adaptive green duration: 10
+[Step 3460] Action: 3
+[Step 3460] Adaptive green duration: 10
+[Step 3470] Action: 3
+[Step 3470] Adaptive green duration: 10
+[Step 3480] Action: 2
+[Step 3484] Adaptive green duration: 10
+[Step 3494] Action: 2
+[Step 3494] Adaptive green duration: 10
+[Step 3504] Action: 2
+[Step 3504] Adaptive green duration: 10
+[Step 3514] Action: 2
+[Step 3514] Adaptive green duration: 10
+[Step 3524] Action: 3
+[Step 3528] Adaptive green duration: 10
+[Step 3538] Action: 3
+[Step 3538] Adaptive green duration: 10
+[Step 3548] Action: 3
+[Step 3548] Adaptive green duration: 10
+[Step 3558] Action: 3
+[Step 3558] Adaptive green duration: 10
+[Step 3568] Action: 2
+[Step 3572] Adaptive green duration: 10
+[Step 3582] Action: 2
+[Step 3582] Adaptive green duration: 10
+[Step 3592] Action: 1
+[Step 3596] Adaptive green duration: 10
+[Step 3606] Action: 3
+[Step 3610] Adaptive green duration: 11
+[Step 3621] Action: 3
+[Step 3621] Adaptive green duration: 10
+[Step 3631] Action: 3
+[Step 3631] Adaptive green duration: 10
+[Step 3641] Action: 3
+[Step 3641] Adaptive green duration: 10
+[Step 3651] Action: 3
+[Step 3651] Adaptive green duration: 10
+[Step 3661] Action: 1
+[Step 3665] Adaptive green duration: 10
+[Step 3675] Action: 1
+[Step 3675] Adaptive green duration: 10
+[Step 3685] Action: 2
+[Step 3689] Adaptive green duration: 10
+[Step 3699] Action: 3
+[Step 3703] Adaptive green duration: 10
+[Step 3713] Action: 3
+[Step 3713] Adaptive green duration: 10
+[Step 3723] Action: 3
+[Step 3723] Adaptive green duration: 11
+[Step 3734] Action: 3
+[Step 3734] Adaptive green duration: 12
+[Step 3746] Action: 0
+[Step 3750] Adaptive green duration: 10
+[Step 3760] Action: 2
+[Step 3764] Adaptive green duration: 10
+[Step 3774] Action: 3
+[Step 3778] Adaptive green duration: 10
+[Step 3788] Action: 3
+[Step 3788] Adaptive green duration: 10
+[Step 3798] Action: 3
+[Step 3798] Adaptive green duration: 10
+[Step 3808] Action: 3
+[Step 3808] Adaptive green duration: 10
+[Step 3818] Action: 2
+[Step 3822] Adaptive green duration: 10
+[Step 3832] Action: 2
+[Step 3832] Adaptive green duration: 10
+[Step 3842] Action: 2
+[Step 3842] Adaptive green duration: 10
+[Step 3852] Action: 3
+[Step 3856] Adaptive green duration: 10
+[Step 3866] Action: 3
+[Step 3866] Adaptive green duration: 10
+[Step 3876] Action: 3
+[Step 3876] Adaptive green duration: 11
+[Step 3887] Action: 3
+[Step 3887] Adaptive green duration: 12
+[Step 3899] Action: 1
+[Step 3903] Adaptive green duration: 10
+[Step 3913] Action: 2
+[Step 3917] Adaptive green duration: 10
+[Step 3927] Action: 2
+[Step 3927] Adaptive green duration: 10
+[Step 3937] Action: 2
+[Step 3937] Adaptive green duration: 10
+[Step 3947] Action: 3
+[Step 3951] Adaptive green duration: 10
+[Step 3961] Action: 3
+[Step 3961] Adaptive green duration: 10
+[Step 3971] Action: 3
+[Step 3971] Adaptive green duration: 10
+[Step 3981] Action: 3
+[Step 3981] Adaptive green duration: 10
+[Step 3991] Action: 2
+[Step 3995] Adaptive green duration: 10
+[Step 4005] Action: 2
+[Step 4005] Adaptive green duration: 10
+[Step 4015] Action: 2
+[Step 4015] Adaptive green duration: 10
+[Step 4025] Action: 2
+[Step 4025] Adaptive green duration: 10
+[Step 4035] Action: 3
+[Step 4039] Adaptive green duration: 10
+[Step 4049] Action: 3
+[Step 4049] Adaptive green duration: 10
+[Step 4059] Action: 3
+[Step 4059] Adaptive green duration: 10
+[Step 4069] Action: 3
+[Step 4069] Adaptive green duration: 10
+[Step 4079] Action: 2
+[Step 4083] Adaptive green duration: 10
+[Step 4093] Action: 2
+[Step 4093] Adaptive green duration: 10
+[Step 4103] Action: 2
+[Step 4103] Adaptive green duration: 10
+[Step 4113] Action: 2
+[Step 4113] Adaptive green duration: 10
+[Step 4123] Action: 3
+[Step 4127] Adaptive green duration: 10
+[Step 4137] Action: 3
+[Step 4137] Adaptive green duration: 10
+[Step 4147] Action: 0
+[Step 4151] Adaptive green duration: 11
+[Step 4162] Action: 2
+[Step 4166] Adaptive green duration: 10
+[Step 4176] Action: 3
+[Step 4180] Adaptive green duration: 10
+[Step 4190] Action: 3
+[Step 4190] Adaptive green duration: 10
+[Step 4200] Action: 3
+[Step 4200] Adaptive green duration: 10
+[Step 4210] Action: 0
+[Step 4214] Adaptive green duration: 10
+[Step 4224] Action: 2
+[Step 4228] Adaptive green duration: 10
+[Step 4238] Action: 3
+[Step 4242] Adaptive green duration: 10
+[Step 4252] Action: 3
+[Step 4252] Adaptive green duration: 10
+[Step 4262] Action: 3
+[Step 4262] Adaptive green duration: 10
+[Step 4272] Action: 3
+[Step 4272] Adaptive green duration: 10
+[Step 4282] Action: 2
+[Step 4286] Adaptive green duration: 10
+[Step 4296] Action: 2
+[Step 4296] Adaptive green duration: 10
+[Step 4306] Action: 2
+[Step 4306] Adaptive green duration: 10
+[Step 4316] Action: 3
+[Step 4320] Adaptive green duration: 10
+[Step 4330] Action: 3
+[Step 4330] Adaptive green duration: 10
+[Step 4340] Action: 3
+[Step 4340] Adaptive green duration: 10
+[Step 4350] Action: 3
+[Step 4350] Adaptive green duration: 10
+[Step 4360] Action: 3
+[Step 4360] Adaptive green duration: 10
+[Step 4370] Action: 2
+[Step 4374] Adaptive green duration: 10
+[Step 4384] Action: 2
+[Step 4384] Adaptive green duration: 10
+[Step 4394] Action: 2
+[Step 4394] Adaptive green duration: 10
+[Step 4404] Action: 2
+[Step 4404] Adaptive green duration: 10
+[Step 4414] Action: 3
+[Step 4418] Adaptive green duration: 10
+[Step 4428] Action: 3
+[Step 4428] Adaptive green duration: 11
+[Step 4439] Action: 3
+[Step 4439] Adaptive green duration: 11
+[Step 4450] Action: 3
+[Step 4450] Adaptive green duration: 12
+[Step 4462] Action: 2
+[Step 4466] Adaptive green duration: 10
+[Step 4476] Action: 2
+[Step 4476] Adaptive green duration: 10
+[Step 4486] Action: 2
+[Step 4486] Adaptive green duration: 10
+[Step 4496] Action: 3
+[Step 4500] Adaptive green duration: 10
+[Step 4510] Action: 3
+[Step 4510] Adaptive green duration: 10
+[Step 4520] Action: 3
+[Step 4520] Adaptive green duration: 10
+[Step 4530] Action: 3
+[Step 4530] Adaptive green duration: 10
+[Step 4540] Action: 3
+[Step 4540] Adaptive green duration: 10
+[Step 4550] Action: 2
+[Step 4554] Adaptive green duration: 10
+[Step 4564] Action: 2
+[Step 4564] Adaptive green duration: 10
+[Step 4574] Action: 2
+[Step 4574] Adaptive green duration: 10
+[Step 4584] Action: 2
+[Step 4584] Adaptive green duration: 10
+[Step 4594] Action: 3
+[Step 4598] Adaptive green duration: 10
+[Step 4608] Action: 3
+[Step 4608] Adaptive green duration: 10
+[Step 4618] Action: 3
+[Step 4618] Adaptive green duration: 10
+[Step 4628] Action: 3
+[Step 4628] Adaptive green duration: 10
+[Step 4638] Action: 2
+[Step 4642] Adaptive green duration: 10
+[Step 4652] Action: 2
+[Step 4652] Adaptive green duration: 10
+[Step 4662] Action: 2
+[Step 4662] Adaptive green duration: 10
+[Step 4672] Action: 2
+[Step 4672] Adaptive green duration: 10
+[Step 4682] Action: 3
+[Step 4686] Adaptive green duration: 10
+[Step 4696] Action: 3
+[Step 4696] Adaptive green duration: 11
+[Step 4707] Action: 3
+[Step 4707] Adaptive green duration: 12
+[Step 4719] Action: 0
+[Step 4723] Adaptive green duration: 14
+[Step 4737] Action: 2
+[Step 4741] Adaptive green duration: 10
+[Step 4751] Action: 3
+[Step 4755] Adaptive green duration: 10
+[Step 4765] Action: 3
+[Step 4765] Adaptive green duration: 10
+[Step 4775] Action: 3
+[Step 4775] Adaptive green duration: 10
+[Step 4785] Action: 3
+[Step 4785] Adaptive green duration: 10
+[Step 4795] Action: 2
+[Step 4799] Adaptive green duration: 10
+[Step 4809] Action: 2
+[Step 4809] Adaptive green duration: 10
+[Step 4819] Action: 2
+[Step 4819] Adaptive green duration: 10
+[Step 4829] Action: 3
+[Step 4833] Adaptive green duration: 10
+[Step 4843] Action: 3
+[Step 4843] Adaptive green duration: 10
+[Step 4853] Action: 3
+[Step 4853] Adaptive green duration: 10
+[Step 4863] Action: 3
+[Step 4863] Adaptive green duration: 10
+[Step 4873] Action: 3
+[Step 4873] Adaptive green duration: 10
+[Step 4883] Action: 2
+[Step 4887] Adaptive green duration: 10
+[Step 4897] Action: 2
+[Step 4897] Adaptive green duration: 10
+[Step 4907] Action: 2
+[Step 4907] Adaptive green duration: 10
+[Step 4917] Action: 2
+[Step 4917] Adaptive green duration: 10
+[Step 4927] Action: 3
+[Step 4931] Adaptive green duration: 10
+[Step 4941] Action: 3
+[Step 4941] Adaptive green duration: 10
+[Step 4951] Action: 3
+[Step 4951] Adaptive green duration: 10
+[Step 4961] Action: 3
+[Step 4961] Adaptive green duration: 10
+[Step 4971] Action: 2
+[Step 4975] Adaptive green duration: 10
+[Step 4985] Action: 2
+[Step 4985] Adaptive green duration: 10
+[Step 4995] Action: 2
+[Step 4995] Adaptive green duration: 10
+[Step 5005] Action: 2
+[Step 5005] Adaptive green duration: 10
+[Step 5015] Action: 3
+[Step 5019] Adaptive green duration: 10
+[Step 5029] Action: 3
+[Step 5029] Adaptive green duration: 10
+[Step 5039] Action: 3
+[Step 5039] Adaptive green duration: 10
+[Step 5049] Action: 3
+[Step 5049] Adaptive green duration: 10
+[Step 5059] Action: 2
+[Step 5063] Adaptive green duration: 10
+[Step 5073] Action: 2
+[Step 5073] Adaptive green duration: 10
+[Step 5083] Action: 2
+[Step 5083] Adaptive green duration: 10
+[Step 5093] Action: 2
+[Step 5093] Adaptive green duration: 10
+[Step 5103] Action: 3
+[Step 5107] Adaptive green duration: 10
+[Step 5117] Action: 3
+[Step 5117] Adaptive green duration: 10
+[Step 5127] Action: 3
+[Step 5127] Adaptive green duration: 10
+[Step 5137] Action: 3
+[Step 5137] Adaptive green duration: 10
+[Step 5147] Action: 2
+[Step 5151] Adaptive green duration: 10
+[Step 5161] Action: 2
+[Step 5161] Adaptive green duration: 10
+[Step 5171] Action: 2
+[Step 5171] Adaptive green duration: 10
+[Step 5181] Action: 2
+[Step 5181] Adaptive green duration: 10
+[Step 5191] Action: 3
+[Step 5195] Adaptive green duration: 10
+[Step 5205] Action: 3
+[Step 5205] Adaptive green duration: 10
+[Step 5215] Action: 3
+[Step 5215] Adaptive green duration: 10
+[Step 5225] Action: 3
+[Step 5225] Adaptive green duration: 10
+[Step 5235] Action: 3
+[Step 5235] Adaptive green duration: 10
+[Step 5245] Action: 2
+[Step 5249] Adaptive green duration: 10
+[Step 5259] Action: 2
+[Step 5259] Adaptive green duration: 10
+[Step 5269] Action: 2
+[Step 5269] Adaptive green duration: 10
+[Step 5279] Action: 3
+[Step 5283] Adaptive green duration: 10
+[Step 5293] Action: 3
+[Step 5293] Adaptive green duration: 10
+[Step 5303] Action: 3
+[Step 5303] Adaptive green duration: 10
+[Step 5313] Action: 3
+[Step 5313] Adaptive green duration: 10
+[Step 5323] Action: 3
+[Step 5323] Adaptive green duration: 10
+[Step 5333] Action: 2
+[Step 5337] Adaptive green duration: 10
+[Step 5347] Action: 2
+[Step 5347] Adaptive green duration: 10
+[Step 5357] Action: 2
+[Step 5357] Adaptive green duration: 10
+[Step 5367] Action: 2
+[Step 5367] Adaptive green duration: 10
+[Step 5377] Action: 3
+[Step 5381] Adaptive green duration: 10
+[Step 5391] Action: 3
+[Step 5391] Adaptive green duration: 10

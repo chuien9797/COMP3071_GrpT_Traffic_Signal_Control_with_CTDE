@@ -1,0 +1,18 @@
+Timestamp: 2025-04-11 01:59:11
+Intersection: T_intersection
+Total reward: -3879.00
+Epsilon: 0.58
+Simulation duration: 13.2s
+Avg queue length: 1.35
+Cumulative wait time: 7291.00
+Fault injected: ❌ No
+
+Emergency Vehicles Crossed: 0
+Total Emergency Delay: 10314.00
+Teleports This Episode: 0
+
+Action Distribution:
+Action 0: 1351 times
+Action 1: 983 times
+Action 2: 1108 times
+Action 3: 1097 times

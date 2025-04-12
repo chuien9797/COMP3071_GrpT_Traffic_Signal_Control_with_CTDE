@@ -1,18 +1,15 @@
-Timestamp: 2025-04-12 01:26:22
+Timestamp: 2025-04-12 17:12:52
 Intersection: cross
-Total reward: -16076.00
+Total reward: -6988.00
 Epsilon: 1.0
-Simulation duration: 10.1s
-Avg queue length: 3.83
-Cumulative wait time: 20682.00
+Simulation duration: 9.2s
+Avg queue length: 1.70
+Cumulative wait time: 9191.00
 Fault injected: ❌ No
-
-Emergency Vehicles Crossed: 0
-Total Emergency Delay: 253220.00
-Teleports This Episode: 0
+Total Emergency Delay: 16083.00
 
 Action Distribution:
-Action 0: 47 times
-Action 1: 45 times
-Action 2: 42 times
-Action 3: 36 times
+Action 0: 91 times
+Action 1: 75 times
+Action 2: 108 times
+Action 3: 98 times

@@ -102,7 +102,6 @@ def main():
             yellow_duration = local_conf['yellow_duration'],
             # We can ignore num_states or set it arbitrarily:
             num_states      = 9999,  # not used by aggregator
-            num_actions     = max_num_actions,  # from aggregator
             training_epochs = local_conf['training_epochs'],
             intersection_type = env_name
         )

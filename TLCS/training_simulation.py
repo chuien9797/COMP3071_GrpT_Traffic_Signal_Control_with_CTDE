@@ -73,7 +73,10 @@ class Simulation:
         self._avg_queue_length_store = []    # Combined average queue length
         self._avg_queue_length_store_a1 = []
         self._avg_queue_length_store_a2 = []
-        self._q_loss_log = []                # Training loss log
+        self._q_loss_log = []         # Training loss log
+        self._emergency_crossed = 0
+        self._emergency_total_delay = 0.0
+
 
         # Accumulators for multi-agent metrics
         self._sum_neg_reward_one = 0
@@ -226,29 +229,57 @@ class Simulation:
         return simulation_time, 0
 
     def _write_summary_log(self, episode, epsilon, sim_time):
+        """
+        Writes a summary log for an episode.
+        It prints the timestamp, intersection type, combined and per‑agent rewards,
+        epsilon, simulation duration, average queue lengths, cumulative waiting times,
+        fault injection details (if any), total emergency delay, and the action distribution.
+        """
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with open(f"logs19/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
+                # Header information
                 f.write(f"Timestamp: {timestamp}\n")
                 f.write(f"Intersection: {self.intersection_type}\n")
-                total_reward = self._sum_neg_reward_one + self._sum_neg_reward_two
-                f.write(f"Total reward (combined): {total_reward:.2f}\n")
-                f.write(f"Agent 1 reward: {self._sum_neg_reward_one:.2f}\n")
-                f.write(f"Agent 2 reward: {self._sum_neg_reward_two:.2f}\n")
-                f.write(f"Epsilon: {round(epsilon, 2)}\n")
-                f.write(f"Simulation duration: {sim_time}s\n")
-                avg_queue = self._sum_queue_length / self._max_steps if self._max_steps else 0
-                f.write(f"Average queue length: {avg_queue:.2f}\n")
-                f.write(f"Cumulative wait time: {self._sum_waiting_time:.2f}\n")
+                f.write(f"Epsilon: {epsilon:.2f}\n")
+                f.write(f"Simulation Duration: {sim_time} seconds\n\n")
+
+                # Rewards (combined and per agent)
+                combined_reward = self._sum_neg_reward_one + self._sum_neg_reward_two
+                f.write("=== Rewards ===\n")
+                f.write(f"Combined Reward: {combined_reward:.2f}\n")
+                f.write(f"Agent 1 Reward: {self._sum_neg_reward_one:.2f}\n")
+                f.write(f"Agent 2 Reward: {self._sum_neg_reward_two:.2f}\n\n")
+
+                # Queue and waiting time statistics
+                avg_queue_combined = (self._sum_queue_length / self._max_steps) if self._max_steps > 0 else 0
+                avg_queue_a1 = (self._sum_queue_length_a1 / self._max_steps) if self._max_steps > 0 else 0
+                avg_queue_a2 = (self._sum_queue_length_a2 / self._max_steps) if self._max_steps > 0 else 0
+                f.write("=== Traffic Statistics ===\n")
+                f.write(f"Average Queue (combined): {avg_queue_combined:.2f}\n")
+                f.write(f"Average Queue (Agent 1): {avg_queue_a1:.2f}\n")
+                f.write(f"Average Queue (Agent 2): {avg_queue_a2:.2f}\n")
+                f.write(f"Cumulative Waiting Time (combined): {self._sum_waiting_time:.2f}\n")
+                f.write(f"Cumulative Waiting Time (Agent 1): {self._cumulative_waiting_time_agent_one:.2f}\n")
+                f.write(f"Cumulative Waiting Time (Agent 2): {self._cumulative_waiting_time_agent_two:.2f}\n\n")
+
+                # Fault injection information
+                f.write("=== Fault Injection ===\n")
                 f.write(f"Fault injected: {'Yes' if self.fault_injected_this_episode else 'No'}\n")
                 if self.fault_details:
-                    f.write("\nFault Details:\n")
+                    f.write("Fault Details:\n")
                     for detail in self.fault_details:
-                        # Each detail should be a tuple: (step, tlid, original, modified)
-                        f.write(f"Step {detail[0]} | TLID: {detail[1]} | Orig: {detail[2]} -> Mod: {detail[3]}\n")
-                f.write("\nAction Distribution:\n")
+                        step, tlid, original, modified = detail
+                        f.write(f" Step {step} | TL: {tlid} | Original: {original} -> Modified: {modified}\n")
+                f.write("\n")
+
+                # Total emergency delay
+                f.write(f"Total Emergency Delay: {self._emergency_total_delay:.2f}\n\n")
+
+                # Action distribution
+                f.write("=== Action Distribution (combined) ===\n")
                 for i, count in enumerate(self._action_counts):
-                    f.write(f"Action {i}: {count} times\n")
+                    f.write(f" Action {i}: {count} times\n")
         except Exception as e:
             print(f"Error writing summary log: {e}")
 
@@ -257,20 +288,31 @@ class Simulation:
         Epsilon-greedy action selection.
         If exploring, returns a random action.
         Otherwise, performs a REST call for agent 'num' to get predicted Q-values and selects the best action.
+        If the REST call fails, falls back to a random action.
         """
         if random.random() < epsilon:
             random_action = random.randint(0, self._num_actions - 1)
             print(f"[DEBUG] Random action chosen for agent {num}: {random_action}")
             return random_action
         else:
-            response = requests.post(
-                'http://127.0.0.1:5000/predict',
-                json={'state': state.tolist(), 'num': int(num)}
-            )
-            pred = np.array(response.json()['prediction'])
-            best_action = int(np.argmax(pred))
-            print(f"[DEBUG] Best action chosen for agent {num}: {best_action}")
-            return best_action
+            try:
+                response = requests.post(
+                    'http://127.0.0.1:5000/predict',
+                    json={'state': state.tolist(), 'agent_num': int(num)}
+                )
+                # Check that the response has valid content
+                response.raise_for_status()  # Raises HTTPError if the HTTP request returned an unsuccessful status code.
+                json_response = response.json()  # This may raise a JSONDecodeError if the response is empty or not JSON.
+                pred = np.array(json_response['prediction'])
+                best_action = int(np.argmax(pred))
+                print(f"[DEBUG] Best action chosen for agent {num}: {best_action}")
+                return best_action
+            except Exception as e:
+                # Log the error and fall back to a random action.
+                print(f"[ERROR] REST call for agent {num} failed: {e}. Falling back to random action.")
+                fallback_action = random.randint(0, self._num_actions - 1)
+                print(f"[DEBUG] Fallback random action chosen for agent {num}: {fallback_action}")
+                return fallback_action
 
     def _set_yellow_phase(self, action_number):
         """
@@ -394,6 +436,8 @@ class Simulation:
             q2 = self._get_queue_length_intersection_two()
             self._sum_queue_length += (q1 + q2)
             self._sum_waiting_time += (q1 + q2)
+
+
 
     def _inject_signal_faults(self):
         self.manual_override = False

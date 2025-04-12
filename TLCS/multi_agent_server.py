@@ -4,7 +4,7 @@ import os
 from waitress import serve
 import logging
 
-# Suppress extra logging messages
+# Suppress extra logging messages from werkzeug
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
 
@@ -15,7 +15,6 @@ from model import TrainModelAggregator
 app = Flask(__name__)
 
 # --- Define Hyperparameters for the Aggregator Agents ---
-# (Adjust these values as needed.)
 lane_feature_dim = 5
 embedding_dim = 32
 final_hidden = 64
@@ -27,7 +26,7 @@ memory_size_min = 600
 memory_size_max = 50000
 
 # --- Create two Aggregator Agent Instances ---
-# Agent for (for example) the left intersection
+# Agent for the left intersection
 agent_left = TrainModelAggregator(
     lane_feature_dim=lane_feature_dim,
     embedding_dim=embedding_dim,
@@ -38,7 +37,7 @@ agent_left = TrainModelAggregator(
 )
 mem_left = Memory(memory_size_max, memory_size_min)
 
-# Agent for (for example) the right intersection
+# Agent for the right intersection
 agent_right = TrainModelAggregator(
     lane_feature_dim=lane_feature_dim,
     embedding_dim=embedding_dim,
@@ -54,8 +53,16 @@ mem_right = Memory(memory_size_max, memory_size_min)
 
 @app.route('/initialize_agents', methods=['POST'])
 def initialize_agents():
-    """Initialize or update agent hyperparameters based on JSON settings."""
-    data = request.get_json()
+    """
+    Initialize or update agent hyperparameters based on JSON settings.
+    Expected keys: lane_feature_dim, embedding_dim, final_hidden, batch_size, learning_rate,
+                   memory_size_max, memory_size_min
+    """
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify(error=str(e)), 400
+
     # Update left agent
     agent_left._lane_feature_dim = data.get('lane_feature_dim', lane_feature_dim)
     agent_left._embedding_dim = data.get('embedding_dim', embedding_dim)
@@ -81,28 +88,35 @@ def initialize_agents():
 def add_samples():
     """
     Add training samples for both agents.
-    The JSON payload must include samples for each agent:
-      - old_state_left, action_left, reward_left, current_state_left
-      - old_state_right, action_right, reward_right, current_state_right
+    The JSON payload must include samples for each agent with keys:
+      - old_state_one, old_action_one, reward_one, current_state_one
+      - old_state_two, old_action_two, reward_two, current_state_two
     """
-    data = request.get_json()
-    # Process left agent sample
-    sample_left = (
-        np.array(data['old_state_left']),
-        data['action_left'],
-        data['reward_left'],
-        np.array(data['current_state_left'])
-    )
-    mem_left.add_sample(sample_left)
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify(error=str(e)), 400
 
-    # Process right agent sample
-    sample_right = (
-        np.array(data['old_state_right']),
-        data['action_right'],
-        data['reward_right'],
-        np.array(data['current_state_right'])
-    )
-    mem_right.add_sample(sample_right)
+    try:
+        # Process left agent sample
+        sample_left = (
+            np.array(data['old_state_one']),
+            data['old_action_one'],
+            data['reward_one'],
+            np.array(data['current_state_one'])
+        )
+        mem_left.add_sample(sample_left)
+
+        # Process right agent sample
+        sample_right = (
+            np.array(data['old_state_two']),
+            data['old_action_two'],
+            data['reward_two'],
+            np.array(data['current_state_two'])
+        )
+        mem_right.add_sample(sample_right)
+    except KeyError as e:
+        return jsonify(error=f"Missing field: {str(e)}"), 400
 
     return "Samples added", 200
 
@@ -111,13 +125,30 @@ def add_samples():
 def predict():
     """
     Given a state and an agent identifier, return the Q-value predictions.
-    JSON payload must include:
-      - state: the state vector (or array) for prediction
+    Expected JSON payload must include:
+      - state: the flat state vector for prediction
       - agent_num: 1 (left) or 2 (right)
+    The state is reshaped into a 3D tensor of shape (1, num_lanes, lane_feature_dim)
+    before being passed to the model.
     """
-    data = request.get_json()
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify(error=str(e)), 400
+
     agent_num = data.get('agent_num', 1)
-    state = np.array(data['state'])
+    try:
+        state = np.array(data['state'])
+    except KeyError as e:
+        return jsonify(error=f"Missing field: {str(e)}"), 400
+
+    # If state is a flat vector (1D), reshape it to (1, num_lanes, lane_feature_dim)
+    if state.ndim == 1:
+        total_length = state.shape[0]
+        if total_length % lane_feature_dim != 0:
+            return jsonify(error="State length is not a multiple of lane_feature_dim"), 400
+        num_lanes = total_length // lane_feature_dim
+        state = np.reshape(state, (1, num_lanes, lane_feature_dim))
 
     if agent_num == 1:
         model = agent_left
@@ -126,19 +157,27 @@ def predict():
     else:
         return jsonify(error="Invalid agent number"), 400
 
-    prediction = model.predict_one(state)
+    try:
+        prediction = model.predict_one(state)
+    except Exception as e:
+        return jsonify(error=str(e)), 500
+
     return jsonify(prediction=prediction.tolist()), 200
 
 
 @app.route('/replay', methods=['POST'])
 def replay():
     """
-    Sample a batch from the memory, compute the Q-learning update, and train the network.
-    The JSON payload should include:
-      - gamma: discount factor
+    Sample a batch from memory, perform the Q-learning update, and train the network.
+    Expected JSON payload should include:
+      - gamma: discount factor (optional, default=0.75)
       - agent_num: 1 (left) or 2 (right)
     """
-    data = request.get_json()
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify(error=str(e)), 400
+
     gamma = data.get('gamma', 0.75)
     agent_num = data.get('agent_num', 1)
 
@@ -167,8 +206,6 @@ def replay():
             y[i, action] = reward + gamma * np.amax(next_q_vals[i])
             x[i] = state
         model.train_batch(x, y)
-        # You might compute and return the loss value in your TrainModelAggregator,
-        # for example, by evaluating the network on the updated batch.
         loss = model._model.evaluate(x, y, verbose=0)
     else:
         loss = None
@@ -178,13 +215,16 @@ def replay():
 @app.route('/save_models', methods=['POST'])
 def save_models():
     """
-    Save both agents’ models into specified subdirectories.
-    The JSON payload should include:
+    Save both agents' models into specified subdirectories.
+    The JSON payload must include:
       - path: the base directory where models will be saved.
     """
-    data = request.get_json()
+    try:
+        data = request.get_json()
+    except Exception as e:
+        return jsonify(error=str(e)), 400
+
     base_path = data.get('path', './models')
-    # Create directories if needed
     agent_left_path = os.path.join(base_path, 'agent_left')
     agent_right_path = os.path.join(base_path, 'agent_right')
     os.makedirs(agent_left_path, exist_ok=True)
@@ -196,5 +236,5 @@ def save_models():
 
 
 if __name__ == '__main__':
-    # Run the server with waitress (or use app.run() locally)
+    # Run the server with waitress on port 5000
     serve(app, host='127.0.0.1', port=5000)

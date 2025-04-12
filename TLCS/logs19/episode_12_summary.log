@@ -1,15 +1,21 @@
-Timestamp: 2025-04-13 00:53:17
-Intersection: T_intersection
-Total reward: -46275.00
-Epsilon: 0.6
-Simulation duration: 12.0s
-Avg queue length: 14.67
-Cumulative wait time: 79203.00
-Fault injected: ❌ No
-Total Emergency Delay: 1250743.00
+Timestamp: 2025-04-13 05:18:25
+Intersection: roundabout
+Epsilon: 0.40
+Simulation Duration: 4.0 seconds
 
-Action Distribution:
-Action 0: 225 times
-Action 1: 127 times
-Action 2: 188 times
-Action 3: 148 times
+=== Rewards ===
+Combined Reward: -7551.15
+Agent 1 Reward: -3791.50
+Agent 2 Reward: -3759.65
+
+=== Traffic Statistics ===
+Average Queue (combined): 6.81
+Average Queue (Agent 1): 0.00
+Average Queue (Agent 2): 0.00
+Cumulative Waiting Time (combined): 36751.00
+Cumulative Waiting Time (Agent 1): 85773.40
+Cumulative Waiting Time (Agent 2): 103918.80
+
+=== Fault Injection ===
+Fault injected: No
+

@@ -1,0 +1,15 @@
+Timestamp: 2025-04-13 01:00:03
+Intersection: T_intersection
+Total reward: -16215.00
+Epsilon: 0.4
+Simulation duration: 10.1s
+Avg queue length: 6.29
+Cumulative wait time: 33964.00
+Fault injected: ❌ No
+Total Emergency Delay: 2614761.00
+
+Action Distribution:
+Action 0: 330 times
+Action 1: 179 times
+Action 2: 369 times
+Action 3: 307 times

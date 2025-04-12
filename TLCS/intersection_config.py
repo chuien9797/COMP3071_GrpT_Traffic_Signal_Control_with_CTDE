@@ -3,14 +3,18 @@ Intersection configuration for various intersection types (cross, roundabout,
 T_intersection, Y_intersection).
 
 We include:
-  - sumocfg_file: path to the SUMO .sumocfg for each intersection
-  - incoming_lanes: dict of lane groups to their lane IDs
-  - phase_mapping: how we map an RL "action" to (green, yellow) phases
-  - occupancy_grid: (cells_per_lane, max_distance) for occupancy
-  - route_config: how we define route probabilities for route generation
-  - header: optional custom <routes> XML snippet
-  - monitor_edges: which edges we want to call traci.edge.getLastStepHaltingNumber on
-  - monitor_lanes: which lanes we want to call traci.lane.getWaitingTime on
+  - sumocfg_file: path to the SUMO .sumocfg file for the network associated with that intersection.
+  - traffic_light_ids: a list of traffic light IDs controlling the intersection.
+       For multi-agent setups (e.g. when one intersection is split into two control groups),
+       two IDs should be provided.
+  - incoming_lanes: dictionary mapping logical lane groups to the lane IDs as defined in your net file.
+  - phase_mapping: a mapping from agent actions (the RL “action”) to a dictionary with keys
+       "green" and "yellow" for the corresponding phase indices.
+  - occupancy_grid: parameters for the cell size and maximum distance for occupancy measurements.
+  - route_config: definitions for route choices (including probabilities) for generating routes.
+  - header: XML snippet for route definitions (used to generate the SUMO routes file).
+  - monitor_edges: a list of edge IDs for measuring halted vehicles (queue length).
+  - monitor_lanes: a list of lane IDs for measuring waiting times.
 """
 
 INTERSECTION_CONFIGS = {
@@ -122,20 +126,22 @@ INTERSECTION_CONFIGS = {
     },
 
     "T_intersection": {
-        "sumocfg_file": "t_intersection/t_intersection.sumocfg",
-        "traffic_light_ids": ["TL"],
+        "sumocfg_file": "2x2_grid/2x2_grid.sumocfg",  # Adjust the file path to match your SUMO configuration for the grid network
+        "traffic_light_ids": ["1", "2"],  # Explicitly supply two IDs from your net file (the tlLogic IDs "1" and "2")
         "incoming_lanes": {
-            "main": ["left_in_0", "left_in_1", "right_in_0", "right_in_1"],
-            "side": ["top_in_0", "top_in_1"]
+            # These lane IDs are derived from the junction (e.g., junction id "1" in the 2x2 grid)
+            # Here we group them into "vertical" and "horizontal" approaches.
+            "vertical": ["-v11_0", "-v11_1", "v12_0", "v12_1"],
+            "horizontal": ["h12_0", "h12_1", "-h11_0", "-h11_1"]
         },
         "phase_mapping": {
-            0: {"green": 0, "yellow": 1},   # main road green
-            1: {"green": 2, "yellow": 3},   # side road green
-            2: {"green": 0, "yellow": 1},   # duplicate main road green
-            3: {"green": 2, "yellow": 3}    # duplicate side road green
+            0: {"green": 0, "yellow": 1},
+            1: {"green": 2, "yellow": 3},
+            2: {"green": 0, "yellow": 1},
+            3: {"green": 2, "yellow": 3}
         },
         "occupancy_grid": {
-            "cells_per_lane": 8,
+            "cells_per_lane": 10,
             "max_distance": 600
         },
         "route_config": {
@@ -149,43 +155,31 @@ INTERSECTION_CONFIGS = {
             }
         },
         "header": """<routes>
-    <!-- Define emergency vehicle type -->
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
-           maxSpeed="20" sigma="0.5" emergency="true"/>
-    <!-- Define standard vehicle type -->
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
-           minGap="2.5" maxSpeed="25" sigma="0.5"/>
-
-    <!-- Main road routes (west-east and east-west) -->
-    <route id="W_E" edges="left_in right_out"/>
-    <route id="E_W" edges="right_in left_out"/>
-
-    <!-- Routes from the north approach joining the main road -->
-    <route id="N_E" edges="top_in right_out"/>
-    <route id="N_W" edges="top_in left_out"/>
-
-    <!-- Optional: if vehicles on the main road can turn northward -->
-    <route id="E_N" edges="right_in top_out"/>
-    <route id="W_N" edges="left_in top_out"/>""",
-        # For T_intersection, let's monitor the three inbound edges
-        # named left_in, right_in, top_in. If your net uses different names, adjust them.
-        "monitor_edges": ["left_in", "right_in", "top_in"],
-        # We'll track waiting time on lane 0 for each approach
-        "monitor_lanes": ["left_in_0", "right_in_0", "top_in_0"]
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
+    <!-- Define routes based on the new lane naming -->
+    <route id="main_W_E" edges="h12_0 h12_1"/>
+    <route id="main_E_W" edges="-h11_0 -h11_1"/>
+    <route id="side_N_E" edges="-v11_0 -v11_1"/>
+    <route id="side_N_W" edges="v12_0 v12_1"/>
+</routes>""",
+        # For monitoring, we split the edges into two halves.
+        "monitor_edges": ["-v11", "-h11", "v12", "h12"],
+        "monitor_lanes": ["-v11_0", "-v11_1", "-h11_0", "-h11_1", "v12_0", "v12_1", "h12_0", "h12_1"]
     },
 
     "Y_intersection": {
-        # If you have a Y intersection net + sumocfg:
         "sumocfg_file": "y_intersection/y_intersection.sumocfg",
+        "traffic_light_ids": ["YTL1", "YTL2"],
         "incoming_lanes": {
             "branch1": ["Y_branch1_0", "Y_branch1_1"],
             "branch2": ["Y_branch2_0", "Y_branch2_1"],
             "branch3": ["Y_branch3_0", "Y_branch3_1"]
         },
         "phase_mapping": {
-            0: {"green": 0, "yellow": 1},  # branch1
-            1: {"green": 2, "yellow": 3},  # branch2
-            2: {"green": 4, "yellow": 5}   # branch3
+            0: {"green": 0, "yellow": 1},
+            1: {"green": 2, "yellow": 3},
+            2: {"green": 4, "yellow": 5}
         },
         "occupancy_grid": {
             "cells_per_lane": 8,
@@ -206,19 +200,16 @@ INTERSECTION_CONFIGS = {
             }
         },
         "header": """<routes>
-    <!-- Define emergency vehicle type -->
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
-           maxSpeed="20" sigma="0.5" emergency="true" />
-    <!-- Define standard vehicle type -->
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
-           minGap="2.5" maxSpeed="25" sigma="0.5" />
-
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
     <route id="Y_branch1" edges="edge1 edge2"/>
     <route id="Y_branch2" edges="edge3 edge4"/>
-    <route id="Y_branch3" edges="edge5 edge6"/>""",
-        # For a Y, you might define 3 inbound edges: e.g. "Y_branch1","Y_branch2","Y_branch3"
+    <route id="Y_branch3" edges="edge5 edge6"/>
+</routes>""",
         "monitor_edges": ["Y_branch1", "Y_branch2", "Y_branch3"],
-        # Only lane 0 for each approach
         "monitor_lanes": ["Y_branch1_0", "Y_branch2_0", "Y_branch3_0"]
     }
 }
+
+if __name__ == "__main__":
+    print("Intersection configurations loaded.")

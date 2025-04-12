@@ -143,9 +143,9 @@
     </tlLogic>
     <tlLogic id="TL3" type="static" programID="0" offset="0">
         <phase duration="42" state="GGGGrr"/>
-        <phase duration="3"  state="GGyyrr"/>
-        <phase duration="42" state="GGrrGG"/>
-        <phase duration="3"  state="GGrryy"/>
+        <phase duration="3"  state="yyGGrr"/>
+        <phase duration="42" state="rrGGGG"/>
+        <phase duration="3"  state="rrGGyy"/>
     </tlLogic>
     <tlLogic id="TL4" type="static" programID="0" offset="0">
         <phase duration="42" state="GGGGrr"/>

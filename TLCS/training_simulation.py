@@ -26,7 +26,6 @@ class Simulation:
         green_duration,
         yellow_duration,
         num_states,
-        num_actions,
         training_epochs,
         intersection_type="cross",
         signal_fault_prob=0.1,
@@ -42,32 +41,33 @@ class Simulation:
         self._green_duration = green_duration
         self._yellow_duration = yellow_duration
         self._num_states = num_states
-        self._num_actions = num_actions
         self._reward_store = []
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
         self._training_epochs = training_epochs
         self._emergency_q_logs = []
         self._waiting_times = {}
-        self.signal_fault_prob = signal_fault_prob  # Probability a 'G' flips to 'r'
-        self.manual_override = False 
-        self.recovery_queue = {}  # { (tlid, phase): { 'step': recover_at, 'original': 'GGG...r' } }
-        self._green_durations_log = [] 
-        self.fault_details = []  # store tuples like (step, tlid, original, modified)
+        self.signal_fault_prob = signal_fault_prob
+        self.manual_override = False
+        self.recovery_queue = {}
+        self._green_durations_log = []
+        self.fault_details = []
         self._q_loss_log = []
-        self._action_counts = np.zeros(self._num_actions, dtype=int)
         self._emergency_crossed = 0
         self._emergency_total_delay = 0.0
-        self._teleport_count = 0      
+        self._teleport_count = 0
 
         self.intersection_type = intersection_type
         if self.intersection_type not in int_config.INTERSECTION_CONFIGS:
             raise ValueError(f"Intersection type '{self.intersection_type}' not found in config.")
         self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
+        self._num_actions = len(self.int_conf["phase_mapping"])
+        self._action_counts = np.zeros(self._num_actions, dtype=int)
+
 
     def run(self, episode, epsilon):
-        os.makedirs("logs14", exist_ok=True)
-        log_file = open(f"logs14/episode_{episode}.log", "w")
+        os.makedirs("logs19", exist_ok=True)
+        log_file = open(f"logs19/episode_{episode}.log", "w")
 
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
@@ -142,27 +142,32 @@ class Simulation:
 
         return simulation_time, training_time
     
+    
+    
     def _write_summary_log(self, episode, epsilon, sim_time):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        with open(f"logs14/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
-            f.write(f"Timestamp: {timestamp}\n")
-            f.write(f"Intersection: {self.intersection_type}\n")
-            f.write(f"Total reward: {self._sum_neg_reward:.2f}\n")
-            f.write(f"Epsilon: {round(epsilon, 2)}\n")
-            f.write(f"Simulation duration: {sim_time}s\n")
-            f.write(f"Avg queue length: {self._sum_queue_length / self._max_steps:.2f}\n")
-            f.write(f"Cumulative wait time: {self._sum_waiting_time:.2f}\n")
-            f.write(f"Fault injected: {'Yes' if self.fault_injected_this_episode else '❌ No'}\n")
-            if self.fault_details:
-                f.write("\nFault Details:\n")
-                for step, tlid, original, modified in self.fault_details:
-                    f.write(f"Step {step} | TLID: {tlid} | Orig: {original} -> Mod: {modified}\n")
-            f.write(f"\nEmergency Vehicles Crossed: {self._emergency_crossed}\n")
-            f.write(f"Total Emergency Delay: {self._emergency_total_delay:.2f}\n")
-            f.write(f"Teleports This Episode: {self._teleport_count}\n")
-            f.write("\nAction Distribution:\n")
-            for i, count in enumerate(self._action_counts):
-                f.write(f"Action {i}: {count} times\n")
+        try:
+            with open(f"logs19/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
+                f.write(f"Timestamp: {timestamp}\n")
+                f.write(f"Intersection: {self.intersection_type}\n")
+                f.write(f"Total reward: {self._sum_neg_reward:.2f}\n")
+                f.write(f"Epsilon: {round(epsilon, 2)}\n")
+                f.write(f"Simulation duration: {sim_time}s\n")
+                f.write(f"Avg queue length: {self._sum_queue_length / self._max_steps:.2f}\n")
+                f.write(f"Cumulative wait time: {self._sum_waiting_time:.2f}\n")
+                f.write(f"Fault injected: {'Yes' if self.fault_injected_this_episode else '❌ No'}\n")
+                if self.fault_details:
+                    f.write("\nFault Details:\n")
+                    for step, tlid, original, modified in self.fault_details:
+                        f.write(f"Step {step} | TLID: {tlid} | Orig: {original} -> Mod: {modified}\n")
+                # f.write(f"\nEmergency Vehicles Crossed: {self._emergency_crossed}\n")
+                f.write(f"Total Emergency Delay: {self._emergency_total_delay:.2f}\n")
+                # f.write(f"Teleports This Episode: {self._teleport_count}\n")
+                f.write("\nAction Distribution:\n")
+                for i, count in enumerate(self._action_counts):
+                    f.write(f"Action {i}: {count} times\n")
+        except Exception as e:
+            print(f"❌ Error writing summary log: {e}")
 
 
     def _recover_faults_if_due(self):
@@ -182,12 +187,33 @@ class Simulation:
     def _compute_adaptive_green_duration(self, state):
         avg_wait = np.mean(state[:, 1])
         queue_length = np.sum(state[:, 3])
+        emergency_factor = np.any(state[:, 2] > 0)
         base = self._green_duration
         wait_factor = int(avg_wait // 2)
         queue_factor = int(queue_length // 5)
-        adaptive_extension = min(wait_factor + queue_factor, 10)
+        emergency_bonus = 3 if emergency_factor else 0
+        adaptive_extension = min(wait_factor + queue_factor + emergency_bonus, 10)
         return base + adaptive_extension
     
+
+    def _set_green_phase(self, action_number):
+        if "phase_mapping" not in self.int_conf:
+            return
+        phase_map = self.int_conf["phase_mapping"]
+        if action_number not in phase_map:
+            return
+        green_phase = phase_map[action_number]["green"]
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        for tlid in tl_ids:
+            logics = traci.trafficlight.getAllProgramLogics(tlid)
+            if not logics:
+                continue
+            num_phases = len(logics[0].phases)
+            if green_phase < num_phases:
+                traci.trafficlight.setProgram(tlid, "0")  # Reset to default program
+                traci.trafficlight.setPhase(tlid, green_phase)
+            else:
+                print(f"⚠️ Skipping invalid green phase {green_phase} for {tlid} (only {num_phases} phases)")
 
     def _simulate(self, steps_todo):
         if (self._step + steps_todo) >= self._max_steps:
@@ -257,29 +283,56 @@ class Simulation:
                     del self._waiting_times[car_id]
         return float(sum(self._waiting_times.values()))
 
-    def _choose_action(self, state, epsilon):
-        if random.random() < epsilon:
-            return random.randint(0, self._num_actions - 1)
-        else:
-            q_vals = self._Model.predict_one(state)
-            return int(np.argmax(q_vals[0]))
 
-    def _set_green_phase(self, action_number):
-        if hasattr(self, "manual_override") and self.manual_override:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        green_phase = phase_map[action_number]["green"]
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        for tlid in tl_ids:
-            if tlid not in self.faulty_lights:
-                # Reset the traffic light to its default logic before setting the phase
-                try:
-                    traci.trafficlight.setProgram(tlid, "0")
-                    traci.trafficlight.setPhase(tlid, green_phase)
-                except traci.exceptions.TraCIException as e:
-                    print(f"⚠️ Failed to set green phase {green_phase} for {tlid}: {e}")
+    def _choose_action(self, state, epsilon):
+        valid_action_indices = list(self.int_conf["phase_mapping"].keys())
+        if random.random() < epsilon:
+            action = random.choice(valid_action_indices)
+            print(f"[DEBUG] Random action chosen: {action} from valid {valid_action_indices}")
+            return action
+
+
+        q_vals = self._Model.predict_one(state)[0]  # shape: (num_actions,)
+
+        # Boost Q-values for actions favoring emergency lanes
+        emergency_mask = state[:, 2] > 0  # column 2 is emergency vehicle presence
+        if np.any(emergency_mask):
+            # Identify which actions (phases) affect emergency lanes
+            emergency_actions = set()
+
+            lane_order = []
+            for group in sorted(self.int_conf["incoming_lanes"].keys()):
+                lane_order.extend(self.int_conf["incoming_lanes"][group])
+
+            emergency_lane_ids = [lane_order[i] for i, flag in enumerate(emergency_mask) if flag]
+
+
+            for a in range(self._num_actions):
+                phase_map = self.int_conf["phase_mapping"]
+                green_phase = phase_map[a]["green"]
+
+                for tlid in self.int_conf.get("traffic_light_ids", []):
+                    logic = traci.trafficlight.getCompleteRedYellowGreenDefinition(tlid)[0]
+                    if green_phase < len(logic.phases):
+                        state_str = logic.phases[green_phase].state
+                        controlled = traci.trafficlight.getControlledLanes(tlid)
+
+                        # Check if this phase opens any emergency lane
+                        for eid in emergency_lane_ids:
+                            if eid in controlled:
+                                idx = controlled.index(eid)
+                                if state_str[idx] == 'G':
+                                    emergency_actions.add(a)
+
+            # Apply bonus to Q-values for emergency-beneficial actions
+            for ea in emergency_actions:
+                q_vals[ea] += 1.5  # you can tune this value
+
+        # Choose the best valid action
+        valid_q_vals = q_vals[valid_action_indices]
+        best_valid_action = valid_action_indices[int(np.argmax(valid_q_vals))]
+        print(f"[DEBUG] Best valid action: {best_valid_action} from {valid_action_indices}")
+        return best_valid_action
 
 
 
@@ -400,8 +453,6 @@ class Simulation:
         rewards = np.array(rewards, dtype=np.float32)
 
         q_s_a = self._Model.predict_batch(states)
-        
-        # Double DQN logic
         best_next_actions = np.argmax(self._Model.predict_batch(next_states), axis=1)
         target_q_next = self._TargetModel.predict_batch(next_states)
         target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
@@ -409,7 +460,6 @@ class Simulation:
         y = np.copy(q_s_a)
         y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
 
-        # ✅ Add Q-loss tracking here
         loss = np.mean(np.square(y - q_s_a))
         self._q_loss_log.append(loss)
 

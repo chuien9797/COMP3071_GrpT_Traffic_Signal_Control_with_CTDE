@@ -24,6 +24,7 @@ def import_train_configuration(config_file):
     config['n_cars_generated'] = content['simulation'].getint('n_cars_generated')
     config['green_duration'] = content['simulation'].getint('green_duration')
     config['yellow_duration'] = content['simulation'].getint('yellow_duration')
+    config['communication_mode'] = content['agent'].getboolean('communication_mode', fallback=False)
 
     # Model (DQN)
     config['num_layers'] = content['model'].getint('num_layers')

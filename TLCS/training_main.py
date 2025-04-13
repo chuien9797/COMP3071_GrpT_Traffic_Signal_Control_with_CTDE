@@ -12,26 +12,26 @@ from training_simulation import Simulation
 from memory import Memory
 from visualization import Visualization
 from model import TrainModelAggregator
+from communication import send_message, get_messages, broadcast
+
 
 def main():
     """
     Multi-environment DQN training loop using a per-lane embedding + aggregator approach.
-    The code randomly selects one environment per episode. However, the simulation is now built
-    to “sense” the environment configuration. Based on the intersection configuration, it creates
-    as many agent controllers as there are intersections. For instance, if the chosen environment
-    has 1 intersection then one agent is created; if 3 intersections are detected, 3 agents are created
-    and they work cooperatively (by, for example, sharing parts of the state and reward calculations).
+    The simulation “senses” the intersection configuration and (if needed) creates as many agent
+    controllers as there are intersections. Reward calculation is based on the difference
+    in total waiting time gathered via a dedicated function. Also, each agent broadcasts its selected
+    action for cooperative behavior.
     """
 
-    # 1) Load config from .ini
+    # 1) Load configuration from .ini file.
     config = import_train_configuration("training_settings.ini")
     algorithm = config.get('algorithm', 'DQN')
     if algorithm != 'DQN':
         raise ValueError("This script is for DQN. Found algorithm=%s" % algorithm)
 
-    # The possible environment types to train on in a single run:
+    # The possible environment types to train on:
     possible_envs = ["cross", "roundabout", "T_intersection"]
-    # (You can add more types if needed.)
 
     # 2) Determine the maximum action space across these environments.
     max_num_actions = 0
@@ -42,37 +42,32 @@ def main():
             max_num_actions = nA
     config['num_actions'] = max_num_actions
 
-    # 3) Define fixed hyperparameters for the aggregator network
-    lane_feature_dim = 5          # e.g. occupancy, waiting time, etc.
-    aggregator_embedding_dim = 32 # dimension for per-lane embedding
+    # 3) Define fixed hyperparameters for the aggregator network.
+    lane_feature_dim = 5  # e.g. occupancy, waiting time, etc.
+    aggregator_embedding_dim = 32  # dimension for per-lane embedding
     aggregator_final_hidden = 64  # final hidden layer size
 
-    # 4) We create a Simulation instance for each environment type.
-    #    Each Simulation instance will “scan” its environment configuration to determine
-    #    how many intersections exist (via the 'traffic_light_ids' key in the config),
-    #    then create that many agent controllers.
+    # 4) For each environment type, create a Simulation instance.
+    #    The Simulation “scans” its config to determine the number of intersections.
     simulations = {}
-
     for env_name in possible_envs:
-        # Create a local copy of the configuration for this environment
+        # Create a local copy of configuration for this environment.
         local_conf = config.copy()
         local_conf['intersection_type'] = env_name
 
-        # Retrieve environment-specific configuration
+        # Retrieve environment-specific configuration.
         env_conf = INTERSECTION_CONFIGS[env_name]
-        # Get sumocfg file name; if not present, fall back to a default name.
         sumocfg_file = env_conf.get("sumocfg_file", f"{env_name}/{env_name}.sumocfg")
         sumo_cmd = set_sumo(local_conf['gui'], sumocfg_file, local_conf['max_steps'])
 
-        # Create a TrafficGenerator for this environment.
+        # Create TrafficGenerator.
         TrafficGen = TrafficGenerator(
-            max_steps         = local_conf['max_steps'],
-            n_cars_generated  = local_conf['n_cars_generated'],
-            intersection_type = env_name
+            max_steps=local_conf['max_steps'],
+            n_cars_generated=local_conf['n_cars_generated'],
+            intersection_type=env_name
         )
 
-        # Determine number of intersections in this environment.
-        # We assume the intersection configuration has a key "traffic_light_ids" which is a list.
+        # Determine the number of intersections.
         if "traffic_light_ids" in env_conf:
             if isinstance(env_conf["traffic_light_ids"], list):
                 num_intersections = len(env_conf["traffic_light_ids"])
@@ -80,63 +75,61 @@ def main():
                 num_intersections = 1
         else:
             num_intersections = 1
-
         print(f"Environment '{env_name}' has {num_intersections} intersection(s).")
 
-        # Create a list of agent controllers for the environment.
+        # For this version using a single shared model,
+        # we create a list with one agent.
         agents = []
         for i in range(num_intersections):
             agent = TrainModelAggregator(
-                lane_feature_dim = lane_feature_dim,
-                embedding_dim    = aggregator_embedding_dim,
-                final_hidden     = aggregator_final_hidden,
-                num_actions      = max_num_actions,
-                batch_size       = config['batch_size'],
-                learning_rate    = config['learning_rate']
+                lane_feature_dim=lane_feature_dim,
+                embedding_dim=aggregator_embedding_dim,
+                final_hidden=aggregator_final_hidden,
+                num_actions=max_num_actions,
+                batch_size=config['batch_size'],
+                learning_rate=config['learning_rate']
             )
             agents.append(agent)
 
-        # Create a single replay Memory instance for this environment.
+        # Create the replay Memory instance.
         memory_instance = Memory(
             config['memory_size_max'],
             config['memory_size_min']
         )
 
         # Create the Simulation instance.
-        # (Here we assume that the Simulation class has been updated to accept:
-        #   - agents: a list of controllers,
-        #   - memory: a Memory instance,
-        #   - TrafficGen, sumo_cmd, gamma, max_steps, green_duration, yellow_duration,
-        #   - num_states (may be ignored by the aggregator), training_epochs, and
-        #   - intersection_type for scanning configuration.)
+        # (This version uses a single shared model for reward calculation,
+        #  similar to your previous design with a dedicated waiting-time function.)
         sim = Simulation(
-            agents,               # list of agent controllers (one per intersection)
-            memory_instance,      # replay memory for the environment
-            TrafficGen,           # traffic generator
-            sumo_cmd,             # sumo command line
-            gamma           = local_conf['gamma'],
-            max_steps       = local_conf['max_steps'],
-            green_duration  = local_conf['green_duration'],
-            yellow_duration = local_conf['yellow_duration'],
-            num_states      = 9999,          # not used by aggregator, so an arbitrary value
-            training_epochs = local_conf['training_epochs'],
-            intersection_type = env_name       # pass the type so Simulation can scan its config
+            Model=agents[0],
+            TargetModel=agents[0],
+            Memory=memory_instance,
+            TrafficGen=TrafficGen,
+            sumo_cmd=sumo_cmd,
+            gamma=local_conf['gamma'],
+            max_steps=local_conf['max_steps'],
+            green_duration=local_conf['green_duration'],
+            yellow_duration=local_conf['yellow_duration'],
+            num_states=9999,  # Arbitrary, not used by the aggregator.
+            training_epochs=local_conf['training_epochs'],
+            intersection_type=env_name,
+            signal_fault_prob=local_conf.get('signal_fault_prob', 0.1)
         )
         simulations[env_name] = sim
 
-    # 5) Main training loop (unchanged): randomly choose an environment per episode.
+    # 5) Main training loop: randomly choose an environment per episode.
     total_episodes = config['total_episodes']
     start_time = datetime.datetime.now()
     print("Num GPUs Available:", len(tf.config.list_physical_devices('GPU')))
     print("Physical devices:", tf.config.list_physical_devices())
 
     combined_rewards = []
-
     for ep in range(total_episodes):
         chosen_env = random.choice(possible_envs)
         sim = simulations[chosen_env]
         print(f"----- Episode {ep + 1}/{total_episodes} on environment '{chosen_env}' -----")
-        epsilon = 1.0 - (ep / total_episodes)  # linear decay of epsilon
+        # Linear decay of epsilon.
+        epsilon = 1.0 - (ep / total_episodes)
         sim_time, train_time = sim.run(episode=ep, epsilon=epsilon)
         print(f"Episode {ep + 1} done | env='{chosen_env}' | sim time = {sim_time}s | train time = {train_time}s\n")
         combined_rewards.append(sim.reward_store[-1])
@@ -145,18 +138,14 @@ def main():
     print("\n----- Start time:", start_time)
     print("----- End time:", end_time)
 
-    # 6) Save the final aggregator model(s).
-    # In case of multiple intersections, you can choose to save a single combined model or
-    # save each agent’s model separately.
+    # 6) Save final model.
     model_save_path = set_train_path(config['models_path_name'])
-    # Here, for simplicity, we save the agents from the first environment.
-    # You may extend this to save models for every environment if needed.
+    # Save the shared model (agent from the first environment).
     chosen_env = possible_envs[0]
-    agents = simulations[chosen_env]._agents  # assuming Simulation stores the agents list in attribute _agents
-    for idx, agent in enumerate(agents):
-        agent_save_path = os.path.join(model_save_path, f"{chosen_env}_agent_{idx+1}")
-        agent.save_model(agent_save_path)
-        print(f"Model for {chosen_env} agent {idx+1} saved at: {agent_save_path}")
+    agent = simulations[chosen_env]._Model
+    agent_save_path = os.path.join(model_save_path, f"{chosen_env}_agent_1")
+    agent.save_model(agent_save_path)
+    print(f"Model for {chosen_env} agent 1 saved at: {agent_save_path}")
 
     # 7) Save plots for each environment.
     viz = Visualization(model_save_path, dpi=96)

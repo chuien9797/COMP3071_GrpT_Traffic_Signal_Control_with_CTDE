@@ -1,31 +1,12 @@
-Timestamp: 2025-04-13 15:35:52
+Timestamp: 2025-04-13 21:32:08
 Intersection Type: roundabout
-Total reward: -15661.00
+Total reward: -18636.00
 Epsilon: 1.0
-Simulation duration: 20.6s
-Avg queue length: 12.02
-Cumulative wait time: 64917.00
+Simulation duration: 121.0s
+Avg queue length: 11.66
+Cumulative wait time: 4334027.00
 Fault injected: No
-Total Emergency Delay: 37331.00
+Total Emergency Delay: 0.00
 
 Action Distribution:
 Intersection 1:
- Action 0: 24 times
- Action 1: 27 times
- Action 2: 22 times
- Action 3: 20 times
-Intersection 2:
- Action 0: 28 times
- Action 1: 16 times
- Action 2: 25 times
- Action 3: 24 times
-Intersection 3:
- Action 0: 23 times
- Action 1: 15 times
- Action 2: 27 times
- Action 3: 28 times
-Intersection 4:
- Action 0: 24 times
- Action 1: 20 times
- Action 2: 26 times
- Action 3: 23 times

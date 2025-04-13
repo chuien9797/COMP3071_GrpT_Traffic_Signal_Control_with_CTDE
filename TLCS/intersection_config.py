@@ -47,6 +47,7 @@ INTERSECTION_CONFIGS = {
                 "probability": 0.25
             }
         },
+        "communication_mode": True,
         "header": """<routes>
     <!-- Define emergency vehicle type -->
     <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
@@ -103,6 +104,7 @@ INTERSECTION_CONFIGS = {
                 "probability": 0.2
             }
         },
+        "communication_mode": True,
         "header": """<routes>
     <!-- Define emergency vehicle type -->
     <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
@@ -154,6 +156,7 @@ INTERSECTION_CONFIGS = {
                 "probability": 0.3
             }
         },
+        "communication_mode": True,
         "header": """<routes>
     <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
     <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />

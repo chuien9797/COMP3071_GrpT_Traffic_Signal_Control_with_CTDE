@@ -12,16 +12,14 @@ from training_simulation import Simulation
 from memory import Memory
 from visualization import Visualization
 from model import TrainModelAggregator
-from communication import send_message, get_messages, broadcast
 
 
 def main():
     """
     Multi-environment DQN training loop using a per-lane embedding + aggregator approach.
-    The simulation “senses” the intersection configuration and (if needed) creates as many agent
-    controllers as there are intersections. Reward calculation is based on the difference
-    in total waiting time gathered via a dedicated function. Also, each agent broadcasts its selected
-    action for cooperative behavior.
+    This version creates one agent per traffic light (intersection) and passes the list of agents
+    to Simulation. The simulation then splits the overall state among the agents, and each agent's
+    prediction is used to control its corresponding traffic light. Emergency handling is kept as-is.
     """
 
     # 1) Load configuration from .ini file.
@@ -48,7 +46,6 @@ def main():
     aggregator_final_hidden = 64  # final hidden layer size
 
     # 4) For each environment type, create a Simulation instance.
-    #    The Simulation “scans” its config to determine the number of intersections.
     simulations = {}
     for env_name in possible_envs:
         # Create a local copy of configuration for this environment.
@@ -67,7 +64,7 @@ def main():
             intersection_type=env_name
         )
 
-        # Determine the number of intersections.
+        # Determine the number of intersections (agents).
         if "traffic_light_ids" in env_conf:
             if isinstance(env_conf["traffic_light_ids"], list):
                 num_intersections = len(env_conf["traffic_light_ids"])
@@ -77,8 +74,7 @@ def main():
             num_intersections = 1
         print(f"Environment '{env_name}' has {num_intersections} intersection(s).")
 
-        # For this version using a single shared model,
-        # we create a list with one agent.
+        # Create a list of agents (one per intersection).
         agents = []
         for i in range(num_intersections):
             agent = TrainModelAggregator(
@@ -97,12 +93,10 @@ def main():
             config['memory_size_min']
         )
 
-        # Create the Simulation instance.
-        # (This version uses a single shared model for reward calculation,
-        #  similar to your previous design with a dedicated waiting-time function.)
+        # Create the Simulation instance passing in a list of agents (and targets).
         sim = Simulation(
-            Model=agents[0],
-            TargetModel=agents[0],
+            Models=agents,  # Modified Simulation expects a list of models.
+            TargetModels=agents,  # You can use separate target models if desired.
             Memory=memory_instance,
             TrafficGen=TrafficGen,
             sumo_cmd=sumo_cmd,
@@ -139,10 +133,10 @@ def main():
     print("----- End time:", end_time)
 
     # 6) Save final model.
+    # Here we save the first agent's model from the first environment.
     model_save_path = set_train_path(config['models_path_name'])
-    # Save the shared model (agent from the first environment).
     chosen_env = possible_envs[0]
-    agent = simulations[chosen_env]._Model
+    agent = simulations[chosen_env]._Models[0]
     agent_save_path = os.path.join(model_save_path, f"{chosen_env}_agent_1")
     agent.save_model(agent_save_path)
     print(f"Model for {chosen_env} agent 1 saved at: {agent_save_path}")

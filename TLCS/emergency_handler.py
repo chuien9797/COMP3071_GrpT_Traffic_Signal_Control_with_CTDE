@@ -18,7 +18,7 @@ def check_emergency(simulation):
     else:
         lane_prefixes = ["E2TL", "N2TL", "W2TL", "S2TL"]
 
-    # Initialize the handled set if not yet created
+    # Initialize the handled set if not yet created.
     if not hasattr(simulation, "handled_emergency_ids"):
         simulation.handled_emergency_ids = set()
 
@@ -38,7 +38,8 @@ def check_emergency(simulation):
 
 def handle_emergency_vehicle(simulation, veh_id):
     """
-    Handles the emergency vehicle by commanding the traffic lights to switch to an emergency phase.
+    Handles the emergency vehicle by commanding the traffic lights (each agent)
+    to switch to an emergency phase.
     """
     route_id = traci.vehicle.getRouteID(veh_id)
     itype = simulation.intersection_type.lower()
@@ -70,13 +71,14 @@ def handle_emergency_vehicle(simulation, veh_id):
     else:
         emergency_action = 0
 
-    # 🔁 Loop over all traffic lights (multi-agent)
-    for i in range(len(simulation.int_conf.get("traffic_light_ids", []))):
+    # Loop over all agents based on the recorded number of agents.
+    for i in range(simulation.num_agents):
         simulation._set_green_phase(i, emergency_action)
 
-    # Simulate emergency duration
+    # Simulate emergency duration using the green duration (could be adjusted if needed).
     simulation._simulate(simulation._green_duration)
 
+    # Log emergency handling (you may expand this logging if needed).
     if not hasattr(simulation, "_emergency_q_logs"):
         simulation._emergency_q_logs = []
     simulation._emergency_q_logs.append((simulation._step, veh_id))

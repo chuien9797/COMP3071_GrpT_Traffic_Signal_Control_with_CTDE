@@ -1,41 +1,38 @@
-import traci
-import numpy as np
+import os
 import random
 import timeit
-import os
+import datetime
+import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
+import traci
 
-from emergency_handler import check_emergency
+from emergency_handler import check_emergency, handle_emergency_vehicle
 import intersection_config as int_config
 
-# Import communication functions.
-from communication import send_message, get_messages, broadcast
+# Global constants for faults, etc.
+RECOVERY_DELAY = 15
+FAULT_REWARD_SCALE = 0.5
+EPISODE_FAULT_START = 25
 
-# Global constants
-RECOVERY_DELAY = 15               # Steps to recover faulty signals
-FAULT_REWARD_SCALE = 0.5          # Scale reward if fault occurs
-EPISODE_FAULT_START = 25          # Start injecting faults after a given episode
 
 class Simulation:
-    def __init__(
-            self,
-            Model,
-            TargetModel,
-            Memory,
-            TrafficGen,
-            sumo_cmd,
-            gamma,
-            max_steps,
-            green_duration,
-            yellow_duration,
-            num_states,        # Not used by aggregator but preserved for interface
-            training_epochs,
-            intersection_type="cross",
-            signal_fault_prob=0.1,
-    ):
-        self._Model = Model
-        self._TargetModel = TargetModel
+    def __init__(self,
+                 Models,  # List of agent models
+                 TargetModels,  # List of target models (can be same as Models for shared parameters)
+                 Memory,
+                 TrafficGen,
+                 sumo_cmd,
+                 gamma,
+                 max_steps,
+                 green_duration,
+                 yellow_duration,
+                 num_states,  # Not used by aggregator but preserved for compatibility.
+                 training_epochs,
+                 intersection_type="cross",
+                 signal_fault_prob=0.1):
+        # Store multi-agent models as lists.
+        self._Models = Models
+        self._TargetModels = TargetModels
         self._Memory = Memory
         self._TrafficGen = TrafficGen
         self._gamma = gamma
@@ -47,12 +44,10 @@ class Simulation:
         self._num_states = num_states
         self._training_epochs = training_epochs
 
-        # Global statistics
+        # Global statistics and logs.
         self._reward_store = []
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
-
-        # Logging and fault arrays
         self._q_loss_log = []
         self._green_durations_log = []
         self.fault_details = []
@@ -61,7 +56,7 @@ class Simulation:
         self._emergency_total_delay = 0.0
         self._teleport_count = 0
 
-        # Fault injection parameters
+        # Fault injection parameters.
         self.signal_fault_prob = signal_fault_prob
         self.manual_override = False
         self.recovery_queue = {}
@@ -71,12 +66,15 @@ class Simulation:
             raise ValueError(f"Intersection type '{intersection_type}' not found in config.")
         self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
         self._num_actions = len(self.int_conf["phase_mapping"])
-        self._action_counts = np.zeros(self._num_actions, dtype=int)
+        # Set number of agents based on the provided traffic light IDs.
+        self._traffic_light_ids = self.int_conf.get("traffic_light_ids", [])
+        self.num_agents = len(self._traffic_light_ids) if isinstance(self._traffic_light_ids, list) else 1
 
     def run(self, episode, epsilon):
         os.makedirs("logs22", exist_ok=True)
         log_file = open(f"logs22/episode_{episode}.log", "w")
 
+        # Generate routes with the current episode seed.
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
         print(f"Simulating Episode {episode} on {self.intersection_type}...")
@@ -87,11 +85,12 @@ class Simulation:
         self._sum_queue_length = 0
         self._sum_waiting_time = 0
         old_total_wait = 0
-        old_state = None
-        old_action = None
+        # For multi-agent, we initialize per-agent old state and action.
+        old_states = [None] * self.num_agents
+        old_actions = [None] * self.num_agents
+
         self.faulty_lights = set()
         self.fault_injected_this_episode = False
-
         self.skip_fault_this_episode = (episode < EPISODE_FAULT_START) or (random.random() < 0.5)
         self.handled_emergency_ids = set()
         start_time = timeit.default_timer()
@@ -100,37 +99,49 @@ class Simulation:
             if check_emergency(self):
                 continue
 
-            current_state = self._get_state()
-            current_total_wait = self._collect_waiting_times()
-            reward = 0.0
+            # Get the overall state and partition it among agents.
+            states = self._get_state()  # returns a list with one state per agent
+
+            # For each agent, calculate reward, update memory and choose an action.
+            actions = []
+            for i in range(self.num_agents):
+                current_state = states[i]
+                # For reward, we use the difference of total wait from the previous step.
+                # Here, we use a simplified global wait instead of per-agent wait; adjust as needed.
+                current_total_wait = self._collect_waiting_times()
+                reward = 0.0
+                if self._step != 0 and old_states[i] is not None:
+                    reward = float(old_total_wait - current_total_wait)
+                    if self.fault_injected_this_episode:
+                        reward *= FAULT_REWARD_SCALE
+                    self._Memory.add_sample((old_states[i], old_actions[i], reward, current_state))
+                # Choose action using the i-th model.
+                action = self._choose_action(current_state, epsilon, model=self._Models[i])
+                actions.append(action)
+                # Log action for this agent.
+                log_file.write(f"[Step {self._step}] Agent {i} Action: {action}\n")
+
+            # If phase changed between steps, set yellow phases; here we assume old_actions from agent 0 as example.
             if self._step != 0:
-                reward = float(old_total_wait - current_total_wait)
+                for i in range(self.num_agents):
+                    if old_actions[i] is not None and old_actions[i] != actions[i]:
+                        self._set_yellow_phase(i, old_actions[i], log_file)
+                        self._simulate(self._yellow_duration, log_file)
 
-                if self.fault_injected_this_episode:
-                    reward *= FAULT_REWARD_SCALE
+            # Set green phases for each agent.
+            for i, action in enumerate(actions):
+                self._set_green_phase(i, action, log_file)
 
-                self._Memory.add_sample((old_state, old_action, reward, current_state))
-
-            action = self._choose_action(current_state, epsilon)
-            self._action_counts[action] += 1
-            log_file.write(f"[Step {self._step}] Action: {action}\n")
-
-            if self._step != 0 and old_action is not None and old_action != action:
-                self._set_yellow_phase(0, old_action, log_file)
-                self._simulate(self._yellow_duration, log_file)
-
-            # Fix: pass agent index 0 along with action to set green phase
-            self._set_green_phase(0, action, log_file)
-            # Compute adaptive green duration
-            adaptive_green = self._compute_adaptive_green_duration(current_state)
+            # Adaptive green duration can be computed from global state; we use state from agent 0 as a proxy.
+            adaptive_green = self._compute_adaptive_green_duration(states[0])
             self._green_durations_log.append(adaptive_green)
-            # print(f"[Step {self._step}] Adaptive green duration: {adaptive_green}")
             log_file.write(f"[Step {self._step}] Adaptive green duration: {adaptive_green}\n")
             self._simulate(adaptive_green, log_file)
 
-            old_state = current_state
-            old_action = action
-            old_total_wait = current_total_wait
+            # Store overall values for reward calculation.
+            old_total_wait = self._collect_waiting_times()
+            old_states = states
+            old_actions = actions
 
             if reward < 0:
                 self._sum_neg_reward += reward
@@ -163,6 +174,10 @@ class Simulation:
         return total_wait
 
     def _get_state(self):
+        """
+        Aggregates lane features into a 2D array, then partitions the lanes equally among the agents.
+        Returns a list of state arrays (one per agent).
+        """
         incoming_lanes = self.int_conf["incoming_lanes"]
         lane_order = []
         for group in sorted(incoming_lanes.keys()):
@@ -179,7 +194,9 @@ class Simulation:
         }
         type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
 
-        for i, lane_id in enumerate(sorted(sum([v for v in self.int_conf["incoming_lanes"].values()], []))):
+        # Fill the lane features similar to before.
+        sorted_lanes = sorted(sum([v for v in self.int_conf["incoming_lanes"].values()], []))
+        for i, lane_id in enumerate(sorted_lanes):
             lane_features[i, 0] = traci.lane.getLastStepVehicleNumber(lane_id)
             lane_features[i, 1] = traci.lane.getWaitingTime(lane_id)
             flag = 0
@@ -199,9 +216,8 @@ class Simulation:
                 try:
                     logics = traci.trafficlight.getAllProgramLogics(tl_ids[0])
                     if logics:
-                        logic = logics[0]
                         current_phase = traci.trafficlight.getPhase(tl_ids[0])
-                        phase_state = logic.phases[current_phase].state
+                        phase_state = logics[0].phases[current_phase].state
                         connections = traci.trafficlight.getControlledLanes(tl_ids[0])
                         if lane_id in connections:
                             idx = connections.index(lane_id)
@@ -211,45 +227,33 @@ class Simulation:
                     pass
             lane_features[i, 5] = controlled_by_faulty
             lane_features[i, 6:9] = np.array(type_vector)
-        return lane_features
 
-    def _choose_action(self, state, epsilon):
+        # Partition lanes equally among agents.
+        lanes_per_agent = num_lanes // self.num_agents if self.num_agents > 0 else num_lanes
+        states = []
+        for i in range(self.num_agents):
+            start = i * lanes_per_agent
+            # For the last agent, include any remaining lanes.
+            if i == self.num_agents - 1:
+                state_i = lane_features[start:]
+            else:
+                state_i = lane_features[start:start + lanes_per_agent]
+            states.append(state_i)
+        return states
+
+    def _choose_action(self, state, epsilon, model):
+        """
+        Given a state (for a single agent) and a model, choose an action using epsilon-greedy.
+        """
         valid_action_indices = list(self.int_conf["phase_mapping"].keys())
         if random.random() < epsilon:
-            action = random.choice(valid_action_indices)
-            # print(f"[DEBUG] Random action chosen: {action} from valid {valid_action_indices}")
-            return action
-
-        q_vals = self._Model.predict_one(state)[0]  # shape: (num_actions,)
-
-        # Boost Q-values for actions favoring emergency lanes.
-        emergency_mask = state[:, 2] > 0  # column 2: emergency vehicle presence.
-        if np.any(emergency_mask):
-            emergency_actions = set()
-            lane_order = []
-            for group in sorted(self.int_conf["incoming_lanes"].keys()):
-                lane_order.extend(self.int_conf["incoming_lanes"][group])
-            # For each lane where emergency is detected, mark its corresponding index.
-            emergency_lane_ids = [lane_order[i] for i, flag in enumerate(emergency_mask) if flag]
-            for a in range(self._num_actions):
-                phase_map = self.int_conf["phase_mapping"]
-                green_phase = phase_map[a]["green"]
-                for tlid in self.int_conf.get("traffic_light_ids", []):
-                    logics = traci.trafficlight.getAllProgramLogics(tlid)
-                    if logics and green_phase < len(logics[0].phases):
-                        state_str = logics[0].phases[green_phase].state
-                        controlled = traci.trafficlight.getControlledLanes(tlid)
-                        for eid in emergency_lane_ids:
-                            if eid in controlled:
-                                idx = controlled.index(eid)
-                                if state_str[idx] == 'G':
-                                    emergency_actions.add(a)
-            for ea in emergency_actions:
-                q_vals[ea] += 1.5  # Tune bonus value as needed.
-
+            return random.choice(valid_action_indices)
+        # Expand dimensions to add batch dimension if needed.
+        state_expanded = np.expand_dims(state, axis=0)
+        q_vals = model.predict_one(state)[0]  # shape: (num_actions,)
+        # (Optionally, add any emergency adjustments here.)
         valid_q_vals = q_vals[valid_action_indices]
         best_valid_action = valid_action_indices[int(np.argmax(valid_q_vals))]
-        # print(f"[DEBUG] Best valid action: {best_valid_action} from {valid_action_indices}")
         return best_valid_action
 
     def _set_yellow_phase(self, agent_index, action_number, log_file=None):
@@ -270,7 +274,8 @@ class Simulation:
                         traci.trafficlight.setProgram(tlid, "0")
                         traci.trafficlight.setPhase(tlid, yellow_phase)
                         if log_file:
-                            log_file.write(f"[SetYellow] TL {tlid}: Set yellow phase {yellow_phase} out of {num_phases} phases.\n")
+                            log_file.write(
+                                f"[SetYellow] TL {tlid}: Set yellow phase {yellow_phase} out of {num_phases} phases.\n")
                     else:
                         message = f"⚠️ Invalid yellow phase {yellow_phase} for TL {tlid} (only {num_phases} phases)"
                         print(message)
@@ -298,11 +303,9 @@ class Simulation:
                 logics = traci.trafficlight.getAllProgramLogics(tlid)
                 if logics:
                     num_phases = len(logics[0].phases)
-                    phases_state = [phase.state for phase in logics[0].phases]
                     if green_phase < num_phases:
                         traci.trafficlight.setProgram(tlid, "0")
                         traci.trafficlight.setPhase(tlid, green_phase)
-
                     else:
                         message = f"⚠️ Skipping invalid green phase {green_phase} for TL {tlid} (only {num_phases} phases)."
                         print(message)
@@ -334,17 +337,11 @@ class Simulation:
             traci.simulationStep()
             self._step += 1
             steps_todo -= 1
-
-            # Obtain queue length using the designated function.
             q_len = self._get_queue_length()
             self._sum_queue_length += q_len
-
-            # Collect waiting times using the dedicated function.
             current_wait = self._collect_waiting_times()
             self._sum_waiting_time += current_wait
-
             self._teleport_count += traci.simulation.getStartingTeleportNumber()
-
             if log_file:
                 log_file.write(f"[Simulate] Step {self._step}: Queue length {q_len}, Waiting time {current_wait}\n")
 
@@ -411,8 +408,7 @@ class Simulation:
         return sum(traci.lane.getLastStepHaltingNumber(lane) for lane in incoming_lane_ids)
 
     def _replay(self):
-        batch = self._Memory.get_samples(self._Model.batch_size)
-        # print(f"[Replay] Memory size: {self._Memory._size_now()} samples")
+        batch = self._Memory.get_samples(self._Models[0].batch_size)
         if len(batch) == 0:
             print("[Replay] Not enough samples. Skipping training update.")
             return
@@ -430,16 +426,15 @@ class Simulation:
         next_states = self._pad_states(next_state_list)
         actions = np.array(actions, dtype=np.int32)
         rewards = np.array(rewards, dtype=np.float32)
-        q_s_a = self._Model.predict_batch(states)
-        best_next_actions = np.argmax(self._Model.predict_batch(next_states), axis=1)
-        target_q_next = self._TargetModel.predict_batch(next_states)
+        q_s_a = self._Models[0].predict_batch(states)
+        best_next_actions = np.argmax(self._Models[0].predict_batch(next_states), axis=1)
+        target_q_next = self._TargetModels[0].predict_batch(next_states)
         target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
         y = np.copy(q_s_a)
         y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
         loss = np.mean(np.square(y - q_s_a))
         self._q_loss_log.append(loss)
-        # print(f"[Replay] Training loss: {loss:.4f}")
-        self._Model.train_batch(states, y)
+        self._Models[0].train_batch(states, y)
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]
@@ -460,7 +455,7 @@ class Simulation:
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)
 
     def _write_summary_log(self, episode, epsilon, sim_time):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
             with open(f"logs19/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
                 f.write(f"Timestamp: {timestamp}\n")
@@ -477,27 +472,26 @@ class Simulation:
                         f.write(f"Step {step} | TLID: {tlid} | Orig: {orig} -> Mod: {mod}\n")
                 f.write(f"Total Emergency Delay: {self._emergency_total_delay:.2f}\n")
                 f.write("\nAction Distribution:\n")
-                for i, counts in enumerate(self._action_counts):
-                    f.write(f"Intersection {i+1}:\n")
-                    for a, count in enumerate(counts):
-                        f.write(f" Action {a}: {count} times\n")
+                for i in range(self.num_agents):
+                    f.write(f"Agent {i + 1}\n")
+                # Additional logging as needed.
         except Exception as e:
             print(f"Error writing summary log: {e}")
 
     def analyze_results(self):
         plt.figure(figsize=(15, 5))
         plt.subplot(1, 3, 1)
-        plt.plot(self.reward_store)
+        plt.plot(self._reward_store)
         plt.title("Reward per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Reward")
         plt.subplot(1, 3, 2)
-        plt.plot(self.avg_queue_length_store)
+        plt.plot(self._avg_queue_length_store)
         plt.title("Avg Queue Length per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Avg Queue Length")
         plt.subplot(1, 3, 3)
-        plt.plot(self.cumulative_wait_store)
+        plt.plot(self._cumulative_wait_store)
         plt.title("Cumulative Wait Time per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Cumulative Wait Time")

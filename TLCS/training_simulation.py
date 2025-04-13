@@ -1,11 +1,3 @@
-"""
-Adaptive Traffic Light Simulation with Multi-Agent Support.
-This Simulation class has been modified to operate with two agents.
-It auto-scans the intersection configuration to determine which edges and lanes
-are assigned to each agent. The class includes methods for state extraction, reward
-computation, action selection (via REST calls), phase control, and experience replay.
-"""
-
 import traci
 import numpy as np
 import random
@@ -13,45 +5,35 @@ import timeit
 import os
 import matplotlib.pyplot as plt
 from datetime import datetime
-import requests
 
 from emergency_handler import check_emergency
 import intersection_config as int_config
 
 # Global constants
-RECOVERY_DELAY = 15               # Steps to recover faulty signals
-FAULT_REWARD_SCALE = 0.5          # Scale reward if a fault is injected
-EPISODE_FAULT_START = 25          # Start injecting faults from episode 25
+RECOVERY_DELAY = 15  # Steps to recover faulty signals
+FAULT_REWARD_SCALE = 0.5  # Scale reward if fault occurs
+EPISODE_FAULT_START = 25  # Start injecting faults after a given episode
 
-# Phase codes (as defined in your environment)
-PHASE_NS_GREEN = 0    # action 0
-PHASE_NS_YELLOW = 1
-PHASE_NSL_GREEN = 2   # action 1
-PHASE_NSL_YELLOW = 3
-PHASE_EW_GREEN = 4    # action 2
-PHASE_EW_YELLOW = 5
-PHASE_EWL_GREEN = 6   # action 3
-PHASE_EWL_YELLOW = 7
 
 class Simulation:
     def __init__(
-        self,
-        Model,
-        TargetModel,
-        Memory,
-        TrafficGen,
-        sumo_cmd,
-        gamma,
-        max_steps,
-        green_duration,
-        yellow_duration,
-        num_states,
-        training_epochs,
-        intersection_type="cross",
-        signal_fault_prob=0.1,
+            self,
+            agents,  # List of controller agents, one per intersection
+            Memory,  # A shared replay Memory instance
+            TrafficGen,
+            sumo_cmd,
+            gamma,
+            max_steps,
+            green_duration,
+            yellow_duration,
+            num_states,  # Not used by aggregator but preserved for interface
+            training_epochs,
+            intersection_type="cross",
+            signal_fault_prob=0.1,
     ):
-        self._Model = Model
-        self._TargetModel = TargetModel
+        # Instead of a single model, we now store a list of controllers.
+        self._agents = agents
+        # Shared Memory instance
         self._Memory = Memory
         self._TrafficGen = TrafficGen
         self._gamma = gamma
@@ -63,79 +45,65 @@ class Simulation:
         self._num_states = num_states
         self._training_epochs = training_epochs
 
-        # Statistics for each episode (combined and per agent)
-        self._reward_store = []              # Combined rewards (agent1 + agent2)
-        self._reward_store_a1 = []           # Agent one rewards
-        self._reward_store_a2 = []           # Agent two rewards
-        self._cumulative_wait_store = []     # Combined cumulative waiting time
-        self._cumulative_wait_store_a1 = []
-        self._cumulative_wait_store_a2 = []
-        self._avg_queue_length_store = []    # Combined average queue length
-        self._avg_queue_length_store_a1 = []
-        self._avg_queue_length_store_a2 = []
-        self._q_loss_log = []         # Training loss log
-        self._emergency_crossed = 0
-        self._emergency_total_delay = 0.0
+        # Global statistics for the entire simulation (across intersections)
+        self._reward_store = []  # Combined reward per episode
+        self._cumulative_wait_store = []  # Combined cumulative waiting time per episode
+        self._avg_queue_length_store = []  # Combined average queue length per episode
 
-
-        # Accumulators for multi-agent metrics
-        self._sum_neg_reward_one = 0
-        self._sum_neg_reward_two = 0
-        self._sum_queue_length = 0
-        self._sum_queue_length_a1 = 0
-        self._sum_queue_length_a2 = 0
-        self._sum_waiting_time = 0
-        self._cumulative_waiting_time_agent_one = 0
-        self._cumulative_waiting_time_agent_two = 0
-
-        # Other internal trackers
-        self._waiting_times = {}
-        self.faulty_lights = set()
-        self.fault_injected_this_episode = False
-        self.skip_fault_this_episode = False
-        self.manual_override = False
-        self.recovery_queue = {}
+        # Logging and fault-related arrays
+        self._q_loss_log = []
         self._green_durations_log = []
         self.fault_details = []
+        self.faulty_lights = set()
+        self._emergency_crossed = 0
+        self._emergency_total_delay = 0.0
         self._teleport_count = 0
-        self._already_in = []  # For flow tracking
 
-        # For state extraction: number of cells per agent.
-        # Adjust this value based on your occupancy_grid settings.
-        self._num_cells = 40  # Example: 40 cells per intersection
+        # Fault injection parameters
+        self.signal_fault_prob = signal_fault_prob
+        self.manual_override = False
+        self.recovery_queue = {}
 
+        self.int_conf = int_config.INTERSECTION_CONFIGS.get(intersection_type)
+        if self.int_conf is None:
+            raise ValueError(f"Intersection type '{intersection_type}' not found in config.")
         self.intersection_type = intersection_type
-        if self.intersection_type not in int_config.INTERSECTION_CONFIGS:
-            raise ValueError(f"Intersection type '{self.intersection_type}' not found in config.")
-        self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
-        self._num_actions = len(self.int_conf["phase_mapping"])
-        self._action_counts = np.zeros(self._num_actions, dtype=int)
+
+        # Determine number of intersections from configuration.
+        # It is assumed that int_conf["traffic_light_ids"] is a list.
+        self._num_intersections = 1
+        if "traffic_light_ids" in self.int_conf:
+            if isinstance(self.int_conf["traffic_light_ids"], list):
+                self._num_intersections = len(self.int_conf["traffic_light_ids"])
+            else:
+                self._num_intersections = 1
+
+        # Create per-intersection action counters.
+        self._action_counts = [np.zeros(self._agents[0]._num_actions, dtype=int)
+                               for _ in range(self._num_intersections)]
 
     def run(self, episode, epsilon):
         os.makedirs("logs19", exist_ok=True)
         log_file = open(f"logs19/episode_{episode}.log", "w")
 
+        # Generate route file and start SUMO
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
-        print(f"Simulating Episode {episode} on {self.intersection_type} (Multi-Agent)...")
+        print(
+            f"Simulating Episode {episode} on environment '{self.intersection_type}' with {self._num_intersections} intersection(s)...")
 
-        # Reset simulation variables
+        # Reset simulation and per-intersection trackers.
         self._step = 0
-        self._waiting_times = {}
-        self._sum_neg_reward_one = 0
-        self._sum_neg_reward_two = 0
-        self._sum_queue_length = 0
-        self._sum_queue_length_a1 = 0
-        self._sum_queue_length_a2 = 0
-        self._sum_waiting_time = 0
-        old_total_wait_one = 0
-        old_total_wait_two = 0
-        old_state_one = None
-        old_state_two = None
-        old_action_one = None
-        old_action_two = None
+        old_states = [None] * self._num_intersections
+        old_actions = [None] * self._num_intersections
+        old_total_waits = [0.0] * self._num_intersections
 
+        self._sum_neg_reward = 0.0
+        self._sum_queue_length = 0.0
+        self._sum_waiting_time = 0.0
         self.faulty_lights = set()
+        self._q_loss_log = []
+
         self.fault_injected_this_episode = False
         self.skip_fault_this_episode = (episode < EPISODE_FAULT_START) or (random.random() < 0.5)
 
@@ -145,234 +113,178 @@ class Simulation:
             if check_emergency(self):
                 continue
 
-            # Get current state vectors for both agents.
-            current_state_one, current_state_two = self._get_states_with_advanced_perception()
+            # Get overall state and split among intersections.
+            overall_state = self._get_state()  # Shape: (total_lanes, lane_feature_dim)
+            states = self._split_state(overall_state, self._num_intersections)
 
-            # Optionally, append the other agent’s previous action if _num_states equals 321.
-            if self._num_states == 321 and (old_action_one is not None and old_action_two is not None):
-                current_state_one = np.append(current_state_one, old_action_two)
-                current_state_two = np.append(current_state_two, old_action_one)
+            current_total_waits = []
+            for i in range(self._num_intersections):
+                # For demonstration, use sum of waiting times (assume column 1 holds waiting times)
+                wait_time = np.sum(states[i][:, 1])
+                current_total_waits.append(wait_time)
 
-            # Compute rewards for each agent.
-            current_total_wait_one = 0.2 * self._collect_waiting_times_first_intersection() + self._get_queue_length_intersection_one()
-            reward_one = old_total_wait_one - current_total_wait_one
-            current_total_wait_two = 0.2 * self._collect_waiting_times_second_intersection() + self._get_queue_length_intersection_two()
-            reward_two = old_total_wait_two - current_total_wait_two
-
-            # Mutual influence.
-            reward_one += 0.5 * reward_two
-            reward_two += 0.5 * reward_one
-
-            # Accumulate waiting times.
-            self._cumulative_waiting_time_agent_one += current_total_wait_one
-            self._cumulative_waiting_time_agent_two += current_total_wait_two
-
-            # If not the first step, add experience samples via REST.
+            # Update memory with experiences (if not the very first step)
             if self._step != 0:
-                requests.post(
-                    'http://127.0.0.1:5000/add_samples',
-                    json={
-                        'old_state_one': old_state_one.tolist(),
-                        'old_state_two': old_state_two.tolist(),
-                        'old_action_one': int(old_action_one),
-                        'old_action_two': int(old_action_two),
-                        'reward_one': reward_one,
-                        'reward_two': reward_two,
-                        'current_state_one': current_state_one.tolist(),
-                        'current_state_two': current_state_two.tolist()
-                    }
-                )
+                for i in range(self._num_intersections):
+                    reward = old_total_waits[i] - current_total_waits[i]
+                    if self.fault_injected_this_episode:
+                        reward *= FAULT_REWARD_SCALE
+                    # Add sample: (old_state, old_action, reward, current_state)
+                    self._Memory.add_sample((old_states[i], old_actions[i], reward, states[i]))
+                    # print(
+                    #     f"[Step {self._step}] Added sample for intersection {i + 1}. Memory size now: {self._Memory._size_now()} samples")
+                    if reward < 0:
+                        self._sum_neg_reward += reward
 
-            # Choose actions for both agents.
-            action_one = self._choose_action(current_state_one, epsilon, 1)
-            action_two = self._choose_action(current_state_two, epsilon, 2)
+            # Each agent chooses an action for its intersection.
+            actions = []
+            for i in range(self._num_intersections):
+                action = self._choose_action(states[i], epsilon, i)
+                actions.append(action)
+                self._action_counts[i][action] += 1
+                log_file.write(f"[Step {self._step}] Intersection {i + 1} Action: {action}\n")
 
-            # Manage yellow-phase transitions if needed.
-            if self._step != 0 and old_action_one is not None and old_action_two is not None:
-                if old_action_one != action_one and old_action_two != action_two:
-                    self._set_yellow_phase(old_action_one)
-                    self._set_yellow_phase_two(old_action_two)
-                    self._simulate(self._yellow_duration)
-                elif old_action_one != action_one:
-                    self._set_yellow_phase(old_action_one)
-                    self._simulate(self._yellow_duration)
-                elif old_action_two != action_two:
-                    self._set_yellow_phase_two(old_action_two)
+            # Handle yellow phase transitions for intersections with action change.
+            for i in range(self._num_intersections):
+                if self._step != 0 and old_actions[i] is not None and old_actions[i] != actions[i]:
+                    self._set_yellow_phase(i, old_actions[i])
                     self._simulate(self._yellow_duration)
 
-            # Set green phases for both intersections.
-            self._set_green_phase(action_one)
-            self._set_green_phase_two(action_two)
-            self._simulate(self._green_duration)
+            # Set green phase for each intersection.
+            for i in range(self._num_intersections):
+                self._set_green_phase(i, actions[i])
 
-            # Update old state and action.
-            old_state_one = current_state_one
-            old_state_two = current_state_two
-            old_action_one = action_one
-            old_action_two = action_two
-            old_total_wait_one = current_total_wait_one
-            old_total_wait_two = current_total_wait_two
+            # Compute adaptive green duration based on overall state.
+            adaptive_green = self._compute_adaptive_green_duration(overall_state)
+            self._green_durations_log.append(adaptive_green)
+            log_file.write(f"[Step {self._step}] Adaptive green duration: {adaptive_green}\n")
+            self._simulate(adaptive_green)
 
-            if reward_one < 0:
-                self._sum_neg_reward_one += reward_one
-            if reward_two < 0:
-                self._sum_neg_reward_two += reward_two
+            # Save current states, actions, and waiting times for the next step.
+            for i in range(self._num_intersections):
+                old_states[i] = states[i]
+                old_actions[i] = actions[i]
+                old_total_waits[i] = current_total_waits[i]
 
-        # End of episode: record statistics and close simulation.
+        # End of simulation: save stats and summary log.
         self._save_episode_stats()
-        total_episode_reward = self._sum_neg_reward_one + self._sum_neg_reward_two
-        print("Total reward (combined):", total_episode_reward, "- Epsilon:", round(epsilon, 2))
+        print("Total reward:", self._sum_neg_reward, "- Epsilon:", round(epsilon, 2))
         traci.close()
         simulation_time = round(timeit.default_timer() - start_time, 1)
         self._write_summary_log(episode, epsilon, simulation_time)
-        print("Training phase skipped in Simulation.run (handled externally)")
-        return simulation_time, 0
 
-    def _write_summary_log(self, episode, epsilon, sim_time):
+        print("Training phase starting...")
+        start_train = timeit.default_timer()
+        for _ in range(self._training_epochs):
+            self._replay()  # Replay uses the shared Memory and the common agent model (assumed shared)
+        training_time = round(timeit.default_timer() - start_train, 1)
+        return simulation_time, training_time
+
+    def _split_state(self, overall_state, num_parts):
+        total_lanes = overall_state.shape[0]
+        part = total_lanes // num_parts
+        states = []
+        for i in range(num_parts):
+            start = i * part
+            if i == num_parts - 1:
+                s = overall_state[start:, :]
+            else:
+                s = overall_state[start:start + part, :]
+            states.append(s)
+        return states
+
+    def _get_state(self):
+        """Retrieve the overall state from SUMO.
+        Returns an array of shape (total_lanes, lane_feature_dim) using the lanes specified.
         """
-        Writes a summary log for an episode.
-        It prints the timestamp, intersection type, combined and per‑agent rewards,
-        epsilon, simulation duration, average queue lengths, cumulative waiting times,
-        fault injection details (if any), total emergency delay, and the action distribution.
-        """
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        try:
-            with open(f"logs19/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
-                # Header information
-                f.write(f"Timestamp: {timestamp}\n")
-                f.write(f"Intersection: {self.intersection_type}\n")
-                f.write(f"Epsilon: {epsilon:.2f}\n")
-                f.write(f"Simulation Duration: {sim_time} seconds\n\n")
+        incoming_lanes = self.int_conf["incoming_lanes"]
+        lane_order = []
+        for group in sorted(incoming_lanes.keys()):
+            lane_order.extend(incoming_lanes[group])
+        num_lanes = len(lane_order)
+        lane_feature_dim = 9  # For example: vehicle count, waiting time, emergency flag, halting, current phase, faulty flag, type vector.
+        lane_features = np.zeros((num_lanes, lane_feature_dim), dtype=np.float32)
 
-                # Rewards (combined and per agent)
-                combined_reward = self._sum_neg_reward_one + self._sum_neg_reward_two
-                f.write("=== Rewards ===\n")
-                f.write(f"Combined Reward: {combined_reward:.2f}\n")
-                f.write(f"Agent 1 Reward: {self._sum_neg_reward_one:.2f}\n")
-                f.write(f"Agent 2 Reward: {self._sum_neg_reward_two:.2f}\n\n")
+        intersection_encoding = {
+            "cross": [1.0, 0.0, 0.0],
+            "roundabout": [0.0, 1.0, 0.0],
+            "t_intersection": [0.0, 0.0, 1.0],
+            "y_intersection": [0.33, 0.33, 0.34]
+        }
+        type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
 
-                # Queue and waiting time statistics
-                avg_queue_combined = (self._sum_queue_length / self._max_steps) if self._max_steps > 0 else 0
-                avg_queue_a1 = (self._sum_queue_length_a1 / self._max_steps) if self._max_steps > 0 else 0
-                avg_queue_a2 = (self._sum_queue_length_a2 / self._max_steps) if self._max_steps > 0 else 0
-                f.write("=== Traffic Statistics ===\n")
-                f.write(f"Average Queue (combined): {avg_queue_combined:.2f}\n")
-                f.write(f"Average Queue (Agent 1): {avg_queue_a1:.2f}\n")
-                f.write(f"Average Queue (Agent 2): {avg_queue_a2:.2f}\n")
-                f.write(f"Cumulative Waiting Time (combined): {self._sum_waiting_time:.2f}\n")
-                f.write(f"Cumulative Waiting Time (Agent 1): {self._cumulative_waiting_time_agent_one:.2f}\n")
-                f.write(f"Cumulative Waiting Time (Agent 2): {self._cumulative_waiting_time_agent_two:.2f}\n\n")
+        for i, lane_id in enumerate(lane_order):
+            lane_features[i, 0] = traci.lane.getLastStepVehicleNumber(lane_id)
+            lane_features[i, 1] = traci.lane.getWaitingTime(lane_id)
+            flag = 0
+            for car_id in traci.lane.getLastStepVehicleIDs(lane_id):
+                if traci.vehicle.getTypeID(car_id) == "emergency":
+                    flag = 1
+                    break
+            lane_features[i, 2] = float(flag)
+            lane_features[i, 3] = traci.lane.getLastStepHaltingNumber(lane_id)
+            tl_ids = self.int_conf.get("traffic_light_ids", [])
+            phase_val = 0.0
+            if tl_ids:
+                phase_val = float(traci.trafficlight.getPhase(tl_ids[0]))
+            lane_features[i, 4] = phase_val
+            controlled_by_faulty = 0.0
+            if tl_ids:
+                try:
+                    logic = traci.trafficlight.getCompleteRedYellowGreenDefinition(tl_ids[0])[0]
+                    current_phase = traci.trafficlight.getPhase(tl_ids[0])
+                    phase_state = logic.phases[current_phase].state
+                    connections = traci.trafficlight.getControlledLanes(tl_ids[0])
+                    if lane_id in connections:
+                        idx = connections.index(lane_id)
+                        if phase_state[idx] == 'r':
+                            controlled_by_faulty = 1.0
+                except Exception as e:
+                    pass
+            lane_features[i, 5] = controlled_by_faulty
+            lane_features[i, 6:9] = np.array(type_vector)
+        return lane_features
 
-                # Fault injection information
-                f.write("=== Fault Injection ===\n")
-                f.write(f"Fault injected: {'Yes' if self.fault_injected_this_episode else 'No'}\n")
-                if self.fault_details:
-                    f.write("Fault Details:\n")
-                    for detail in self.fault_details:
-                        step, tlid, original, modified = detail
-                        f.write(f" Step {step} | TL: {tlid} | Original: {original} -> Modified: {modified}\n")
-                f.write("\n")
-
-                # Total emergency delay
-                f.write(f"Total Emergency Delay: {self._emergency_total_delay:.2f}\n\n")
-
-                # Action distribution
-                f.write("=== Action Distribution (combined) ===\n")
-                for i, count in enumerate(self._action_counts):
-                    f.write(f" Action {i}: {count} times\n")
-        except Exception as e:
-            print(f"Error writing summary log: {e}")
-
-    def _choose_action(self, state, epsilon, num):
-        """
-        Epsilon-greedy action selection.
-        If exploring, returns a random action.
-        Otherwise, performs a REST call for agent 'num' to get predicted Q-values and selects the best action.
-        If the REST call fails, falls back to a random action.
-        """
+    def _choose_action(self, state, epsilon, agent_index):
+        """Epsilon–greedy action selection for the intersection corresponding to agent_index."""
+        valid_actions = list(self.int_conf["phase_mapping"].keys())
         if random.random() < epsilon:
-            random_action = random.randint(0, self._num_actions - 1)
-            print(f"[DEBUG] Random action chosen for agent {num}: {random_action}")
-            return random_action
+            action = random.choice(valid_actions)
+            # Uncomment the next line to log random action selections.
+            # print(f"[DEBUG] Intersection {agent_index+1} random action: {action}")
+            return action
         else:
+            q_vals = self._agents[agent_index].predict_one(state)[0]
+            best_action = valid_actions[int(np.argmax(q_vals))]
+            # Uncomment the next line to log greedy selections.
+            # print(f"[DEBUG] Intersection {agent_index+1} best action: {best_action}")
+            return best_action
+
+    def _set_yellow_phase(self, agent_index, action_number):
+        """Set the yellow phase for the intersection corresponding to agent_index."""
+        if "phase_mapping" not in self.int_conf:
+            return
+        phase_map = self.int_conf["phase_mapping"]
+        if action_number not in phase_map:
+            return
+        yellow_phase = phase_map[action_number]["yellow"]
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        if tl_ids and agent_index < len(tl_ids):
+            tlid = tl_ids[agent_index]
             try:
-                response = requests.post(
-                    'http://127.0.0.1:5000/predict',
-                    json={'state': state.tolist(), 'agent_num': int(num)}
-                )
-                # Check that the response has valid content
-                response.raise_for_status()  # Raises HTTPError if the HTTP request returned an unsuccessful status code.
-                json_response = response.json()  # This may raise a JSONDecodeError if the response is empty or not JSON.
-                pred = np.array(json_response['prediction'])
-                best_action = int(np.argmax(pred))
-                print(f"[DEBUG] Best action chosen for agent {num}: {best_action}")
-                return best_action
+                logics = traci.trafficlight.getAllProgramLogics(tlid)
+                if logics:
+                    num_phases = len(logics[0].phases)
+                    if yellow_phase < num_phases:
+                        traci.trafficlight.setProgram(tlid, "0")
+                        traci.trafficlight.setPhase(tlid, yellow_phase)
+                    else:
+                        print(f"⚠️ Invalid yellow phase {yellow_phase} for TL {tlid}")
             except Exception as e:
-                # Log the error and fall back to a random action.
-                print(f"[ERROR] REST call for agent {num} failed: {e}. Falling back to random action.")
-                fallback_action = random.randint(0, self._num_actions - 1)
-                print(f"[DEBUG] Fallback random action chosen for agent {num}: {fallback_action}")
-                return fallback_action
+                print(f"Error setting yellow phase for {tlid}: {e}")
 
-    def _set_yellow_phase(self, action_number):
-        """
-        Set yellow phase for the first intersection (agent one).
-        """
-        if "phase_mapping" not in self.int_conf:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        yellow_phase = phase_map[action_number]["yellow"]
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        for tlid in tl_ids:
-            try:
-                logics = traci.trafficlight.getAllProgramLogics(tlid)
-            except traci.exceptions.TraCIException:
-                continue
-            if not logics:
-                continue
-            num_phases = len(logics[0].phases)
-            if yellow_phase < num_phases:
-                traci.trafficlight.setProgram(tlid, "0")
-                traci.trafficlight.setPhase(tlid, yellow_phase)
-            else:
-                print(f"⚠️ Skipping invalid yellow phase {yellow_phase} for {tlid} (only {num_phases} phases)")
-
-    def _set_yellow_phase_two(self, action_number):
-        """
-        Set yellow phase for the second intersection (agent two).
-        """
-        if "phase_mapping" not in self.int_conf:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        yellow_phase = phase_map[action_number]["yellow"]
-        # Try to obtain a second traffic light ID.
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        second_tl = None
-        if len(tl_ids) >= 2:
-            second_tl = tl_ids[1]
-        else:
-            if tl_ids:
-                candidate = "2_" + tl_ids[0]
-                if candidate in traci.trafficlight.getIDList():
-                    second_tl = candidate
-        if second_tl is not None:
-            try:
-                traci.trafficlight.setProgram(second_tl, "0")
-                traci.trafficlight.setPhase(second_tl, yellow_phase)
-            except traci.exceptions.TraCIException as e:
-                print(f"Error setting yellow phase for second intersection on {second_tl}: {e}")
-        else:
-            print("Warning: No second traffic light found for agent two; skipping yellow phase setting.")
-
-    def _set_green_phase(self, action_number):
-        """
-        Set green phase for the first intersection (agent one).
-        Auto-detects traffic light IDs from configuration.
-        """
+    def _set_green_phase(self, agent_index, action_number):
+        """Set the green phase for the intersection corresponding to agent_index."""
         if "phase_mapping" not in self.int_conf:
             return
         phase_map = self.int_conf["phase_mapping"]
@@ -380,99 +292,85 @@ class Simulation:
             return
         green_phase = phase_map[action_number]["green"]
         tl_ids = self.int_conf.get("traffic_light_ids", [])
-        for tlid in tl_ids:
+        if tl_ids and agent_index < len(tl_ids):
+            tlid = tl_ids[agent_index]
             try:
                 logics = traci.trafficlight.getAllProgramLogics(tlid)
-            except traci.exceptions.TraCIException:
-                continue
-            if not logics:
-                continue
-            num_phases = len(logics[0].phases)
-            if green_phase < num_phases:
-                traci.trafficlight.setProgram(tlid, "0")
-                traci.trafficlight.setPhase(tlid, green_phase)
-            else:
-                print(f"⚠️ Skipping invalid green phase {green_phase} for {tlid} (only {num_phases} phases)")
+                if logics:
+                    num_phases = len(logics[0].phases)
+                    if green_phase < num_phases:
+                        traci.trafficlight.setProgram(tlid, "0")
+                        traci.trafficlight.setPhase(tlid, green_phase)
+                    else:
+                        print(f"⚠️ Skipping invalid green phase {green_phase} for {tlid} (only {num_phases} phases)")
+            except Exception as e:
+                print(f"Error setting green phase for {tlid}: {e}")
 
-    def _set_green_phase_two(self, action_number):
+    def _compute_adaptive_green_duration(self, overall_state):
+        """Compute adaptive green duration based on overall state.
+        Uses average waiting time (column 1) and total queue length (column 3).
         """
-        Set green phase for the second intersection (agent two).
-        Attempts to auto-detect or construct the second traffic light's ID.
-        """
-        if "phase_mapping" not in self.int_conf:
-            return
-        phase_map = self.int_conf["phase_mapping"]
-        if action_number not in phase_map:
-            return
-        green_phase = phase_map[action_number]["green"]
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        second_tl = None
-        if len(tl_ids) >= 2:
-            second_tl = tl_ids[1]
-        else:
-            if tl_ids:
-                candidate = "2_" + tl_ids[0]
-                if candidate in traci.trafficlight.getIDList():
-                    second_tl = candidate
-        if second_tl is not None:
-            try:
-                traci.trafficlight.setProgram(second_tl, "0")
-                traci.trafficlight.setPhase(second_tl, green_phase)
-            except traci.exceptions.TraCIException as e:
-                print(f"Error setting green phase for second intersection on {second_tl}: {e}")
-        else:
-            print("Warning: No second traffic light found for agent two; skipping green phase setting.")
+        avg_wait = np.mean(overall_state[:, 1])
+        total_queue = np.sum(overall_state[:, 3])
+        emergency_flag = np.any(overall_state[:, 2] > 0)
+        base = self._green_duration
+        wait_factor = int(avg_wait // 2)
+        queue_factor = int(total_queue // 5)
+        emergency_bonus = 3 if emergency_flag else 0
+        extension = min(wait_factor + queue_factor + emergency_bonus, 10)
+        return base + extension
 
     def _simulate(self, steps_todo):
         if (self._step + steps_todo) >= self._max_steps:
             steps_todo = self._max_steps - self._step
+
         while steps_todo > 0:
             self._inject_signal_faults()
             self._recover_faults_if_due()
             traci.simulationStep()
             self._step += 1
             steps_todo -= 1
-            q1 = self._get_queue_length_intersection_one()
-            q2 = self._get_queue_length_intersection_two()
-            self._sum_queue_length += (q1 + q2)
-            self._sum_waiting_time += (q1 + q2)
+            q_len = self._get_queue_length()
+            self._sum_queue_length += q_len
+            self._sum_waiting_time += q_len
+            self._teleport_count += traci.simulation.getStartingTeleportNumber()
 
-
+            for veh_id in traci.vehicle.getIDList():
+                if traci.vehicle.getTypeID(veh_id) == "emergency":
+                    delay = traci.vehicle.getAccumulatedWaitingTime(veh_id)
+                    self._emergency_total_delay += delay
+                    if traci.vehicle.getRoadID(veh_id) == "":
+                        self._emergency_crossed += 1
 
     def _inject_signal_faults(self):
         self.manual_override = False
         if self.skip_fault_this_episode or self.fault_injected_this_episode:
             return
+
         tl_ids = self.int_conf.get("traffic_light_ids", [])
         for tlid in tl_ids:
             try:
                 logic = traci.trafficlight.getCompleteRedYellowGreenDefinition(tlid)[0]
-            except traci.exceptions.TraCIException:
+                current_phase = traci.trafficlight.getPhase(tlid)
+                current_state = logic.phases[current_phase].state
+                new_state = list(current_state)
+                flipped_indices = []
+                g_indices = [i for i, s in enumerate(current_state) if s == 'G']
+                if g_indices:
+                    flip_idx = random.choice(g_indices)
+                    new_state[flip_idx] = 'r'
+                    flipped_indices.append(flip_idx)
+                new_state_str = ''.join(new_state)
+                if new_state_str != current_state:
+                    traci.trafficlight.setRedYellowGreenState(tlid, new_state_str)
+                    self.manual_override = True
+                    self.fault_injected_this_episode = True
+                    print(f"[Step {self._step}] Signal fault injected at TL={tlid}: {current_state} -> {new_state_str}")
+                    return
+            except Exception as e:
                 continue
-            current_phase = traci.trafficlight.getPhase(tlid)
-            current_state = logic.phases[current_phase].state
-            new_state = list(current_state)
-            flipped_indices = []
-            g_indices = [i for i, s in enumerate(current_state) if s == 'G']
-            if g_indices:
-                flip_idx = random.choice(g_indices)
-                new_state[flip_idx] = 'r'
-                flipped_indices.append(flip_idx)
-            new_state_str = ''.join(new_state)
-            if new_state_str != current_state:
-                traci.trafficlight.setRedYellowGreenState(tlid, new_state_str)
-                self.manual_override = True
-                self.fault_injected_this_episode = True
-                print(f"[Step {self._step}] ❌ Signal fault injected at TL={tlid}, phase={current_phase}")
-                print(f"    Original state: {current_state}")
-                print(f"    Modified state: {new_state_str}")
-                print(f"    Flipped indices: {flipped_indices}")
-                return
 
     def _recover_faults_if_due(self):
-        """
-        Check for signals that need to be recovered (reset) based on the recovery queue.
-        """
         tl_ids = self.int_conf.get("traffic_light_ids", [])
         for tlid in tl_ids:
             key = (tlid, self._step)
@@ -480,252 +378,57 @@ class Simulation:
                 original_state = self.recovery_queue[key]
                 try:
                     traci.trafficlight.setRedYellowGreenState(tlid, original_state)
-                    print(f"[Step {self._step}] ✅ Signal recovered at TL={tlid}")
+                    print(f"[Step {self._step}] Signal recovered at TL={tlid}")
                     del self.recovery_queue[key]
                     self.manual_override = False
-                except traci.exceptions.TraCIException:
+                except Exception as e:
                     pass
 
-    def _collect_waiting_times_first_intersection(self):
-        """
-        Sum waiting times for agent one using the first half of monitor_edges.
-        """
-        # Get edges from config.
-        edges = self.int_conf.get("monitor_edges", [])
-        if edges and len(edges) >= 2:
-            selected_edges = edges[:len(edges) // 2]
-        else:
-            # Option: you could also choose to signal an error or a warning.
-            # For now, we'll return 0 if no monitor_edges are defined.
-            selected_edges = []
-            print("Warning: No monitor_edges defined in configuration for agent one.")
-        local_wait = {}
-        car_list = traci.vehicle.getIDList()
-        for car_id in car_list:
-            wait_time = traci.vehicle.getAccumulatedWaitingTime(car_id)
-            road_id = traci.vehicle.getRoadID(car_id)
-            if road_id in selected_edges:
-                local_wait[car_id] = wait_time
-        return sum(local_wait.values())
+    def _get_queue_length(self):
+        """Compute total queue length across all incoming lanes."""
+        incoming_lane_ids = []
+        for lanes in self.int_conf["incoming_lanes"].values():
+            incoming_lane_ids.extend(lanes)
+        return sum(traci.lane.getLastStepHaltingNumber(lane) for lane in incoming_lane_ids)
 
-    def _collect_waiting_times_second_intersection(self):
-        """
-        Sum waiting times for agent two using the second half of monitor_edges.
-        """
-        edges = self.int_conf.get("monitor_edges", [])
-        if edges and len(edges) >= 2:
-            selected_edges = edges[len(edges) // 2:]
-        else:
-            selected_edges = []
-            print("Warning: No monitor_edges defined in configuration for agent two.")
-        local_wait = {}
-        car_list = traci.vehicle.getIDList()
-        for car_id in car_list:
-            wait_time = traci.vehicle.getAccumulatedWaitingTime(car_id)
-            road_id = traci.vehicle.getRoadID(car_id)
-            if road_id in selected_edges:
-                local_wait[car_id] = wait_time
-        return sum(local_wait.values())
+    def _replay(self):
+        # Use the batch size of the first agent; assumes a shared model.
+        batch = self._Memory.get_samples(self._agents[0].batch_size)
+        # print(f"[Replay] Memory size: {self._Memory._size_now()} samples")
+        if len(batch) == 0:
+            print("[Replay] Not enough samples. Skipping training update.")
+            return
 
-    def _get_queue_length_intersection_one(self):
-        """
-        Retrieve the total number of halted vehicles for agent one.
-        Uses the first half of the edges defined in "monitor_edges" in the configuration.
-        """
-        edges = self.int_conf.get("monitor_edges", [])
-        if edges and len(edges) >= 2:
-            selected_edges = edges[:len(edges) // 2]
-        elif edges:
-            selected_edges = edges  # Use all if only one provided.
-        else:
-            selected_edges = []
-            print("Warning: 'monitor_edges' not defined in configuration for agent one.")
-        total = 0
-        for edge in selected_edges:
-            try:
-                total += traci.edge.getLastStepHaltingNumber(edge)
-            except traci.exceptions.TraCIException as e:
-                print(f"Error: Edge '{edge}' is not known: {e}")
-        return total
+        state_list = []
+        next_state_list = []
+        actions = []
+        rewards = []
+        for sample in batch:
+            st, act, rew, nst = sample
+            state_list.append(st)
+            next_state_list.append(nst)
+            actions.append(act)
+            rewards.append(rew)
 
-    def _get_queue_length_intersection_two(self):
-        """
-        Retrieve the total number of halted vehicles for agent two.
-        Uses the second half of the edges defined in "monitor_edges" in the configuration.
-        """
-        edges = self.int_conf.get("monitor_edges", [])
-        if edges and len(edges) >= 2:
-            selected_edges = edges[len(edges) // 2:]
-        elif edges:
-            selected_edges = edges
-        else:
-            selected_edges = []
-            print("Warning: 'monitor_edges' not defined in configuration for agent two.")
-        total = 0
-        for edge in selected_edges:
-            try:
-                total += traci.edge.getLastStepHaltingNumber(edge)
-            except traci.exceptions.TraCIException as e:
-                print(f"Error: Edge '{edge}' is not known: {e}")
-        return total
+        states = self._pad_states(state_list)
+        next_states = self._pad_states(next_state_list)
+        actions = np.array(actions, dtype=np.int32)
+        rewards = np.array(rewards, dtype=np.float32)
 
-    def _get_density(self):
-        """
-        Retrieve the density (vehicles per km) using edges from configuration.
-        It first checks for a key "density_edges" in the config; if not found, it uses "monitor_edges".
-        For each edge, density is computed from the number of vehicles and the length of a lane.
-        """
-        # Try to get a list of edges specifically for density;
-        # otherwise use monitor_edges.
-        edges = self.int_conf.get("density_edges", self.int_conf.get("monitor_edges", []))
-        total_density = 0
-        count = 0
-        for edge in edges:
-            try:
-                num_vehicles = traci.edge.getLastStepVehicleNumber(edge)
-                # Get the list of lane IDs for this edge and use the first for length.
-                lane_ids = traci.edge.getLaneIDs(edge)
-                if lane_ids:
-                    lane_length = traci.lane.getLength(lane_ids[0])
-                    density = num_vehicles / (lane_length / 1000.0)  # vehicles per km
-                    total_density += density
-                    count += 1
-            except traci.exceptions.TraCIException as e:
-                print(f"Error retrieving density for edge '{edge}': {e}")
-        if count > 0:
-            return total_density
-        else:
-            print("Warning: No valid edges found for computing density.")
-            return 0
+        # Replace self._Model with self._agents[0] (assuming a shared model).
+        q_s_a = self._agents[0].predict_batch(states)
+        best_next_actions = np.argmax(self._agents[0].predict_batch(next_states), axis=1)
+        target_q_next = self._agents[0].predict_batch(next_states)
+        target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
 
-    def _get_flow(self):
-        """
-        Retrieve flow (vehicles per hour) using a list of edges from configuration.
-        It first tries to use a key "flow_edges"; if not defined, it uses "monitor_edges".
-        """
-        edges = self.int_conf.get("flow_edges", self.int_conf.get("monitor_edges", []))
-        counter_entered = 0
-        already_in = []  # local list to track vehicles
-        for edge in edges:
-            try:
-                vehicle_ids = traci.edge.getLastStepVehicleIDs(edge)
-                for car_id in vehicle_ids:
-                    if car_id not in already_in:
-                        counter_entered += 1
-                        already_in.append(car_id)
-            except traci.exceptions.TraCIException as e:
-                print(f"Error retrieving flow for edge '{edge}': {e}")
-        # Scale based on simulation duration (you might use self._max_steps instead of a constant)
-        return (counter_entered / self._max_steps) * 3600
+        y = np.copy(q_s_a)
+        y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
 
-    def _get_occupancy(self):
-        """
-        Retrieve the occupancy averaged over edges.
-        It first attempts to use a configuration key "occupancy_edges",
-        and if not available uses "monitor_edges".
-        """
-        edges = self.int_conf.get("occupancy_edges", self.int_conf.get("monitor_edges", []))
-        total_occ = 0
-        count = 0
-        for edge in edges:
-            try:
-                occ = traci.edge.getLastStepOccupancy(edge)
-                total_occ += occ
-                count += 1
-            except traci.exceptions.TraCIException as e:
-                print(f"Error retrieving occupancy for edge '{edge}': {e}")
-        if count > 0:
-            return total_occ / count
-        else:
-            print("Warning: No valid edges found for computing occupancy.")
-            return 0
+        loss = np.mean(np.square(y - q_s_a))
+        self._q_loss_log.append(loss)
+        # print(f"[Replay] Training loss: {loss:.4f}")
 
-    def _get_states_with_advanced_perception(self):
-        """
-        Construct state vectors for agent one and agent two.
-        Each state is formed by concatenating four sets of features over cells:
-          - Number of vehicles
-          - Average speed
-          - Cumulative waiting time
-          - Number of queued vehicles
-        The total vector is of size 2 * self._num_cells, then split equally.
-        """
-        nb_cars = np.zeros(self._num_cells * 2)
-        avg_speed = np.zeros(self._num_cells * 2)
-        cumulated_waiting_time = np.zeros(self._num_cells * 2)
-        nb_queued_cars = np.zeros(self._num_cells * 2)
-
-        incoming_lanes = self.int_conf.get("incoming_lanes", {})
-        if "main" in incoming_lanes and "side" in incoming_lanes:
-            lanes_agent1 = incoming_lanes["main"]
-            lanes_agent2 = incoming_lanes["side"]
-        else:
-            all_lanes = []
-            for key in sorted(incoming_lanes.keys()):
-                all_lanes.extend(incoming_lanes[key])
-            half = len(all_lanes) // 2
-            lanes_agent1 = all_lanes[:half]
-            lanes_agent2 = all_lanes[half:]
-
-        car_list = traci.vehicle.getIDList()
-        for car_id in car_list:
-            car_speed = traci.vehicle.getSpeed(car_id)
-            wait_time = traci.vehicle.getAccumulatedWaitingTime(car_id)
-            lane_id = traci.vehicle.getLaneID(car_id)
-            lane_pos = traci.vehicle.getLanePosition(car_id)
-            lane_pos = 750 - lane_pos  # Inversion: closer means lower cell index
-
-            if lane_pos < 7:
-                cell = 0
-            elif lane_pos < 14:
-                cell = 1
-            elif lane_pos < 21:
-                cell = 2
-            elif lane_pos < 28:
-                cell = 3
-            elif lane_pos < 40:
-                cell = 4
-            elif lane_pos < 60:
-                cell = 5
-            elif lane_pos < 100:
-                cell = 6
-            elif lane_pos < 160:
-                cell = 7
-            elif lane_pos < 400:
-                cell = 8
-            else:
-                cell = 9
-
-            if lane_id in lanes_agent1:
-                idx = cell
-            elif lane_id in lanes_agent2:
-                idx = self._num_cells + cell
-            else:
-                idx = cell  # default to agent one
-
-            nb_cars[idx] += 1
-            avg_speed[idx] += car_speed
-            if car_speed < 0.1:
-                nb_queued_cars[idx] += 1
-            cumulated_waiting_time[idx] += wait_time
-
-        for i in range(len(avg_speed)):
-            if nb_cars[i] > 0:
-                avg_speed[i] /= nb_cars[i]
-
-        state_one = np.concatenate((
-            nb_cars[:self._num_cells],
-            avg_speed[:self._num_cells],
-            cumulated_waiting_time[:self._num_cells],
-            nb_queued_cars[:self._num_cells]
-        ))
-        state_two = np.concatenate((
-            nb_cars[self._num_cells:],
-            avg_speed[self._num_cells:],
-            cumulated_waiting_time[self._num_cells:],
-            nb_queued_cars[self._num_cells:]
-        ))
-        return state_one, state_two
+        self._agents[0].train_batch(states, y)
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]
@@ -734,68 +437,61 @@ class Simulation:
         for state in state_list:
             pad_size = max_lanes - state.shape[0]
             if pad_size > 0:
-                pad_width = ((0, pad_size), (0, 0))
-                padded_state = np.pad(state, pad_width=pad_width, mode='constant')
+                padded_state = np.pad(state, ((0, pad_size), (0, 0)), mode='constant')
             else:
                 padded_state = state
             padded.append(padded_state)
         return np.array(padded, dtype=np.float32)
 
-    def _replay(self):
-        batch = self._Memory.get_samples(self._Model.batch_size)
-        if len(batch) == 0:
-            return
-
-        state_list = [sample[0] for sample in batch]
-        next_state_list = [sample[3] for sample in batch]
-        actions = np.array([sample[1] for sample in batch], dtype=np.int32)
-        rewards = np.array([sample[2] for sample in batch], dtype=np.float32)
-
-        states = self._pad_states(state_list)
-        next_states = self._pad_states(next_state_list)
-
-        q_s_a = self._Model.predict_batch(states)
-        best_next_actions = np.argmax(self._Model.predict_batch(next_states), axis=1)
-        target_q_next = self._TargetModel.predict_batch(next_states)
-        target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
-
-        y = np.copy(q_s_a)
-        y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
-
-        loss = np.mean(np.square(y - q_s_a))
-        self._q_loss_log.append(loss)
-        self._Model.train_batch(states, y)
-
     def _save_episode_stats(self):
-        self._reward_store.append(self._sum_neg_reward_one + self._sum_neg_reward_two)
-        self._reward_store_a1.append(self._sum_neg_reward_one)
-        self._reward_store_a2.append(self._sum_neg_reward_two)
-        self._cumulative_wait_store.append(self._cumulative_waiting_time_agent_one + self._cumulative_waiting_time_agent_two)
-        self._cumulative_wait_store_a1.append(self._cumulative_waiting_time_agent_one)
-        self._cumulative_wait_store_a2.append(self._cumulative_waiting_time_agent_two)
+        self._reward_store.append(self._sum_neg_reward)
+        self._cumulative_wait_store.append(self._sum_waiting_time)
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)
-        self._avg_queue_length_store_a1.append(self._sum_queue_length_a1 / self._max_steps)
-        self._avg_queue_length_store_a2.append(self._sum_queue_length_a2 / self._max_steps)
+
+    def _write_summary_log(self, episode, epsilon, sim_time):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        try:
+            with open(f"logs19/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
+                f.write(f"Timestamp: {timestamp}\n")
+                f.write(f"Intersection Type: {self.intersection_type}\n")
+                f.write(f"Total reward: {self._sum_neg_reward:.2f}\n")
+                f.write(f"Epsilon: {round(epsilon, 2)}\n")
+                f.write(f"Simulation duration: {sim_time}s\n")
+                f.write(f"Avg queue length: {self._sum_queue_length / self._max_steps:.2f}\n")
+                f.write(f"Cumulative wait time: {self._sum_waiting_time:.2f}\n")
+                f.write(f"Fault injected: {'Yes' if self.fault_injected_this_episode else 'No'}\n")
+                if self.fault_details:
+                    f.write("\nFault Details:\n")
+                    for step, tlid, orig, mod in self.fault_details:
+                        f.write(f"Step {step} | TLID: {tlid} | Orig: {orig} -> Mod: {mod}\n")
+                f.write(f"Total Emergency Delay: {self._emergency_total_delay:.2f}\n")
+                f.write("\nAction Distribution:\n")
+                for i, counts in enumerate(self._action_counts):
+                    f.write(f"Intersection {i + 1}:\n")
+                    for a, count in enumerate(counts):
+                        f.write(f" Action {a}: {count} times\n")
+        except Exception as e:
+            print(f"Error writing summary log: {e}")
 
     def analyze_results(self):
         plt.figure(figsize=(15, 5))
         plt.subplot(1, 3, 1)
-        plt.plot(self.reward_store)
+        plt.plot(self._reward_store)
         plt.title("Reward per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Reward")
         plt.subplot(1, 3, 2)
-        plt.plot(self.avg_queue_length_store)
-        plt.title("Average Queue Length per Episode")
+        plt.plot(self._avg_queue_length_store)
+        plt.title("Avg Queue Length per Episode")
         plt.xlabel("Episode")
         plt.ylabel("Avg Queue Length")
         plt.subplot(1, 3, 3)
-        plt.plot(self.cumulative_wait_store)
-        plt.title("Cumulative Waiting Time per Episode")
+        plt.plot(self._cumulative_wait_store)
+        plt.title("Cumulative Wait Time per Episode")
         plt.xlabel("Episode")
-        plt.ylabel("Cumulative Waiting Time")
+        plt.ylabel("Cumulative Wait Time")
         plt.show()
-        print(f"Final Faulty Lights: {self.faulty_lights}")
+        print("Final Faulty Lights:", self.faulty_lights)
         if self._green_durations_log:
             plt.figure(figsize=(10, 4))
             plt.plot(self._green_durations_log)
@@ -820,17 +516,3 @@ class Simulation:
     @property
     def q_loss_log(self):
         return self._q_loss_log
-
-    def stop(self):
-        return (
-            self.reward_store[0],
-            self._reward_store_a1[0],
-            self._reward_store_a2[0],
-            self.cumulative_wait_store[0],
-            self._cumulative_wait_store_a1[0],
-            self._cumulative_wait_store_a2[0],
-            self.avg_queue_length_store[0],
-            self._avg_queue_length_store_a1[0],
-            self._avg_queue_length_store_a2[0],
-            self._q_loss_log
-        )

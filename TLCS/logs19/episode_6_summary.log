@@ -1,9 +1,9 @@
-Timestamp: 2025-04-14 00:48:38
+Timestamp: 2025-04-14 12:42:29
 Intersection Type: cross
-Total reward: -37.64
+Total reward: -64.44
 Epsilon: 0.88
-Simulation duration: 6.7s
-Avg queue length: 13.63
+Simulation duration: 55.8s
+Avg queue length: 9.89
 Cumulative wait time: 0.00
 Fault injected: No
 Total Emergency Delay: 0.00

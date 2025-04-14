@@ -61,7 +61,7 @@ class TrafficGenerator:
 
         # Decide on filename based on intersection type
         if self.intersection_type == "T_intersection":
-            output_file = os.path.join(output_folder, "t_routes.rou.xml")
+            output_file = os.path.join(output_folder, "2x2_grid.rou.xml")
         elif self.intersection_type == "roundabout":
             output_file = os.path.join(output_folder, "roundabout.rou.xml")
         elif self.intersection_type == "cross_intersection":

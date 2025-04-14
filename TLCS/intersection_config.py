@@ -128,47 +128,62 @@ INTERSECTION_CONFIGS = {
     },
 
     "T_intersection": {
-        "sumocfg_file": "2x2_grid/2x2_grid.sumocfg",  # Adjust the file path to match your SUMO configuration for the grid network
-        "traffic_light_ids": ["1", "2"],  # Explicitly supply two IDs from your net file (the tlLogic IDs "1" and "2")
-        "incoming_lanes": {
-            # These lane IDs are derived from the junction (e.g., junction id "1" in the 2x2 grid)
-            # Here we group them into "vertical" and "horizontal" approaches.
-            "vertical": ["-v11_0", "-v11_1", "v12_0", "v12_1"],
-            "horizontal": ["h12_0", "h12_1", "-h11_0", "-h11_1"]
+    "sumocfg_file": "2x2_grid/2x2_grid.sumocfg",  # Adjust to your SUMO config file path
+    "traffic_light_ids": ["1", "2", "5", "6"],  # Now four TL IDs for four intersections
+    "incoming_lanes": {
+        # For junction 1 (located, for example, at (300,600)) as in your net file:
+        "junction1": ["-v11_0", "-v11_1", "h12_0", "h12_1", "-h11_0", "-h11_1"],
+        # For junction 2 (located at (450,600)):
+        "junction2": ["-v21_0", "-v21_1", "h13_0", "h13_1", "v22_0", "v22_1", "-h12_0", "-h12_1"],
+        # For junction 3 (located at (300,450)):
+        "junction3": ["-v12_0", "-v12_1", "h22_0", "h22_1", "v13_0", "v13_1", "-h21_0", "-h21_1"],
+        # For junction 4 (located at (450,450)):
+        "junction4": ["-v22_0", "-v22_1", "h23_0", "h23_1", "v23_0", "v23_1", "-h22_0", "-h22_1"]
+    },
+    "phase_mapping": {
+        # Assuming each traffic light uses a similar 8-phase cycle,
+        # you can use a uniform mapping if appropriate.
+        0: {"green": 0, "yellow": 1},
+        1: {"green": 2, "yellow": 3},
+        2: {"green": 4, "yellow": 5},
+        3: {"green": 6, "yellow": 7}
+    },
+    "occupancy_grid": {
+        "cells_per_lane": 10,
+        "max_distance": 600
+    },
+    "route_config": {
+        # You may need to update or split your routes for a grid network.
+        "main": {
+            "routes": ["W_E", "E_W"],
+            "probability": 0.7
         },
-        "phase_mapping": {
-            0: {"green": 0, "yellow": 1},
-            1: {"green": 2, "yellow": 3},
-            2: {"green": 0, "yellow": 1},
-            3: {"green": 2, "yellow": 3}
-        },
-        "occupancy_grid": {
-            "cells_per_lane": 10,
-            "max_distance": 600
-        },
-        "route_config": {
-            "main": {
-                "routes": ["W_E", "E_W"],
-                "probability": 0.7
-            },
-            "side": {
-                "routes": ["N_E", "N_W"],
-                "probability": 0.3
-            }
-        },
-        "communication_mode": True,
-        "header": """<routes>
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
-    <!-- Define routes based on the new lane naming -->
-    <route id="main_W_E" edges="h12_0 h12_1"/>
-    <route id="main_E_W" edges="-h11_0 -h11_1"/>
-    <route id="side_N_E" edges="-v11_0 -v11_1"/>
-    <route id="side_N_W" edges="v12_0 v12_1"/>
+        "side": {
+            "routes": ["N_E", "N_W"],
+            "probability": 0.3
+        }
+    },
+    "communication_mode": True,
+    "header": """<routes>
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" 
+           maxSpeed="20" sigma="0.5" emergency="true" />
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" 
+           minGap="2.5" maxSpeed="25" sigma="0.5" />
+    <!-- Define routes appropriate for your grid; update as needed -->
+    <route id="W_E" edges="..."/>
+    <route id="E_W" edges="..."/>
+    <route id="N_E" edges="..."/>
+    <route id="N_W" edges="..."/>
 </routes>""",
-        # For monitoring, we split the edges into two halves.
-        "monitor_edges": ["-v11", "-h11", "v12", "h12"],
-        "monitor_lanes": ["-v11_0", "-v11_1", "-h11_0", "-h11_1", "v12_0", "v12_1", "h12_0", "h12_1"]
+    # You might want to monitor each intersection separately.
+    "monitor_edges": ["-v11", "-h11", "h12", "-v21", "h13", "v22", "-v12", "-h21", "h22", "-v22", "h23", "v23"],
+    "monitor_lanes": [
+        "-v11_0", "-v11_1", "-h11_0", "-h11_1",
+        "h12_0", "h12_1",
+        "-v21_0", "-v21_1", "h13_0", "h13_1", "v22_0", "v22_1", "-h12_0", "-h12_1",
+        "-v12_0", "-v12_1", "-h21_0", "-h21_1", "h22_0", "h22_1", "v13_0", "v13_1",
+        "-v22_0", "-v22_1", "h23_0", "h23_1", "v23_0", "v23_1", "-h22_0", "-h22_1"
+    ]
     },
 
     "Y_intersection": {

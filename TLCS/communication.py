@@ -3,22 +3,23 @@ communication.py
 
 A simple communication module for multiagent coordination in traffic simulation.
 
-This module implements a basic message passing interface so that agents can
-explicitly share information (e.g., their chosen actions, Q-values, or local observations)
-with one another. It uses a global dictionary to store messages for each agent.
+This module implements a basic message passing interface so that agents can explicitly share
+information (e.g., their chosen actions, Q-values, or local observations) with one another.
+It uses a global dictionary to store messages for each agent.
 
 Notes:
-  - In a multi-threaded or multi-process scenario, consider adding thread safety
-    (e.g., via locks) or using a multiprocessing.Manager dictionary.
+  - In a multi-threaded or multi-process scenario, consider adding thread safety (e.g., via locks)
+    or using a multiprocessing.Manager dictionary.
   - This module assumes that agent IDs are integers.
 """
 
 # Global dictionary to hold messages for each agent.
 agent_messages = {}
 
-# Optionally, for thread safety you can import threading and use a Lock:
+# Optionally, for thread safety, you may import threading and use a Lock:
 # import threading
 # msg_lock = threading.Lock()
+
 
 def send_message(agent_id, message):
     """
@@ -28,7 +29,7 @@ def send_message(agent_id, message):
         agent_id (int): The identifier of the receiving agent.
         message (dict): The message (as a dictionary) to be sent.
     """
-    # For thread safety in multithreading, uncomment the following:
+    # For thread safety in multi-threading, uncomment the lines below:
     # with msg_lock:
     if agent_id not in agent_messages:
         agent_messages[agent_id] = []
@@ -47,7 +48,7 @@ def get_messages(agent_id):
     Returns:
         list: A list of messages that were stored for the agent.
     """
-    # If thread safety is needed, wrap with lock:
+    # For thread safety in multi-threading, uncomment the lines below:
     # with msg_lock:
     msgs = agent_messages.get(agent_id, [])
     # Clear messages after retrieval.

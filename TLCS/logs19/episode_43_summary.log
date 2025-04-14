@@ -1,11 +1,11 @@
-Timestamp: 2025-04-14 11:34:59
-Intersection Type: roundabout
-Total reward: -144.87
+Timestamp: 2025-04-14 18:36:35
+Intersection Type: T_intersection
+Total reward: -279.42
 Epsilon: 0.14
-Simulation duration: 30.3s
-Avg queue length: 222.55
+Simulation duration: 149.4s
+Avg queue length: 940.16
 Cumulative wait time: 0.00
-Fault injected: No
+Fault injected: Yes
 Total Emergency Delay: 0.00
 
 Action Distribution:

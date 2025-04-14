@@ -110,9 +110,6 @@ class Simulation:
             total_halt += traci.lane.getLastStepHaltingNumber(lane)
         return total_halt
 
-    # -------------------------------------------------------------------
-    # Main run() method with revised reward computation.
-    # -------------------------------------------------------------------
     def run(self, episode, epsilon):
         os.makedirs("logs22", exist_ok=True)
         log_file = open(f"logs22/episode_{episode}.log", "w")
@@ -132,39 +129,76 @@ class Simulation:
         self.handled_emergency_ids = set()
         start_time = timeit.default_timer()
 
+        # Reward scaling constants (tweak as needed)
+        ALPHA_WAIT = 0.2  # weight for waiting time
+        BETA_QUEUE = 1.0  # weight for queue length
+        PHASE_SWITCH_PENALTY = 10.0  # penalty when changing phases (unnecessary switching)
+        EMERGENCY_BONUS = 50.0  # bonus when emergency vehicles are cleared quickly
+        REWARD_SCALE = 0.01  # scaling factor to normalize rewards
+
         while self._step < self._max_steps:
             if check_emergency(self):
-                continue
+                # You might want to also add an emergency bonus to the current rewards if needed.
+                emergency_present = True
+            else:
+                emergency_present = False
 
             # Partition the overall state among agents.
             states = self._get_state()
 
-            # Compute local waiting metrics.
+            # Compute local waiting metrics for each agent.
             current_waits = []
             for i in range(self.num_agents):
                 wt = self._collect_waiting_times_per_agent(i)
                 ql = self._get_queue_length_per_agent(i)
-                current_wait = 0.2 * wt + 1.0 * ql
+                current_wait = ALPHA_WAIT * wt + BETA_QUEUE * ql
                 current_waits.append(current_wait)
 
             # Compute rewards and choose actions for each agent.
             rewards = [0.0] * self.num_agents
             actions = []
             for i in range(self.num_agents):
+                # Calculate base reward as the reduction in the waiting metric.
                 if self._step != 0 and old_states[i] is not None:
-                    rewards[i] = old_waits[i] - current_waits[i]
-                    if self.fault_injected_this_episode:
-                        rewards[i] *= FAULT_REWARD_SCALE
-                    self._Memory.add_sample((old_states[i], old_actions[i], rewards[i], states[i]))
+                    reward_i = old_waits[i] - current_waits[i]
+                else:
+                    reward_i = 0.0
+
+                # Apply penalty for unnecessary phase changes.
+                if self._step != 0 and old_actions[i] is not None and old_actions[i] != self._choose_action(states[i],
+                                                                                                            0,
+                                                                                                            self._Models[
+                                                                                                                i]):
+                    reward_i -= PHASE_SWITCH_PENALTY
+
+                # Add emergency bonus if an emergency is present in the state.
+                # (Assuming that state[:,2] indicates an emergency flag per lane.)
+                if emergency_present:
+                    # Check if there is an emergency flag in the state matrix.
+                    if np.any(states[i][:, 2] > 0):
+                        reward_i += EMERGENCY_BONUS
+
+                # Normalize the reward.
+                reward_i *= REWARD_SCALE
+
+                rewards[i] = reward_i
+
+                # Store experience.
+                if self._step != 0 and old_states[i] is not None:
+                    self._Memory.add_sample((old_states[i], old_actions[i], reward_i, states[i]))
+
+                # Choose the light phase using the i-th model.
                 action = self._choose_action(states[i], epsilon, model=self._Models[i])
                 actions.append(action)
-                log_file.write(f"[Step {self._step}] Agent {i} Action: {action}\n")
+                log_file.write(f"[Step {self._step}] Agent {i} Action: {action}, Reward: {reward_i:.4f}\n")
 
+            # Mutual reward for two-agent systems.
             if self.num_agents == 2:
                 mutual_weight = 0.5
                 rewards[0] += mutual_weight * rewards[1]
                 rewards[1] += mutual_weight * rewards[0]
 
+            # Execute phase changes.
             if self._step != 0:
                 for i in range(self.num_agents):
                     if old_actions[i] is not None and old_actions[i] != actions[i]:
@@ -202,9 +236,6 @@ class Simulation:
 
         return simulation_time, training_time
 
-    # -------------------------------------------------------------------
-    # Other methods remain largely the same.
-    # -------------------------------------------------------------------
     def _collect_waiting_times(self):
         incoming_lane_ids = []
         for lanes in self.int_conf["incoming_lanes"].values():

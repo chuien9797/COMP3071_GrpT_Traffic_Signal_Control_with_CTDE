@@ -187,19 +187,17 @@ class TrafficGenerator:
         # If no config for emergency routes is found, we pick default sets
         if not routes_list:
             if self.intersection_type == "T_intersection":
-                # T-intersection default
                 routes_list = ["W_E", "E_W", "N_E", "N_W", "E_N", "W_N"]
             elif self.intersection_type == "roundabout":
-                # Roundabout default → all route IDs
-                routes_list = ["route1","route2","route3","route4","route5","route6","route7","route8"]
+                routes_list = ["route1", "route2", "route3", "route4", "route5", "route6", "route7", "route8"]
             else:
-                # Cross or fallback
                 routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]
 
         for i, depart_time in enumerate(emergency_departures):
             chosen_route = np.random.choice(routes_list)
-            entry = '    <vehicle id="emergency_{}" type="emergency" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
-                i, chosen_route, depart_time)
+            unique_id = f"emergency_{i}_{chosen_route}_{depart_time}_{np.random.randint(10000,99999)}"
+            entry = '    <vehicle id="{}" type="emergency" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                unique_id, chosen_route, depart_time)
             vehicle_entries.append((depart_time, entry))
         return vehicle_entries
 

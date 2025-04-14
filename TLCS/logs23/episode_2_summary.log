@@ -1,0 +1,15 @@
+Timestamp: 2025-04-13 23:04:42
+Intersection: cross
+Total reward: -7888.00
+Epsilon: 0.96
+Simulation duration: 12.6s
+Avg queue length: 1.87
+Cumulative wait time: 10112.00
+Fault injected: ❌ No
+Total Emergency Delay: 125754.00
+
+Action Distribution:
+Action 0: 295 times
+Action 1: 273 times
+Action 2: 279 times
+Action 3: 270 times

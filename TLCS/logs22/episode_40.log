@@ -6040,3 +6040,75 @@
 [Simulate] Step 5334: Queue length 32, Waiting time 6319.0
 [Simulate] Step 5335: Queue length 33, Waiting time 6352.0
 [Simulate] Step 5336: Queue length 31, Waiting time 6224.0
+[Simulate] Step 5337: Queue length 29, Waiting time 6253.0
+[Simulate] Step 5338: Queue length 28, Waiting time 6281.0
+[Simulate] Step 5339: Queue length 28, Waiting time 6246.0
+[Simulate] Step 5340: Queue length 27, Waiting time 6273.0
+[Simulate] Step 5341: Queue length 26, Waiting time 6280.0
+[Simulate] Step 5342: Queue length 25, Waiting time 6303.0
+[Simulate] Step 5343: Queue length 24, Waiting time 6268.0
+[Simulate] Step 5344: Queue length 25, Waiting time 6293.0
+[Simulate] Step 5345: Queue length 24, Waiting time 6262.0
+[Simulate] Step 5346: Queue length 24, Waiting time 6286.0
+[Simulate] Step 5347: Queue length 25, Waiting time 6259.0
+[Simulate] Step 5348: Queue length 26, Waiting time 6285.0
+[Simulate] Step 5349: Queue length 26, Waiting time 6265.0
+[Simulate] Step 5350: Queue length 26, Waiting time 6291.0
+[Simulate] Step 5351: Queue length 27, Waiting time 6318.0
+[Simulate] Step 5352: Queue length 27, Waiting time 6310.0
+[Simulate] Step 5353: Queue length 28, Waiting time 6338.0
+[Simulate] Step 5354: Queue length 28, Waiting time 6331.0
+[Simulate] Step 5355: Queue length 29, Waiting time 6360.0
+[Simulate] Step 5356: Queue length 30, Waiting time 6357.0
+[Simulate] Step 5357: Queue length 31, Waiting time 6388.0
+[Simulate] Step 5358: Queue length 31, Waiting time 6386.0
+[Simulate] Step 5359: Queue length 31, Waiting time 6417.0
+[Simulate] Step 5360: Queue length 31, Waiting time 6422.0
+[Simulate] Step 5361: Queue length 32, Waiting time 6454.0
+[Simulate] Step 5362: Queue length 32, Waiting time 6486.0
+[Simulate] Step 5363: Queue length 32, Waiting time 6518.0
+[Simulate] Step 5364: Queue length 32, Waiting time 6550.0
+[Simulate] Step 5365: Queue length 32, Waiting time 6582.0
+[Simulate] Step 5366: Queue length 32, Waiting time 6614.0
+[Simulate] Step 5367: Queue length 32, Waiting time 6646.0
+[Simulate] Step 5368: Queue length 32, Waiting time 6678.0
+[Simulate] Step 5369: Queue length 32, Waiting time 6710.0
+[Simulate] Step 5370: Queue length 32, Waiting time 6742.0
+[Simulate] Step 5371: Queue length 32, Waiting time 6774.0
+[Simulate] Step 5372: Queue length 31, Waiting time 6708.0
+[Simulate] Step 5373: Queue length 30, Waiting time 6738.0
+[Simulate] Step 5374: Queue length 30, Waiting time 6768.0
+[Simulate] Step 5375: Queue length 30, Waiting time 6800.0
+[Simulate] Step 5376: Queue length 29, Waiting time 6829.0
+[Step 5376] Agent 0 Action: 0, Reward: -0.7480
+[Step 5376] Agent 1 Action: 2, Reward: -0.4053
+[Step 5376] Agent 2 Action: 3, Reward: -0.4453
+[Step 5376] Agent 3 Action: 0, Reward: -0.2213
+[SetYellow] TL 2: Set yellow phase 7 out of 8 phases.
+[Simulate] Step 5377: Queue length 29, Waiting time 6953.0
+[Simulate] Step 5378: Queue length 28, Waiting time 6898.0
+[Simulate] Step 5379: Queue length 29, Waiting time 7010.0
+[Simulate] Step 5380: Queue length 29, Waiting time 6966.0
+[SetYellow] TL 5: Set yellow phase 3 out of 8 phases.
+[Simulate] Step 5381: Queue length 28, Waiting time 6673.0
+[Simulate] Step 5382: Queue length 27, Waiting time 6645.0
+[Simulate] Step 5383: Queue length 26, Waiting time 6726.0
+[Simulate] Step 5384: Queue length 24, Waiting time 6313.0
+[SetYellow] TL 6: Set yellow phase 7 out of 8 phases.
+[Simulate] Step 5385: Queue length 22, Waiting time 6368.0
+[Simulate] Step 5386: Queue length 21, Waiting time 6372.0
+[Simulate] Step 5387: Queue length 21, Waiting time 6412.0
+[Simulate] Step 5388: Queue length 21, Waiting time 6420.0
+[Step 5388] Adaptive green duration: 50
+[Simulate] Step 5389: Queue length 20, Waiting time 6311.0
+[Simulate] Step 5390: Queue length 21, Waiting time 6332.0
+[Simulate] Step 5391: Queue length 21, Waiting time 6489.0
+[Simulate] Step 5392: Queue length 21, Waiting time 6385.0
+[Simulate] Step 5393: Queue length 22, Waiting time 6533.0
+[Simulate] Step 5394: Queue length 22, Waiting time 6555.0
+[Simulate] Step 5395: Queue length 22, Waiting time 6478.0
+[Simulate] Step 5396: Queue length 22, Waiting time 6403.0
+[Simulate] Step 5397: Queue length 22, Waiting time 6425.0
+[Simulate] Step 5398: Queue length 22, Waiting time 6338.0
+[Simulate] Step 5399: Queue length 21, Waiting time 6276.0
+[Simulate] Step 5400: Queue length 21, Waiting time 6297.0

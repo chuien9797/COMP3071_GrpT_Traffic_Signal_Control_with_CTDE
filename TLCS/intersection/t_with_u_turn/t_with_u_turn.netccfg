@@ -1,0 +1,9 @@
+<configuration>
+    <input>
+        <node-files value="t_with_u_turn.nod.xml"/>
+        <edge-files value="t_with_u_turn.edg.xml"/>
+    </input>
+    <output>
+        <output-file value="t_with_u_turn.net.xml"/>
+    </output>
+</configuration>

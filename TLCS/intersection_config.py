@@ -127,7 +127,7 @@ INTERSECTION_CONFIGS = {
         "monitor_lanes": ["e1_0", "e2_0", "e3_0", "e4_0"]
     },
 
-    "2x2_grid": {
+    "T_intersection": {
     "sumocfg_file": "2x2_grid/2x2_grid.sumocfg",  # Adjust to your SUMO config file path
     "traffic_light_ids": ["1", "2", "5", "6"],  # Now four TL IDs for four intersections
     "incoming_lanes": {
@@ -185,102 +185,6 @@ INTERSECTION_CONFIGS = {
         "-v22_0", "-v22_1", "h23_0", "h23_1", "v23_0", "v23_1", "-h22_0", "-h22_1"
     ]
     },
-
-    "T_intersection": {
-        "sumocfg_file": "t_intersection/t_intersection.sumocfg",
-        "traffic_light_ids": ["TL"],
-        "incoming_lanes": {
-            "main": ["left_in_0", "left_in_1", "right_in_0", "right_in_1"],
-            "side": ["top_in_0", "top_in_1"]
-        },
-        "phase_mapping": {
-            0: {"green": 0, "yellow": 1},   # main road green
-            1: {"green": 2, "yellow": 3},   # side road green
-            2: {"green": 0, "yellow": 1},   # duplicate main road green
-            3: {"green": 2, "yellow": 3}    # duplicate side road green
-        },
-        "occupancy_grid": {
-            "cells_per_lane": 8,
-            "max_distance": 600
-        },
-        "route_config": {
-            "main": {
-                "routes": ["W_E", "E_W"],
-                "probability": 0.7
-            },
-            "side": {
-                "routes": ["N_E", "N_W"],
-                "probability": 0.3
-            }
-        },
-        "header": """<routes>
-    <!-- Define emergency vehicle type -->
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
-           maxSpeed="20" sigma="0.5" emergency="true"/>
-    <!-- Define standard vehicle type -->
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
-           minGap="2.5" maxSpeed="25" sigma="0.5"/>
-
-    <!-- Main road routes (west-east and east-west) -->
-    <route id="W_E" edges="left_in right_out"/>
-    <route id="E_W" edges="right_in left_out"/>
-
-    <!-- Routes from the north approach joining the main road -->
-    <route id="N_E" edges="top_in right_out"/>
-    <route id="N_W" edges="top_in left_out"/>
-
-    <!-- Optional: if vehicles on the main road can turn northward -->
-    <route id="E_N" edges="right_in top_out"/>
-    <route id="W_N" edges="left_in top_out"/>""",
-        # For T_intersection, let's monitor the three inbound edges
-        # named left_in, right_in, top_in. If your net uses different names, adjust them.
-        "monitor_edges": ["left_in", "right_in", "top_in"],
-        # We'll track waiting time on lane 0 for each approach
-        "monitor_lanes": ["left_in_0", "right_in_0", "top_in_0"]
-    },
-
-    "ow": {
-    "sumocfg_file": "intersection/ow/ow.sumocfg",
-    "traffic_light_ids": ["TL1", "TL2", "TL3", "TL4", "TL5"],
-    "incoming_lanes": {
-        "entry1": ["-e1_0", "-e1_1"],
-        "entry2": ["-e2_0", "-e2_1"],
-        "entry3": ["-e3_0", "-e3_1"],
-        "entry4": ["-e4_0", "-e4_1"],
-        "entry5": ["-e5_0", "-e5_1"]
-    },
-    "phase_mapping": {
-        0: {"green": 0, "yellow": 1},
-        1: {"green": 2, "yellow": 3},
-        2: {"green": 4, "yellow": 5}
-    },
-    "occupancy_grid": {
-        "cells_per_lane": 10,
-        "max_distance": 600
-    },
-    "route_config": {
-        "main": {
-            "routes": ["b1a", "b1b", "e6a", "e6b", "c2a"],
-            "probability": 1.0
-        }
-    },
-    "communication_mode": True,
-    "header": """<routes>
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
-           maxSpeed="20" sigma="0.5" emergency="true" />
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
-           minGap="2.5" maxSpeed="25" sigma="0.5" />
-
-    <route id="b1a" edges="e1 e3"/>
-    <route id="b1b" edges="e1 e4"/>
-    <route id="e6a" edges="e6 e7"/>
-    <route id="e6b" edges="e6 e8"/>
-    <route id="c2a" edges="e9 e10"/>
-</routes>""",
-    "monitor_edges": ["e1", "e2", "e3", "e4", "e5", "e6", "e9"],
-    "monitor_lanes": ["-e1_0", "-e2_0", "-e3_0", "-e4_0", "-e5_0", "-e6_0"]
-},
-
 
     "Y_intersection": {
         "sumocfg_file": "y_intersection/y_intersection.sumocfg",

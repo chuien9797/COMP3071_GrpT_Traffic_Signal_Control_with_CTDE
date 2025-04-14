@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges>
+
+    <!-- Main horizontal road: LEFT -> CENTER (2 lanes) -->
+    <edge id="left_to_center"
+          from="left"
+          to="center"
+          numLanes="2"
+          speed="13.9"/>
+
+    <!-- Main horizontal road: CENTER -> LEFT (2 lanes) -->
+    <edge id="center_to_left"
+          from="center"
+          to="left"
+          numLanes="2"
+          speed="13.9"/>
+
+    <!-- Main horizontal road: CENTER -> RIGHT (2 lanes) -->
+    <edge id="center_to_right"
+          from="center"
+          to="right"
+          numLanes="2"
+          speed="13.9"/>
+
+    <!-- Main horizontal road: RIGHT -> CENTER (2 lanes) -->
+    <edge id="right_to_center"
+          from="right"
+          to="center"
+          numLanes="2"
+          speed="13.9"/>
+
+    <!-- Vertical side road: CENTER -> DOWN (1 lane) -->
+    <edge id="center_to_down"
+          from="center"
+          to="down"
+          numLanes="1"
+          speed="13.9"/>
+
+    <!-- Vertical side road: DOWN -> CENTER (1 lane) -->
+    <edge id="down_to_center"
+          from="down"
+          to="center"
+          numLanes="1"
+          speed="13.9"/>
+
+</edges>

@@ -8,16 +8,100 @@ import traci
 
 from emergency_handler import check_emergency, handle_emergency_vehicle
 import intersection_config as int_config
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras import layers
+import tensorflow as tf
 
 # Global constants for faults, etc.
 RECOVERY_DELAY = 15
 FAULT_REWARD_SCALE = 0.5
 EPISODE_FAULT_START = 25
 
+
+###############################################################################
+# Centralized Critic Network for CTDE
+###############################################################################
+class CentralizedCritic(tf.keras.Model):
+    """
+    A centralized critic network that maps the global state to a joint Q value.
+    In this discrete-action setting, we assume a scalar value representing the joint
+    evaluation of the current global state. This network is trained with an MSE loss.
+    """
+    def __init__(self, global_state_dim, hidden_units=64):
+        super().__init__()
+        self.dense1 = layers.Dense(hidden_units, activation='relu')
+        self.dense2 = layers.Dense(hidden_units, activation='relu')
+        self.out = layers.Dense(1, activation='linear')
+
+    def call(self, global_state):
+        x = self.dense1(global_state)
+        x = self.dense2(x)
+        q_joint = self.out(x)
+        return q_joint  # shape: (batch_size, 1)
+
+
+###############################################################################
+# Memory Class with Encapsulated per-Agent Sample Retrieval
+###############################################################################
+class Memory:
+    def __init__(self, size_max, size_min):
+        """
+        Initialize the replay memory.
+
+        In a multi-agent scenario, each sample is stored as a tuple:
+          (agent_id, state, action, reward, next_state, global_state)
+        """
+        self._samples = []
+        self._size_max = size_max
+        self._size_min = size_min
+
+    def add_sample(self, sample):
+        """
+        Add a sample to the memory.
+
+        Parameters:
+            sample (tuple): Expected form is
+              (agent_id, state, action, reward, next_state, global_state)
+        """
+        self._samples.append(sample)
+        if self._size_now() > self._size_max:
+            self._samples.pop(0)
+
+    def get_samples(self, n):
+        """
+        Retrieve n random samples from memory if enough samples exist.
+        """
+        if self._size_now() < self._size_min:
+            return []
+        available_samples = self._size_now()
+        if n > available_samples:
+            return random.sample(self._samples, available_samples)
+        else:
+            return random.sample(self._samples, n)
+
+    def get_samples_by_agent(self, agent_id, n):
+        """
+        Retrieve n random samples specifically for the given agent id.
+        """
+        agent_samples = [sample for sample in self._samples if sample[0] == agent_id]
+        if len(agent_samples) < self._size_min:
+            return []
+        if n > len(agent_samples):
+            return random.sample(agent_samples, len(agent_samples))
+        else:
+            return random.sample(agent_samples, n)
+
+    def _size_now(self):
+        return len(self._samples)
+
+
+###############################################################################
+# Simulation Class with Flexible Reward Sharing, Per-Agent Replay, and CTDE
+###############################################################################
 class Simulation:
     def __init__(self,
                  Models,         # List of agent models
-                 TargetModels,   # List of target models (can be same as Models for shared parameters)
+                 TargetModels,   # List of target models (can be same as Models for shared params)
                  Memory,
                  TrafficGen,
                  sumo_cmd,
@@ -25,11 +109,11 @@ class Simulation:
                  max_steps,
                  green_duration,
                  yellow_duration,
-                 num_states,     # Not used by aggregator but preserved for compatibility.
+                 num_states,     # Not used by aggregator but preserved for compatibility
                  training_epochs,
                  intersection_type="cross",
                  signal_fault_prob=0.1):
-        # Store multi-agent models as lists.
+        # Store multi-agent models and other parameters.
         self._Models = Models
         self._TargetModels = TargetModels
         self._Memory = Memory
@@ -43,7 +127,7 @@ class Simulation:
         self._num_states = num_states
         self._training_epochs = training_epochs
 
-        # Global statistics and logs.
+        # Logging and statistics.
         self._reward_store = []
         self._cumulative_wait_store = []
         self._avg_queue_length_store = []
@@ -55,11 +139,9 @@ class Simulation:
         self._emergency_total_delay = 0.0
         self._teleport_count = 0
 
-        # Initialize accumulators for simulation statistics.
         self._sum_queue_length = 0
         self._sum_waiting_time = 0
 
-        # Fault injection parameters.
         self.signal_fault_prob = signal_fault_prob
         self.manual_override = False
         self.recovery_queue = {}
@@ -69,48 +151,113 @@ class Simulation:
             raise ValueError(f"Intersection type '{intersection_type}' not found in config.")
         self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
         self._num_actions = len(self.int_conf["phase_mapping"])
-        # Set number of agents based on the provided traffic light IDs.
-        self._traffic_light_ids = self.int_conf.get("traffic_light_ids", [])
-        self.num_agents = len(self._traffic_light_ids) if isinstance(self._traffic_light_ids, list) else 1
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        self.num_agents = len(tl_ids) if isinstance(tl_ids, list) else 1
 
-    # -------------------------------------------------------------------
-    # Helper functions for per-agent local metrics.
-    # -------------------------------------------------------------------
+        # Instantiate the centralized critic.
+        # Compute global state dimension as (total number of lanes across all groups * lane_feature_dim).
+        lane_feature_dim = 9
+        total_lanes = sum(len(lanes) for lanes in self.int_conf["incoming_lanes"].values())
+        global_state_dim = total_lanes * lane_feature_dim
+        self.centralized_critic = CentralizedCritic(global_state_dim, hidden_units=64)
+        self.centralized_critic.compile(loss='mse', optimizer=Adam(learning_rate=0.001))
+
+    def _get_state(self):
+        """
+        Returns a list of state matrices—one per agent.
+        Each state is a matrix of shape [num_lanes, lane_feature_dim].
+        """
+        groups = sorted(self.int_conf["incoming_lanes"].keys())
+        states = []
+        tl_ids = self.int_conf.get("traffic_light_ids", [])
+        lane_feature_dim = 9
+        for agent_index, group in enumerate(groups):
+            lanes = self.int_conf["incoming_lanes"][group]
+            num_lanes = len(lanes)
+            group_state = np.zeros((num_lanes, lane_feature_dim), dtype=np.float32)
+            for i, lane_id in enumerate(lanes):
+                group_state[i, 0] = traci.lane.getLastStepVehicleNumber(lane_id)
+                group_state[i, 1] = traci.lane.getWaitingTime(lane_id)
+                flag = 0
+                for car_id in traci.lane.getLastStepVehicleIDs(lane_id):
+                    if traci.vehicle.getTypeID(car_id) == "emergency":
+                        flag = 1
+                        break
+                group_state[i, 2] = float(flag)
+                group_state[i, 3] = traci.lane.getLastStepHaltingNumber(lane_id)
+                if agent_index < len(tl_ids):
+                    phase_val = float(traci.trafficlight.getPhase(tl_ids[agent_index]))
+                else:
+                    phase_val = 0.0
+                group_state[i, 4] = phase_val
+                controlled_by_faulty = 0.0
+                if agent_index < len(tl_ids):
+                    tlid = tl_ids[agent_index]
+                    try:
+                        logics = traci.trafficlight.getAllProgramLogics(tlid)
+                        if logics:
+                            current_phase = traci.trafficlight.getPhase(tlid)
+                            phase_state = logics[0].phases[current_phase].state
+                            connections = traci.trafficlight.getControlledLanes(tlid)
+                            if lane_id in connections:
+                                conn_idx = connections.index(lane_id)
+                                if phase_state[conn_idx] == 'r':
+                                    controlled_by_faulty = 1.0
+                    except Exception as e:
+                        pass
+                group_state[i, 5] = controlled_by_faulty
+                intersection_encoding = {
+                    "cross": [1.0, 0.0, 0.0],
+                    "roundabout": [0.0, 1.0, 0.0],
+                    "t_intersection": [0.0, 0.0, 1.0],
+                    "y_intersection": [0.33, 0.33, 0.34]
+                }
+                type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
+                group_state[i, 6:9] = np.array(type_vector)
+            states.append(group_state)
+        return states
+
+    def _get_global_state(self, states):
+        """
+        Combine local states into one global state vector.
+        Here we flatten each agent’s state and concatenate them.
+        """
+        flat_list = [s.flatten() for s in states]
+        global_state = np.concatenate(flat_list)
+        return global_state
+
     def _collect_waiting_times_per_agent(self, agent_index):
-        incoming_lanes = []
-        for group in sorted(self.int_conf["incoming_lanes"].keys()):
-            incoming_lanes.extend(self.int_conf["incoming_lanes"][group])
-        sorted_lanes = sorted(incoming_lanes)
-        num_lanes = len(sorted_lanes)
-        lanes_per_agent = num_lanes // self.num_agents if self.num_agents > 0 else num_lanes
-        start = agent_index * lanes_per_agent
-        if agent_index == self.num_agents - 1:
-            lanes = sorted_lanes[start:]
+        groups = sorted(self.int_conf["incoming_lanes"].keys())
+        if agent_index < len(groups):
+            lanes = self.int_conf["incoming_lanes"][groups[agent_index]]
         else:
-            lanes = sorted_lanes[start:start + lanes_per_agent]
+            lanes = []
         total_wait = 0.0
         for lane in lanes:
             total_wait += traci.lane.getWaitingTime(lane)
         return total_wait
 
     def _get_queue_length_per_agent(self, agent_index):
-        incoming_lanes = []
-        for group in sorted(self.int_conf["incoming_lanes"].keys()):
-            incoming_lanes.extend(self.int_conf["incoming_lanes"][group])
-        sorted_lanes = sorted(incoming_lanes)
-        num_lanes = len(sorted_lanes)
-        lanes_per_agent = num_lanes // self.num_agents if self.num_agents > 0 else num_lanes
-        start = agent_index * lanes_per_agent
-        if agent_index == self.num_agents - 1:
-            lanes = sorted_lanes[start:]
+        groups = sorted(self.int_conf["incoming_lanes"].keys())
+        if agent_index < len(groups):
+            lanes = self.int_conf["incoming_lanes"][groups[agent_index]]
         else:
-            lanes = sorted_lanes[start:start + lanes_per_agent]
+            lanes = []
         total_halt = 0
         for lane in lanes:
             total_halt += traci.lane.getLastStepHaltingNumber(lane)
         return total_halt
 
     def run(self, episode, epsilon):
+        """
+        Main simulation loop:
+          - Generates route files and steps through the simulation.
+          - Computes per-agent local rewards.
+          - Uses a flexible reward-sharing scheme: each agent’s final reward is a mix of
+            its own local reward and the average of other agents' rewards.
+          - Stores experiences in memory along with a computed global state.
+          - After simulation, calls replay() and train_ctde() to update networks.
+        """
         os.makedirs("logs22", exist_ok=True)
         log_file = open(f"logs22/episode_{episode}.log", "w")
 
@@ -129,24 +276,16 @@ class Simulation:
         self.handled_emergency_ids = set()
         start_time = timeit.default_timer()
 
-        # Reward scaling constants (tweak as needed)
-        ALPHA_WAIT = 0.2  # weight for waiting time
-        BETA_QUEUE = 1.0  # weight for queue length
-        PHASE_SWITCH_PENALTY = 10.0  # penalty when changing phases (unnecessary switching)
-        EMERGENCY_BONUS = 50.0  # bonus when emergency vehicles are cleared quickly
-        REWARD_SCALE = 0.01  # scaling factor to normalize rewards
+        # Reward scaling parameters.
+        ALPHA_WAIT = 0.2
+        BETA_QUEUE = 1.0
+        PHASE_SWITCH_PENALTY = 10.0
+        EMERGENCY_BONUS = 50.0
+        REWARD_SCALE = 0.01
 
         while self._step < self._max_steps:
-            if check_emergency(self):
-                # You might want to also add an emergency bonus to the current rewards if needed.
-                emergency_present = True
-            else:
-                emergency_present = False
-
-            # Partition the overall state among agents.
+            emergency_present = check_emergency(self)
             states = self._get_state()
-
-            # Compute local waiting metrics for each agent.
             current_waits = []
             for i in range(self.num_agents):
                 wt = self._collect_waiting_times_per_agent(i)
@@ -154,60 +293,65 @@ class Simulation:
                 current_wait = ALPHA_WAIT * wt + BETA_QUEUE * ql
                 current_waits.append(current_wait)
 
-            # Compute rewards and choose actions for each agent.
-            rewards = [0.0] * self.num_agents
+            # Compute local rewards.
+            local_rewards = [0.0] * self.num_agents
+            for i in range(self.num_agents):
+                if self._step != 0 and old_states[i] is not None:
+                    local_reward = old_waits[i] - current_waits[i]
+                else:
+                    local_reward = 0.0
+
+                if self._step != 0 and old_actions[i] is not None and \
+                   old_actions[i] != self._choose_action(states[i], 0, self._Models[i]):
+                    local_reward -= PHASE_SWITCH_PENALTY
+
+                if emergency_present and np.any(states[i][:, 2] > 0):
+                    local_reward += EMERGENCY_BONUS
+
+                local_rewards[i] = local_reward * REWARD_SCALE
+
+            # Flexible reward sharing across agents.
+            lambda_coef = 0.5
+            final_rewards = []
+            for i in range(self.num_agents):
+                if self.num_agents > 1:
+                    other_sum = sum(local_rewards) - local_rewards[i]
+                    global_component = other_sum / (self.num_agents - 1)
+                else:
+                    global_component = 0.0
+                final_reward = (1 - lambda_coef) * local_rewards[i] + lambda_coef * global_component
+                final_rewards.append(final_reward)
+
+            # Compute global state (for CTDE).
+            global_state = self._get_global_state(states)
+
             actions = []
             for i in range(self.num_agents):
-                # Calculate base reward as the reduction in the waiting metric.
                 if self._step != 0 and old_states[i] is not None:
-                    reward_i = old_waits[i] - current_waits[i]
-                else:
-                    reward_i = 0.0
-
-                # Apply penalty for unnecessary phase changes.
-                if self._step != 0 and old_actions[i] is not None and old_actions[i] != self._choose_action(states[i],
-                                                                                                            0,
-                                                                                                            self._Models[
-                                                                                                                i]):
-                    reward_i -= PHASE_SWITCH_PENALTY
-
-                # Add emergency bonus if an emergency is present in the state.
-                # (Assuming that state[:,2] indicates an emergency flag per lane.)
-                if emergency_present:
-                    # Check if there is an emergency flag in the state matrix.
-                    if np.any(states[i][:, 2] > 0):
-                        reward_i += EMERGENCY_BONUS
-
-                # Normalize the reward.
-                reward_i *= REWARD_SCALE
-
-                rewards[i] = reward_i
-
-                # Store experience.
-                if self._step != 0 and old_states[i] is not None:
-                    self._Memory.add_sample((old_states[i], old_actions[i], reward_i, states[i]))
-
-                # Choose the light phase using the i-th model.
+                    # Store experience: (agent_id, old_state, old_action, reward, new_state, global_state)
+                    self._Memory.add_sample((i, old_states[i], old_actions[i], final_rewards[i], states[i], global_state))
                 action = self._choose_action(states[i], epsilon, model=self._Models[i])
                 actions.append(action)
-                log_file.write(f"[Step {self._step}] Agent {i} Action: {action}, Reward: {reward_i:.4f}\n")
+                log_file.write(f"[Step {self._step}] Agent {i} Action: {action}, Reward: {final_rewards[i]:.4f}\n")
 
-            # Mutual reward for two-agent systems.
+            # (Optional) Two-agent additional sharing.
             if self.num_agents == 2:
                 mutual_weight = 0.5
-                rewards[0] += mutual_weight * rewards[1]
-                rewards[1] += mutual_weight * rewards[0]
+                final_rewards[0] += mutual_weight * final_rewards[1]
+                final_rewards[1] += mutual_weight * final_rewards[0]
 
-            # Execute phase changes.
+            # Execute yellow phases as needed.
             if self._step != 0:
                 for i in range(self.num_agents):
                     if old_actions[i] is not None and old_actions[i] != actions[i]:
                         self._set_yellow_phase(i, old_actions[i], log_file)
                         self._simulate(self._yellow_duration, log_file)
 
+            # Set green phases.
             for i, action in enumerate(actions):
                 self._set_green_phase(i, action, log_file)
 
+            # Compute adaptive green duration using first agent’s state.
             adaptive_green = self._compute_adaptive_green_duration(states[0])
             self._green_durations_log.append(adaptive_green)
             log_file.write(f"[Step {self._step}] Adaptive green duration: {adaptive_green}\n")
@@ -217,7 +361,7 @@ class Simulation:
             old_actions = actions
             old_waits = current_waits
 
-            for r in rewards:
+            for r in final_rewards:
                 if r < 0:
                     self._sum_neg_reward += r
 
@@ -229,83 +373,14 @@ class Simulation:
         self._write_summary_log(episode, epsilon, simulation_time)
 
         print("Training...")
-        start_time = timeit.default_timer()
+        start_train_time = timeit.default_timer()
         for _ in range(self._training_epochs):
             self._replay()
-        training_time = round(timeit.default_timer() - start_time, 1)
+            # Perform centralized training with CTDE.
+            self.train_ctde()
+        training_time = round(timeit.default_timer() - start_train_time, 1)
 
         return simulation_time, training_time
-
-    def _collect_waiting_times(self):
-        incoming_lane_ids = []
-        for lanes in self.int_conf["incoming_lanes"].values():
-            incoming_lane_ids.extend(lanes)
-        total_wait = 0.0
-        for veh in traci.vehicle.getIDList():
-            lane = traci.vehicle.getLaneID(veh)
-            if lane in incoming_lane_ids:
-                total_wait += traci.vehicle.getAccumulatedWaitingTime(veh)
-        return total_wait
-
-    def _get_state(self):
-        incoming_lanes = self.int_conf["incoming_lanes"]
-        lane_order = []
-        for group in sorted(incoming_lanes.keys()):
-            lane_order.extend(incoming_lanes[group])
-        num_lanes = len(lane_order)
-        lane_feature_dim = 9
-        lane_features = np.zeros((num_lanes, lane_feature_dim), dtype=np.float32)
-        intersection_encoding = {
-            "cross":         [1.0, 0.0, 0.0],
-            "roundabout":    [0.0, 1.0, 0.0],
-            "2x2_grid":      [0.0, 0.0, 1.0],
-            "y_intersection":[0.33, 0.33, 0.34],
-            "t_intersection":[0.6, 0.2, 0.2],   # just make sure it's distinguishable
-            "ow":            [0.2, 0.6, 0.2]
-        }
-        type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
-        sorted_lanes = sorted(sum([v for v in self.int_conf["incoming_lanes"].values()], []))
-        for i, lane_id in enumerate(sorted_lanes):
-            lane_features[i, 0] = traci.lane.getLastStepVehicleNumber(lane_id)
-            lane_features[i, 1] = traci.lane.getWaitingTime(lane_id)
-            flag = 0
-            for car_id in traci.lane.getLastStepVehicleIDs(lane_id):
-                if traci.vehicle.getTypeID(car_id) == "emergency":
-                    flag = 1
-                    break
-            lane_features[i, 2] = float(flag)
-            lane_features[i, 3] = traci.lane.getLastStepHaltingNumber(lane_id)
-            tl_ids = self.int_conf.get("traffic_light_ids", [])
-            phase_val = 0.0
-            if tl_ids:
-                phase_val = float(traci.trafficlight.getPhase(tl_ids[0]))
-            lane_features[i, 4] = phase_val
-            controlled_by_faulty = 0.0
-            if tl_ids:
-                try:
-                    logics = traci.trafficlight.getAllProgramLogics(tl_ids[0])
-                    if logics:
-                        current_phase = traci.trafficlight.getPhase(tl_ids[0])
-                        phase_state = logics[0].phases[current_phase].state
-                        connections = traci.trafficlight.getControlledLanes(tl_ids[0])
-                        if lane_id in connections:
-                            idx = connections.index(lane_id)
-                            if phase_state[idx] == 'r':
-                                controlled_by_faulty = 1.0
-                except Exception as e:
-                    pass
-            lane_features[i, 5] = controlled_by_faulty
-            lane_features[i, 6:9] = np.array(type_vector)
-        lanes_per_agent = num_lanes // self.num_agents if self.num_agents > 0 else num_lanes
-        states = []
-        for i in range(self.num_agents):
-            start = i * lanes_per_agent
-            if i == self.num_agents - 1:
-                state_i = lane_features[start:]
-            else:
-                state_i = lane_features[start:start + lanes_per_agent]
-            states.append(state_i)
-        return states
 
     def _choose_action(self, state, epsilon, model):
         valid_action_indices = list(self.int_conf["phase_mapping"].keys())
@@ -324,7 +399,7 @@ class Simulation:
             return
         yellow_phase = phase_map[action_number]["yellow"]
         tl_ids = self.int_conf.get("traffic_light_ids", [])
-        if tl_ids and agent_index < len(tl_ids):
+        if agent_index < len(tl_ids):
             tlid = tl_ids[agent_index]
             try:
                 logics = traci.trafficlight.getAllProgramLogics(tlid)
@@ -356,7 +431,7 @@ class Simulation:
             return
         green_phase = phase_map[action_number]["green"]
         tl_ids = self.int_conf.get("traffic_light_ids", [])
-        if tl_ids and agent_index < len(tl_ids):
+        if agent_index < len(tl_ids):
             tlid = tl_ids[agent_index]
             try:
                 logics = traci.trafficlight.getAllProgramLogics(tlid)
@@ -464,34 +539,56 @@ class Simulation:
             incoming_lane_ids.extend(lanes)
         return sum(traci.lane.getLastStepHaltingNumber(lane) for lane in incoming_lane_ids)
 
+    def _collect_waiting_times(self):
+        incoming_lane_ids = []
+        for lanes in self.int_conf["incoming_lanes"].values():
+            incoming_lane_ids.extend(lanes)
+        total_wait = 0.0
+        for veh in traci.vehicle.getIDList():
+            lane = traci.vehicle.getLaneID(veh)
+            if lane in incoming_lane_ids:
+                total_wait += traci.vehicle.getAccumulatedWaitingTime(veh)
+        return total_wait
+
     def _replay(self):
-        batch = self._Memory.get_samples(self._Models[0].batch_size)
-        if len(batch) == 0:
-            print("[Replay] Not enough samples. Skipping training update.")
-            return
-        state_list = []
-        next_state_list = []
-        actions = []
-        rewards = []
-        for sample in batch:
-            st, act, rew, nst = sample
-            state_list.append(st)
-            next_state_list.append(nst)
-            actions.append(act)
-            rewards.append(rew)
-        states = self._pad_states(state_list)
-        next_states = self._pad_states(next_state_list)
-        actions = np.array(actions, dtype=np.int32)
-        rewards = np.array(rewards, dtype=np.float32)
-        q_s_a = self._Models[0].predict_batch(states)
-        best_next_actions = np.argmax(self._Models[0].predict_batch(next_states), axis=1)
-        target_q_next = self._TargetModels[0].predict_batch(next_states)
-        target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
-        y = np.copy(q_s_a)
-        y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
-        loss = np.mean(np.square(y - q_s_a))
-        self._q_loss_log.append(loss)
-        self._Models[0].train_batch(states, y)
+        """
+        Update each agent's network by sampling its own experiences from memory.
+        """
+        for agent_index in range(self.num_agents):
+            batch_size = self._Models[agent_index].batch_size
+            batch = self._Memory.get_samples_by_agent(agent_index, batch_size)
+            if len(batch) == 0:
+                print(f"[Replay] Not enough samples for agent {agent_index}. Skipping training update.")
+                continue
+
+            state_list = []
+            next_state_list = []
+            actions = []
+            rewards = []
+            for sample in batch:
+                # Each sample: (agent_id, state, action, reward, next_state, global_state)
+                _, st, act, rew, nst, _ = sample
+                state_list.append(st)
+                next_state_list.append(nst)
+                actions.append(act)
+                rewards.append(rew)
+
+            states = self._pad_states(state_list)
+            next_states = self._pad_states(next_state_list)
+            actions = np.array(actions, dtype=np.int32)
+            rewards = np.array(rewards, dtype=np.float32)
+
+            q_s_a = self._Models[agent_index].predict_batch(states)
+            best_next_actions = np.argmax(self._Models[agent_index].predict_batch(next_states), axis=1)
+            target_q_next = self._TargetModels[agent_index].predict_batch(next_states)
+            target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
+
+            y = np.copy(q_s_a)
+            y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
+
+            loss = np.mean(np.square(y - q_s_a))
+            self._q_loss_log.append(loss)
+            self._Models[agent_index].train_batch(states, y)
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]
@@ -508,7 +605,6 @@ class Simulation:
 
     def _save_episode_stats(self):
         self._reward_store.append(self._sum_neg_reward)
-        # For simplicity, use the sum of waiting times as cumulative wait.
         self._cumulative_wait_store.append(self._sum_waiting_time)
         self._avg_queue_length_store.append(self._sum_queue_length / self._max_steps)
 
@@ -534,6 +630,71 @@ class Simulation:
                     f.write(f"Agent {i + 1}\n")
         except Exception as e:
             print(f"Error writing summary log: {e}")
+
+    def train_ctde(self):
+        """
+        Centralized Training with Decentralized Execution (CTDE).
+
+        In this implementation:
+          1. A joint batch is sampled from the shared memory.
+          2. The centralized critic is trained on (global_state, reward) pairs.
+             (For simplicity, we use the immediate reward as the target.)
+          3. For each agent, an auxiliary loss term is computed as the mean-squared error
+             between the agent's Q value (for the taken action) and the centralized critic's
+             prediction on the corresponding global state.
+          4. In a full implementation, you would combine the DQN loss with this auxiliary term
+             and update the agent's network. Here, we simply print the alignment loss.
+        """
+        # 1. Sample joint experiences (without filtering by agent).
+        joint_batch = self._Memory.get_samples(self._Models[0].batch_size)
+        if len(joint_batch) < self._Memory._size_min:
+            print("[CTDE] Not enough samples for centralized training.")
+            return
+
+        global_states = []
+        rewards = []
+        for sample in joint_batch:
+            # sample: (agent_id, state, action, reward, next_state, global_state)
+            _, _, _, rew, _, g_st = sample
+            global_states.append(g_st)
+            rewards.append(rew)
+        global_states = np.array(global_states)
+        rewards = np.array(rewards).reshape(-1, 1)
+
+        # 2. Train the centralized critic.
+        target = rewards  # For simplicity, we set target = reward (no bootstrapping).
+        critic_loss = self.centralized_critic.train_on_batch(global_states, target)
+        # print(f"[CTDE] Centralized critic loss: {critic_loss}")
+
+        # 3. For each agent, compute the auxiliary critic alignment loss.
+        for agent_index in range(self.num_agents):
+            batch_size = self._Models[agent_index].batch_size
+            agent_batch = self._Memory.get_samples_by_agent(agent_index, batch_size)
+            if not agent_batch:
+                continue
+            state_list = []
+            actions = []
+            global_states_agent = []
+            for sample in agent_batch:
+                # sample: (agent_id, state, action, reward, next_state, global_state)
+                _, st, act, _, _, g_st = sample
+                state_list.append(st)
+                actions.append(act)
+                global_states_agent.append(g_st)
+            states = self._pad_states(state_list)
+            actions = np.array(actions, dtype=np.int32)
+            global_states_agent = np.array(global_states_agent)
+            # Get Q-values from the agent's network.
+            q_vals = self._Models[agent_index].predict_batch(states)
+            # Extract Q value for each taken action.
+            q_taken = q_vals[np.arange(len(actions)), actions].reshape(-1, 1)
+            # Get centralized critic prediction.
+            critic_preds = self.centralized_critic(global_states_agent)
+            # Compute auxiliary loss.
+            alignment_loss = np.mean((q_taken - critic_preds.numpy()) ** 2)
+            # print(f"[CTDE] Agent {agent_index} critic alignment loss: {alignment_loss}")
+            # In practice, you would combine this loss with the standard DQN loss
+            # and perform a joint gradient update on the agent's network.
 
     def analyze_results(self):
         plt.figure(figsize=(15, 5))

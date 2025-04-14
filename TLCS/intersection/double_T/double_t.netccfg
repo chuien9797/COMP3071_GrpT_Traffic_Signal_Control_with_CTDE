@@ -1,0 +1,13 @@
+<netconvert>
+    <input>
+        <node-files value="double_t.nod.xml"/>
+        <edge-files value="double_t.edg.xml"/>
+        <connection-files value="double_t.con.xml"/>
+    </input>
+    <output>
+        <output-file value="double_t.net.xml"/>
+    </output>
+    <processing>
+        <lefthand value="true"/>
+    </processing>
+</netconvert>

@@ -1,0 +1,24 @@
+<edges>
+    <!-- Horizontal -->
+    <edge id="h2L" from="n21" to="n22" numLanes="2"/>
+    <edge id="h2L_rev" from="n22" to="n21" numLanes="2"/>
+
+    <edge id="h2M" from="n22" to="n23" numLanes="2"/>
+    <edge id="h2M_rev" from="n23" to="n22" numLanes="2"/>
+
+    <edge id="h2R" from="n23" to="n24" numLanes="2"/>
+    <edge id="h2R_rev" from="n24" to="n23" numLanes="2"/>
+
+    <!-- Vertical -->
+    <edge id="v2T" from="n12" to="n22" numLanes="2"/>
+    <edge id="v2T_rev" from="n22" to="n12" numLanes="2"/>
+
+    <edge id="v2M" from="n22" to="n32" numLanes="2"/>
+    <edge id="v2M_rev" from="n32" to="n22" numLanes="2"/>
+
+    <edge id="v3T" from="n13" to="n23" numLanes="2"/>
+    <edge id="v3T_rev" from="n23" to="n13" numLanes="2"/>
+
+    <edge id="v3M" from="n23" to="n33" numLanes="2"/>
+    <edge id="v3M_rev" from="n33" to="n23" numLanes="2"/>
+</edges>

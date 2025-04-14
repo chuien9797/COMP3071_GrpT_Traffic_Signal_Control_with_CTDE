@@ -18,7 +18,7 @@ def check_emergency(simulation):
     else:
         lane_prefixes = ["E2TL", "N2TL", "W2TL", "S2TL"]
 
-    # Initialize the handled set if not yet created.
+    # Initialize the handled set if not yet created
     if not hasattr(simulation, "handled_emergency_ids"):
         simulation.handled_emergency_ids = set()
 
@@ -38,8 +38,7 @@ def check_emergency(simulation):
 
 def handle_emergency_vehicle(simulation, veh_id):
     """
-    Handles the emergency vehicle by commanding the traffic lights (each agent)
-    to switch to an emergency phase.
+    Handles the emergency vehicle by commanding the traffic lights to switch to an emergency phase.
     """
     route_id = traci.vehicle.getRouteID(veh_id)
     itype = simulation.intersection_type.lower()
@@ -48,15 +47,24 @@ def handle_emergency_vehicle(simulation, veh_id):
     if itype == "cross":
         straight_routes = ["N_S", "S_N", "E_W", "W_E"]
         if route_id in straight_routes:
-            emergency_action = 0 if route_id[0] in ['N', 'S'] else 2
+            if route_id[0] in ['N', 'S']:
+                emergency_action = 0
+            else:
+                emergency_action = 2
         else:
-            emergency_action = 1 if route_id[0] in ['N', 'S'] else 3
+            if route_id[0] in ['N', 'S']:
+                emergency_action = 1
+            else:
+                emergency_action = 3
 
     elif itype == "roundabout":
-        emergency_action = 0  # You can design this further per TL
+        emergency_action = 0
 
     elif itype == "t_intersection":
-        emergency_action = 0 if any(main in route_id for main in ["W_E", "E_W"]) else 1
+        if any(main in route_id for main in ["W_E", "E_W"]):
+            emergency_action = 0
+        else:
+            emergency_action = 1
 
     elif itype == "y_intersection":
         if "Y_branch1" in route_id:
@@ -69,16 +77,24 @@ def handle_emergency_vehicle(simulation, veh_id):
             emergency_action = 0
 
     else:
-        emergency_action = 0
+        straight_routes = ["N_S", "S_N", "E_W", "W_E"]
+        if route_id in straight_routes:
+            if route_id[0] in ['N', 'S']:
+                emergency_action = 0
+            else:
+                emergency_action = 2
+        else:
+            if route_id[0] in ['N', 'S']:
+                emergency_action = 1
+            else:
+                emergency_action = 3
 
-    # Loop over all agents based on the recorded number of agents.
-    for i in range(simulation.num_agents):
-        simulation._set_green_phase(i, emergency_action)
+    if emergency_action is not None:
+        simulation._set_green_phase(emergency_action)
+        simulation._simulate(simulation._green_duration)
+    else:
+        print("No emergency action determined for vehicle:", veh_id)
 
-    # Simulate emergency duration using the green duration (could be adjusted if needed).
-    simulation._simulate(simulation._green_duration)
-
-    # Log emergency handling (you may expand this logging if needed).
     if not hasattr(simulation, "_emergency_q_logs"):
         simulation._emergency_q_logs = []
     simulation._emergency_q_logs.append((simulation._step, veh_id))

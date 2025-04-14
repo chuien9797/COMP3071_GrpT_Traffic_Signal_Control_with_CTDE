@@ -41,10 +41,13 @@ class TrafficGenerator:
             vehicle_entries = self._generate_cross_routes(car_gen_steps)
         elif self.intersection_type == "roundabout":
             vehicle_entries = self._generate_roundabout_routes(car_gen_steps)
-        elif self.intersection_type == "T_intersection":
-            vehicle_entries = self._generate_T_intersection_routes(car_gen_steps)
+        elif self.intersection_type == "2x2_grid":
+            vehicle_entries = self._generate_2x2_grid_routes(car_gen_steps)
+        elif self.intersection_type == "t_intersection":
+            vehicle_entries = self._generate_t_intersection_routes(car_gen_steps)
+        elif self.intersection_type == "ow":
+            vehicle_entries = self._generate_ow_routes(car_gen_steps)
         else:
-            # If it's something like "Y_intersection" or others, fallback:
             vehicle_entries = self._generate_default_routes(car_gen_steps)
 
         # Generate emergency vehicle entries.
@@ -60,16 +63,19 @@ class TrafficGenerator:
             os.makedirs(output_folder)
 
         # Decide on filename based on intersection type
-        if self.intersection_type == "T_intersection":
+        if self.intersection_type == "2x2_grid":
             output_file = os.path.join(output_folder, "2x2_grid.rou.xml")
         elif self.intersection_type == "roundabout":
             output_file = os.path.join(output_folder, "roundabout.rou.xml")
         elif self.intersection_type == "cross_intersection":
             output_file = os.path.join(output_folder, "cross_routes.rou.xml")
-
+        elif self.intersection_type == "t_intersection":
+            output_file = os.path.join(output_folder, "t_intersection.rou.xml")
+        elif self.intersection_type == "ow":
+            output_file = os.path.join(output_folder, "ow.rou.xml")
         else:
-            # For "Y_intersection", etc. we can reuse "cross_routes.rou.xml as template"
             output_file = os.path.join(output_folder, "default_routes.rou.xml")
+
 
         # Get header from configuration (if provided) or use default.
         header = self._get_header()
@@ -141,9 +147,31 @@ class TrafficGenerator:
             vehicle_entries.append((depart_time, entry))
         return vehicle_entries
 
-    def _generate_T_intersection_routes(self, car_gen_steps):
+    def _generate_t_intersection_routes(self, car_gen_steps):
         """
-        Generate routes for a T-intersection.
+        Generate routes for a t_intersection.
+        Expects route_config with keys like 'main' and 'turn'.
+        """
+        vehicle_entries = []
+        route_conf = self.int_conf.get("route_config", {})
+        main_conf = route_conf.get("main", {"routes": ["left_in_top_out", "right_in_top_out"], "probability": 0.7})
+        turn_conf = route_conf.get("turn", {"routes": ["top_in_left_out", "top_in_right_out"], "probability": 0.3})
+        main_prob = main_conf.get("probability", 0.7)
+
+        for car_counter, step in enumerate(car_gen_steps):
+            depart_time = step
+            if np.random.uniform() < main_prob:
+                chosen_route = np.random.choice(main_conf.get("routes", []))
+            else:
+                chosen_route = np.random.choice(turn_conf.get("routes", []))
+            entry = '    <vehicle id="{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                chosen_route + "_" + str(car_counter), chosen_route, depart_time)
+            vehicle_entries.append((depart_time, entry))
+        return vehicle_entries
+    
+    def _generate_2x2_grid_routes(self, car_gen_steps):
+        """
+        Generate routes for a 2x2_grid.
         Expects a route_config with keys such as 'main' and 'side'.
         """
         vehicle_entries = []
@@ -160,6 +188,21 @@ class TrafficGenerator:
                 chosen_route = np.random.choice(side_conf.get("routes", []))
             entry = '    <vehicle id="{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
                 chosen_route + "_" + str(car_counter), chosen_route, depart_time)
+            vehicle_entries.append((depart_time, entry))
+        return vehicle_entries
+    
+    def _generate_ow_routes(self, car_gen_steps):
+        vehicle_entries = []
+        route_conf = self.int_conf.get("route_config", {})
+        main_conf = route_conf.get("main", {"routes": ["b1a", "b1b", "e6a", "e6b", "c2a"], "probability": 1.0})
+        route_ids = main_conf.get("routes", [])
+        prob = main_conf.get("probability", 1.0)
+
+        for car_counter, step in enumerate(car_gen_steps):
+            depart_time = step
+            chosen_route = np.random.choice(route_ids)
+            entry = '    <vehicle id="ow_{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                car_counter, chosen_route, depart_time)
             vehicle_entries.append((depart_time, entry))
         return vehicle_entries
 
@@ -186,8 +229,8 @@ class TrafficGenerator:
 
         # If no config for emergency routes is found, we pick default sets
         if not routes_list:
-            if self.intersection_type == "T_intersection":
-                # T-intersection default
+            if self.intersection_type == "2x2_grid":
+                # 2x2_grid default
                 routes_list = ["W_E", "E_W", "N_E", "N_W", "E_N", "W_N"]
             elif self.intersection_type == "roundabout":
                 # Roundabout default → all route IDs
@@ -241,7 +284,7 @@ class TrafficGenerator:
     <!-- Example of simple in/out routes, override in config or .rou.xml if needed -->
     <route id="roundabout_in_out" edges="in_edge out_edge"/>
     <route id="roundabout_turn" edges="in_edge turn_edge out_edge"/>"""
-            elif self.intersection_type == "T_intersection":
+            elif self.intersection_type == "2x2_grid":
                 return """<routes>
     <!-- Define emergency vehicle type -->
     <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true"/>

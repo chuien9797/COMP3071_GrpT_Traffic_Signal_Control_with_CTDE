@@ -29,7 +29,7 @@ def main():
         raise ValueError("This script is for DQN. Found algorithm=%s" % algorithm)
 
     # The possible environment types to train on:
-    possible_envs = ["cross", "roundabout", "T_intersection"]
+    possible_envs = ["cross", "roundabout", "T_intersection", "2x2_grid", "ow"]
 
     # 2) Determine the maximum action space across these environments.
     max_num_actions = 0

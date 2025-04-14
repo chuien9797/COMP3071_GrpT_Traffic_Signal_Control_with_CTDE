@@ -256,10 +256,12 @@ class Simulation:
         lane_feature_dim = 9
         lane_features = np.zeros((num_lanes, lane_feature_dim), dtype=np.float32)
         intersection_encoding = {
-            "cross": [1.0, 0.0, 0.0],
-            "roundabout": [0.0, 1.0, 0.0],
-            "t_intersection": [0.0, 0.0, 1.0],
-            "y_intersection": [0.33, 0.33, 0.34]
+            "cross":         [1.0, 0.0, 0.0],
+            "roundabout":    [0.0, 1.0, 0.0],
+            "2x2_grid":      [0.0, 0.0, 1.0],
+            "y_intersection":[0.33, 0.33, 0.34],
+            "t_intersection":[0.6, 0.2, 0.2],   # just make sure it's distinguishable
+            "ow":            [0.2, 0.6, 0.2]
         }
         type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
         sorted_lanes = sorted(sum([v for v in self.int_conf["incoming_lanes"].values()], []))

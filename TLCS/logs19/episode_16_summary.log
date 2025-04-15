@@ -1,9 +1,9 @@
-Timestamp: 2025-04-14 22:06:28
+Timestamp: 2025-04-16 02:42:43
 Intersection Type: T_intersection
-Total reward: -100.19
+Total reward: -106.85
 Epsilon: 0.68
-Simulation duration: 51.6s
-Avg queue length: 372.42
+Simulation duration: 36.4s
+Avg queue length: 349.03
 Cumulative wait time: 0.00
 Fault injected: No
 Total Emergency Delay: 0.00

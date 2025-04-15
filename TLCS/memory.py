@@ -7,7 +7,7 @@ class Memory:
         Initialize the replay memory.
 
         In a multi-agent scenario, each sample is stored as a tuple:
-            (agent_id, state, action, reward, next_state, global_state)
+            (agent_id, state, action, reward, next_state, next_global_state)
 
         Parameters:
             size_max (int): Maximum number of samples to store.

@@ -43,6 +43,8 @@ class TrafficGenerator:
             vehicle_entries = self._generate_roundabout_routes(car_gen_steps)
         elif self.intersection_type == "T_intersection":
             vehicle_entries = self._generate_T_intersection_routes(car_gen_steps)
+        elif self.intersection_type == "1x2_grid":
+            vehicle_entries = self._generate_1x2_grid_routes(car_gen_steps)
         else:
             # If it's something like "Y_intersection" or others, fallback:
             vehicle_entries = self._generate_default_routes(car_gen_steps)
@@ -66,6 +68,8 @@ class TrafficGenerator:
             output_file = os.path.join(output_folder, "roundabout.rou.xml")
         elif self.intersection_type == "cross_intersection":
             output_file = os.path.join(output_folder, "cross_routes.rou.xml")
+        elif self.intersection_type == "1x2_grid":
+            output_file = os.path.join(output_folder, "1x2_grid.rou.xml")
 
         else:
             # For "Y_intersection", etc. we can reuse "cross_routes.rou.xml as template"
@@ -162,6 +166,28 @@ class TrafficGenerator:
                 chosen_route + "_" + str(car_counter), chosen_route, depart_time)
             vehicle_entries.append((depart_time, entry))
         return vehicle_entries
+    
+    def _generate_1x2_grid_routes(self, car_gen_steps):
+        """
+        Generate routes for a 1x2 grid (two intersections horizontally or vertically aligned).
+        Expected to have route_config with keys like 'main' and 'side'.
+        """
+        vehicle_entries = []
+        route_conf = self.int_conf.get("route_config", {})
+        main_conf = route_conf.get("main", {"routes": ["W_E", "E_W, N_S, S_N"], "probability": 0.7})
+        side_conf = route_conf.get("side", {"routes": ["N_W", "S_E", "E_N", "W_S"], "probability": 0.3})
+        main_prob = main_conf.get("probability", 0.7)
+
+        for car_counter, step in enumerate(car_gen_steps):
+            depart_time = step
+            if np.random.uniform() < main_prob:
+                chosen_route = np.random.choice(main_conf.get("routes", []))
+            else:
+                chosen_route = np.random.choice(side_conf.get("routes", []))
+            entry = '    <vehicle id="{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
+                chosen_route + "_" + str(car_counter), chosen_route, depart_time)
+            vehicle_entries.append((depart_time, entry))
+        return vehicle_entries
 
     def _generate_default_routes(self, car_gen_steps):
         """
@@ -192,6 +218,8 @@ class TrafficGenerator:
             elif self.intersection_type == "roundabout":
                 # Roundabout default → all route IDs
                 routes_list = ["route1","route2","route3","route4","route5","route6","route7","route8"]
+            elif self.intersection_type == "1x2_grid":
+                routes_list = ["W_E", "E_W", "N_S", "S_N", "N_W", "S_E", "E_N", "W_S"]
             else:
                 # Cross or fallback
                 routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]

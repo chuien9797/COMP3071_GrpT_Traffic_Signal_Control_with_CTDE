@@ -210,7 +210,7 @@ class Simulation:
                     "cross": [1.0, 0.0, 0.0],
                     "roundabout": [0.0, 1.0, 0.0],
                     "t_intersection": [0.0, 0.0, 1.0],
-                    "y_intersection": [0.33, 0.33, 0.34]
+                    "1x2_grid": [0.33, 0.33, 0.34]
                 }
                 type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
                 group_state[i, 6:9] = np.array(type_vector)
@@ -258,8 +258,8 @@ class Simulation:
           - Stores experiences in memory along with a computed global state.
           - After simulation, calls replay() and train_ctde() to update networks.
         """
-        os.makedirs("logs22", exist_ok=True)
-        log_file = open(f"logs22/episode_{episode}.log", "w")
+        os.makedirs("logs23", exist_ok=True)
+        log_file = open(f"logs23/episode_{episode}.log", "w")
 
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
@@ -611,7 +611,7 @@ class Simulation:
     def _write_summary_log(self, episode, epsilon, sim_time):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
-            with open(f"logs19/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
+            with open(f"logs23/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
                 f.write(f"Timestamp: {timestamp}\n")
                 f.write(f"Intersection Type: {self.intersection_type}\n")
                 f.write(f"Total reward: {self._sum_neg_reward:.2f}\n")

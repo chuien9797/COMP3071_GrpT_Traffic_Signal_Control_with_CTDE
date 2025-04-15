@@ -30,7 +30,7 @@ def main():
         raise ValueError("This script is for DQN. Found algorithm=%s" % algorithm)
 
     # 2. Determine the maximum action space over all environments.
-    possible_envs = ["cross", "roundabout", "T_intersection"]
+    possible_envs = ["cross", "roundabout", "2x2_grid", "1x2_grid"]
     max_num_actions = 0
     for env_name in possible_envs:
         env_conf = INTERSECTION_CONFIGS[env_name]

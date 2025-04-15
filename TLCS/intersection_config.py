@@ -127,7 +127,7 @@ INTERSECTION_CONFIGS = {
         "monitor_lanes": ["e1_0", "e2_0", "e3_0", "e4_0"]
     },
 
-    "T_intersection": {
+    "2x2_grid": {
     "sumocfg_file": "2x2_grid/2x2_grid.sumocfg",  # Adjust to your SUMO config file path
     "traffic_light_ids": ["1", "2", "5", "6"],  # Now four TL IDs for four intersections
     "incoming_lanes": {
@@ -174,7 +174,7 @@ INTERSECTION_CONFIGS = {
     <route id="E_W" edges="..."/>
     <route id="N_E" edges="..."/>
     <route id="N_W" edges="..."/>
-</routes>""",
+""",
     # You might want to monitor each intersection separately.
     "monitor_edges": ["-v11", "-h11", "h12", "-v21", "h13", "v22", "-v12", "-h21", "h22", "-v22", "h23", "v23"],
     "monitor_lanes": [
@@ -185,6 +185,64 @@ INTERSECTION_CONFIGS = {
         "-v22_0", "-v22_1", "h23_0", "h23_1", "v23_0", "v23_1", "-h22_0", "-h22_1"
     ]
     },
+
+    "1x2_grid": {
+        "sumocfg_file": "1x2_grid/1x2_grid.sumocfg",
+        "traffic_light_ids": ["n22", "n23"],
+        "incoming_lanes": {
+            "junction1": ["h2L_0", "h2L_1", "v2T_0", "v2T_1", "v2M_rev_0", "v2M_rev_1"],
+            "junction2": ["h2M_0", "h2M_1", "v3T_0", "v3T_1", "v3M_rev_0", "v3M_rev_1"]
+        },
+        "phase_mapping": {
+            0: {"green": 0, "yellow": 1},
+            1: {"green": 2, "yellow": 3}
+        },
+        "occupancy_grid": {
+            "cells_per_lane": 10,
+            "max_distance": 600
+        },
+        "route_config": {
+            "main": {
+                "routes": ["W_E", "E_W", "N_S", "S_N"],
+                "probability": 0.7
+            },
+            "side": {
+                "routes": ["N_W", "S_E", "E_N", "W_S"],
+                "probability": 0.3
+            }
+        },
+        "communication_mode": True,
+        "header": """<routes>
+        <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
+            maxSpeed="20" sigma="0.5" emergency="true" />
+        <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
+            minGap="2.5" maxSpeed="25" sigma="0.5" />
+        <route id="W_E" edges="h2L h2M h2R"/>
+        <route id="E_W" edges="h2R_rev h2M_rev h2L_rev"/>
+        <route id="N_S" edges="v2T v2M"/>
+        <route id="S_N" edges="v2M_rev v2T_rev"/>
+        <route id="N_W" edges="v2T h2L_rev"/>
+        <route id="S_E" edges="v3M_rev h2R"/>
+        <route id="E_N" edges="h2R_rev v3T_rev"/>
+        <route id="W_S" edges="h2L v2M"/>""",
+        "monitor_edges": [
+        "h2L", "h2M", "h2R", "h2L_rev", "h2M_rev", "h2R_rev",
+        "v2T", "v2T_rev", "v2M", "v2M_rev",
+        "v3T", "v3T_rev", "v3M", "v3M_rev"
+    ],
+
+    "monitor_lanes": [
+        "h2L_0", "h2L_1", "h2M_0", "h2M_1", "h2R_0", "h2R_1",
+        "h2L_rev_0", "h2L_rev_1", "h2M_rev_0", "h2M_rev_1", "h2R_rev_0", "h2R_rev_1",
+        "v2T_0", "v2T_1", "v2T_rev_0", "v2T_rev_1",
+        "v2M_0", "v2M_1", "v2M_rev_0", "v2M_rev_1",
+        "v3T_0", "v3T_1", "v3T_rev_0", "v3T_rev_1",
+        "v3M_0", "v3M_1", "v3M_rev_0", "v3M_rev_1"
+    ]
+    },
+
+
+
 
     "Y_intersection": {
         "sumocfg_file": "y_intersection/y_intersection.sumocfg",

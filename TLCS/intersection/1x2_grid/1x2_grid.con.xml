@@ -10,6 +10,10 @@
     <connection from="v2T" to="v2M" fromLane="0" toLane="0"/> <!-- lane 0 straight -->
     <connection from="v2T" to="v2M" fromLane="1" toLane="1"/> <!-- lane 1 straight -->
     <connection from="v2T" to="h2L_rev" fromLane="0" toLane="0"/> <!-- right turn from lane 0 -->
+    <connection from="v3T" to="v3M" fromLane="0" toLane="0"/>
+    <connection from="v3T" to="v3M" fromLane="1" toLane="1"/>
+
+
 
     <!-- FROM h2M_rev (←) -->
     <connection from="h2M_rev" to="h2L_rev" fromLane="0" toLane="0"/> <!-- lane 0 straight -->

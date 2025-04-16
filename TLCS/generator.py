@@ -169,25 +169,59 @@ class TrafficGenerator:
     
     def _generate_1x2_grid_routes(self, car_gen_steps):
         """
-        Generate routes for a 1x2 grid (two intersections horizontally or vertically aligned).
-        Expected to have route_config with keys like 'main' and 'side'.
+        Generate routes for the environment_intersect map with two connected intersections.
+        Ensures all lanes get vehicles, then uses probabilistic generation.
         """
         vehicle_entries = []
         route_conf = self.int_conf.get("route_config", {})
-        main_conf = route_conf.get("main", {"routes": ["W_E", "E_W, N_S, S_N"], "probability": 0.7})
-        side_conf = route_conf.get("side", {"routes": ["N_W", "S_E", "E_N", "W_S"], "probability": 0.3})
+        
+        main_conf = route_conf.get("main", {
+            "routes": ["W_E", "E_W", "N_S", "S_N"],
+            "probability": 0.7
+        })
+        side_conf = route_conf.get("side", {
+            "routes": ["N_W", "S_E", "E_N", "W_S"],
+            "probability": 0.3
+        })
+
+        all_routes = main_conf.get("routes", []) + side_conf.get("routes", [])
+        all_routes = list(set(all_routes))  # remove duplicates
         main_prob = main_conf.get("probability", 0.7)
 
-        for car_counter, step in enumerate(car_gen_steps):
+        # First, guarantee one vehicle per route (to cover all lanes)
+        car_counter = 0
+        step_iter = iter(car_gen_steps)
+        for route in all_routes:
+            try:
+                depart_time = next(step_iter)
+            except StopIteration:
+                break  # Not enough steps
+            entry = (
+                f'    <vehicle id="{route}_{car_counter}" '
+                f'type="standard_car" route="{route}" '
+                f'depart="{depart_time}" departLane="random" departSpeed="10" />'
+            )
+            vehicle_entries.append((depart_time, entry))
+            car_counter += 1
+
+        # Continue random generation for remaining steps
+        for step in step_iter:
             depart_time = step
             if np.random.uniform() < main_prob:
                 chosen_route = np.random.choice(main_conf.get("routes", []))
             else:
                 chosen_route = np.random.choice(side_conf.get("routes", []))
-            entry = '    <vehicle id="{}" type="standard_car" route="{}" depart="{}" departLane="random" departSpeed="10" />'.format(
-                chosen_route + "_" + str(car_counter), chosen_route, depart_time)
+            
+            entry = (
+                f'    <vehicle id="{chosen_route}_{car_counter}" '
+                f'type="standard_car" route="{chosen_route}" '
+                f'depart="{depart_time}" departLane="random" departSpeed="10" />'
+            )
             vehicle_entries.append((depart_time, entry))
+            car_counter += 1
+
         return vehicle_entries
+
 
     def _generate_default_routes(self, car_gen_steps):
         """

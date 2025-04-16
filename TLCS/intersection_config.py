@@ -188,22 +188,34 @@ INTERSECTION_CONFIGS = {
 
     "1x2_grid": {
         "sumocfg_file": "1x2_grid/1x2_grid.sumocfg",
-        "traffic_light_ids": ["n22", "n23"],
+        "traffic_light_ids": ["TL", "2_TL"],
         "incoming_lanes": {
-            "junction1": ["h2L_0", "h2L_1", "v2T_0", "v2T_1", "v2M_rev_0", "v2M_rev_1"],
-            "junction2": ["h2M_0", "h2M_1", "v3T_0", "v3T_1", "v3M_rev_0", "v3M_rev_1"]
+            "TL": [
+                "N2TL_0", "N2TL_1", "N2TL_2", "N2TL_3",
+                "S2TL_0", "S2TL_1", "S2TL_2", "S2TL_3",
+                "W2TL_0", "W2TL_1", "W2TL_2", "W2TL_3",
+                "2_TL2W_0", "2_TL2W_1", "2_TL2W_2", "2_TL2W_3"
+            ],
+            "2_TL": [
+                "2_N2TL_0", "2_N2TL_1", "2_N2TL_2", "2_N2TL_3",
+                "2_S2TL_0", "2_S2TL_1", "2_S2TL_2", "2_S2TL_3",
+                "2_E2TL_0", "2_E2TL_1", "2_E2TL_2", "2_E2TL_3",
+                "TL2E_0", "TL2E_1", "TL2E_2", "TL2E_3"
+            ]
         },
         "phase_mapping": {
             0: {"green": 0, "yellow": 1},
-            1: {"green": 2, "yellow": 3}
+            1: {"green": 2, "yellow": 3},
+            2: {"green": 4, "yellow": 5},
+            3: {"green": 6, "yellow": 7}
         },
         "occupancy_grid": {
             "cells_per_lane": 10,
-            "max_distance": 600
+            "max_distance": 750
         },
         "route_config": {
             "main": {
-                "routes": ["W_E", "E_W", "N_S", "S_N"],
+                "routes": ["E_W", "W_E", "N_S", "S_N"],
                 "probability": 0.7
             },
             "side": {
@@ -212,33 +224,37 @@ INTERSECTION_CONFIGS = {
             }
         },
         "communication_mode": True,
-        "header": """<routes>
-        <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
-            maxSpeed="20" sigma="0.5" emergency="true" />
-        <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
-            minGap="2.5" maxSpeed="25" sigma="0.5" />
-        <route id="W_E" edges="h2L h2M h2R"/>
-        <route id="E_W" edges="h2R_rev h2M_rev h2L_rev"/>
-        <route id="N_S" edges="v2T v2M"/>
-        <route id="S_N" edges="v2M_rev v2T_rev"/>
-        <route id="N_W" edges="v2T h2L_rev"/>
-        <route id="S_E" edges="v3M_rev h2R"/>
-        <route id="E_N" edges="h2R_rev v3T_rev"/>
-        <route id="W_S" edges="h2L v2M"/>""",
+        "header": "<routes>\n\
+            <vType id=\"emergency\" accel=\"3.0\" decel=\"6.0\" color=\"1,0,0\" maxSpeed=\"20\" sigma=\"0.5\" emergency=\"true\" />\n\
+            <vType id=\"standard_car\" accel=\"1.0\" decel=\"4.5\" length=\"5.0\" minGap=\"2.5\" maxSpeed=\"25\" sigma=\"0.5\" />\n\
+            <route id=\"E_W\" edges=\"2_E2TL 2_TL2W TL2W\" />\n\
+            <route id=\"W_E\" edges=\"W2TL TL2E 2_TL2E\" />\n\
+            <route id=\"N_S\" edges=\"2_N2TL 2_TL2S\" />\n\
+            <route id=\"S_N\" edges=\"S2TL TL2N\" />\n\
+            <route id=\"N_W\" edges=\"2_N2TL 2_TL2W TL2W\" />\n\
+            <route id=\"S_E\" edges=\"S2TL TL2E 2_TL2E\" />\n\
+            <route id=\"E_N\" edges=\"2_E2TL 2_TL2N\" />\n\
+            <route id=\"W_S\" edges=\"W2TL TL2E 2_TL2S\" />",
         "monitor_edges": [
-        "h2L", "h2M", "h2R", "h2L_rev", "h2M_rev", "h2R_rev",
-        "v2T", "v2T_rev", "v2M", "v2M_rev",
-        "v3T", "v3T_rev", "v3M", "v3M_rev"
-    ],
-
-    "monitor_lanes": [
-        "h2L_0", "h2L_1", "h2M_0", "h2M_1", "h2R_0", "h2R_1",
-        "h2L_rev_0", "h2L_rev_1", "h2M_rev_0", "h2M_rev_1", "h2R_rev_0", "h2R_rev_1",
-        "v2T_0", "v2T_1", "v2T_rev_0", "v2T_rev_1",
-        "v2M_0", "v2M_1", "v2M_rev_0", "v2M_rev_1",
-        "v3T_0", "v3T_1", "v3T_rev_0", "v3T_rev_1",
-        "v3M_0", "v3M_1", "v3M_rev_0", "v3M_rev_1"
-    ]
+            "2_E2TL", "2_TL2E", "2_N2TL", "2_TL2N", "2_S2TL", "2_TL2S", "2_TL2W",
+            "N2TL", "TL2N", "S2TL", "TL2S", "W2TL", "TL2W", "TL2E"
+        ],
+        "monitor_lanes": [
+            "2_E2TL_0", "2_E2TL_1", "2_E2TL_2", "2_E2TL_3",
+            "2_TL2E_0", "2_TL2E_1", "2_TL2E_2", "2_TL2E_3",
+            "2_N2TL_0", "2_N2TL_1", "2_N2TL_2", "2_N2TL_3",
+            "2_TL2N_0", "2_TL2N_1", "2_TL2N_2", "2_TL2N_3",
+            "2_S2TL_0", "2_S2TL_1", "2_S2TL_2", "2_S2TL_3",
+            "2_TL2S_0", "2_TL2S_1", "2_TL2S_2", "2_TL2S_3",
+            "2_TL2W_0", "2_TL2W_1", "2_TL2W_2", "2_TL2W_3",
+            "N2TL_0", "N2TL_1", "N2TL_2", "N2TL_3",
+            "TL2N_0", "TL2N_1", "TL2N_2", "TL2N_3",
+            "S2TL_0", "S2TL_1", "S2TL_2", "S2TL_3",
+            "TL2S_0", "TL2S_1", "TL2S_2", "TL2S_3",
+            "W2TL_0", "W2TL_1", "W2TL_2", "W2TL_3",
+            "TL2W_0", "TL2W_1", "TL2W_2", "TL2W_3",
+            "TL2E_0", "TL2E_1", "TL2E_2", "TL2E_3"
+        ]
     },
 
 

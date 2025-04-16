@@ -204,10 +204,8 @@ INTERSECTION_CONFIGS = {
             ]
         },
         "phase_mapping": {
-            0: {"green": 0, "yellow": 1},
-            1: {"green": 2, "yellow": 3},
-            2: {"green": 4, "yellow": 5},
-            3: {"green": 6, "yellow": 7}
+            "0": { "green": 0, "yellow": 1 },
+            "1": { "green": 2, "yellow": 3 }
         },
         "occupancy_grid": {
             "cells_per_lane": 10,
@@ -215,7 +213,7 @@ INTERSECTION_CONFIGS = {
         },
         "route_config": {
             "main": {
-                "routes": ["E_W", "W_E", "N_S", "S_N"],
+                "routes": ["E_W", "W_E", "N_S_1", "N_S_2", "S_N_1", "S_N_2"],
                 "probability": 0.7
             },
             "side": {
@@ -229,10 +227,12 @@ INTERSECTION_CONFIGS = {
             <vType id=\"standard_car\" accel=\"1.0\" decel=\"4.5\" length=\"5.0\" minGap=\"2.5\" maxSpeed=\"25\" sigma=\"0.5\" />\n\
             <route id=\"E_W\" edges=\"2_E2TL 2_TL2W TL2W\" />\n\
             <route id=\"W_E\" edges=\"W2TL TL2E 2_TL2E\" />\n\
-            <route id=\"N_S\" edges=\"2_N2TL 2_TL2S\" />\n\
-            <route id=\"S_N\" edges=\"S2TL TL2N\" />\n\
-            <route id=\"N_W\" edges=\"2_N2TL 2_TL2W TL2W\" />\n\
-            <route id=\"S_E\" edges=\"S2TL TL2E 2_TL2E\" />\n\
+            <route id=\"N_S_1\" edges=\"2_N2TL 2_TL2S\" />\n\
+            <route id=\"N_S_2\" edges=\"N2TL TL2S\" />\n\
+            <route id=\"S_N_1\" edges=\"S2TL TL2N\" />\n\
+            <route id=\"S_N_2\" edges=\"2_S2TL 2_TL2N\" />\n\
+            <route id=\"N_W\" edges=\"2_N2TL 2_TL2W\" />\n\
+            <route id=\"S_E\" edges=\"S2TL TL2E\" />\n\
             <route id=\"E_N\" edges=\"2_E2TL 2_TL2N\" />\n\
             <route id=\"W_S\" edges=\"W2TL TL2E 2_TL2S\" />",
         "monitor_edges": [
@@ -256,9 +256,6 @@ INTERSECTION_CONFIGS = {
             "TL2E_0", "TL2E_1", "TL2E_2", "TL2E_3"
         ]
     },
-
-
-
 
     "Y_intersection": {
         "sumocfg_file": "y_intersection/y_intersection.sumocfg",

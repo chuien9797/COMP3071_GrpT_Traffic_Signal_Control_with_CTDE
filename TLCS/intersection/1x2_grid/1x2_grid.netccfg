@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <input>
+        <node-files value="1x2_grid.nod.xml"/>
+        <edge-files value="1x2_grid.edg.xml"/>
+    </input>
+    <output>
+        <output-file value="1x2_grid.net.xml"/>
+    </output>
+    <!-- Optional: adjust additional parameters as needed -->
+</configuration>

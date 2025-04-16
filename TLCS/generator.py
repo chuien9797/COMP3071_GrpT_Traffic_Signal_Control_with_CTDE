@@ -180,7 +180,7 @@ class TrafficGenerator:
             "probability": 0.7
         })
         side_conf = route_conf.get("side", {
-            "routes": ["N_W", "S_E", "E_N", "W_S"],
+            "routes": ["W_E", "E_W", "N_S_1", "N_S_2", "S_N_1", "S_N_2"],
             "probability": 0.3
         })
 

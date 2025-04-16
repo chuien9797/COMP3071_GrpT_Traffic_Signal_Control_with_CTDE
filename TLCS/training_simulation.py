@@ -1,3 +1,5 @@
+# simulation.py
+
 import os
 import random
 import timeit
@@ -27,6 +29,7 @@ class CentralizedCritic(tf.keras.Model):
     In this discrete-action setting, we assume a scalar value representing the joint
     evaluation of the current global state. This network is trained with an MSE loss.
     """
+
     def __init__(self, global_state_dim, hidden_units=64):
         super().__init__()
         self.dense1 = layers.Dense(hidden_units, activation='relu')
@@ -41,67 +44,12 @@ class CentralizedCritic(tf.keras.Model):
 
 
 ###############################################################################
-# Memory Class with Encapsulated per-Agent Sample Retrieval
-###############################################################################
-class Memory:
-    def __init__(self, size_max, size_min):
-        """
-        Initialize the replay memory.
-
-        In a multi-agent scenario, each sample is stored as a tuple:
-          (agent_id, state, action, reward, next_state, global_state)
-        """
-        self._samples = []
-        self._size_max = size_max
-        self._size_min = size_min
-
-    def add_sample(self, sample):
-        """
-        Add a sample to the memory.
-
-        Parameters:
-            sample (tuple): Expected form is
-              (agent_id, state, action, reward, next_state, global_state)
-        """
-        self._samples.append(sample)
-        if self._size_now() > self._size_max:
-            self._samples.pop(0)
-
-    def get_samples(self, n):
-        """
-        Retrieve n random samples from memory if enough samples exist.
-        """
-        if self._size_now() < self._size_min:
-            return []
-        available_samples = self._size_now()
-        if n > available_samples:
-            return random.sample(self._samples, available_samples)
-        else:
-            return random.sample(self._samples, n)
-
-    def get_samples_by_agent(self, agent_id, n):
-        """
-        Retrieve n random samples specifically for the given agent id.
-        """
-        agent_samples = [sample for sample in self._samples if sample[0] == agent_id]
-        if len(agent_samples) < self._size_min:
-            return []
-        if n > len(agent_samples):
-            return random.sample(agent_samples, len(agent_samples))
-        else:
-            return random.sample(agent_samples, n)
-
-    def _size_now(self):
-        return len(self._samples)
-
-
-###############################################################################
 # Simulation Class with Flexible Reward Sharing, Per-Agent Replay, and CTDE
 ###############################################################################
 class Simulation:
     def __init__(self,
-                 Models,         # List of agent models
-                 TargetModels,   # List of target models (can be same as Models for shared params)
+                 Models,  # List of agent models
+                 TargetModels,  # List of target models (can be same as Models for shared params)
                  Memory,
                  TrafficGen,
                  sumo_cmd,
@@ -109,7 +57,7 @@ class Simulation:
                  max_steps,
                  green_duration,
                  yellow_duration,
-                 num_states,     # Not used by aggregator but preserved for compatibility
+                 num_states,  # Not used by aggregator but preserved for compatibility
                  training_epochs,
                  intersection_type="cross",
                  signal_fault_prob=0.1):
@@ -210,7 +158,7 @@ class Simulation:
                     "cross": [1.0, 0.0, 0.0],
                     "roundabout": [0.0, 1.0, 0.0],
                     "t_intersection": [0.0, 0.0, 1.0],
-                    "1x2_grid": [0.33, 0.33, 0.34]
+                    "y_intersection": [0.33, 0.33, 0.34]
                 }
                 type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
                 group_state[i, 6:9] = np.array(type_vector)
@@ -258,8 +206,8 @@ class Simulation:
           - Stores experiences in memory along with a computed global state.
           - After simulation, calls replay() and train_ctde() to update networks.
         """
-        os.makedirs("logs23", exist_ok=True)
-        log_file = open(f"logs23/episode_{episode}.log", "w")
+        os.makedirs("logs22", exist_ok=True)
+        log_file = open(f"logs22/episode_{episode}.log", "w")
 
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
@@ -286,6 +234,16 @@ class Simulation:
         while self._step < self._max_steps:
             emergency_present = check_emergency(self)
             states = self._get_state()
+
+            # --- Newly Inserted Emergency Handling Code ---
+            # For each agent, if an emergency vehicle is detected and this agent has not yet been handled,
+            # force the traffic light to the emergency green phase (phase 0) and mark it as handled.
+            for i in range(self.num_agents):
+                if i not in self.handled_emergency_ids and np.any(states[i][:, 2] > 0):
+                    handle_emergency_vehicle(self, agent_index=i)
+                    self.handled_emergency_ids.add(i)
+            # -----------------------------------------------------
+
             current_waits = []
             for i in range(self.num_agents):
                 wt = self._collect_waiting_times_per_agent(i)
@@ -302,7 +260,7 @@ class Simulation:
                     local_reward = 0.0
 
                 if self._step != 0 and old_actions[i] is not None and \
-                   old_actions[i] != self._choose_action(states[i], 0, self._Models[i]):
+                        old_actions[i] != self._choose_action(states[i], 0, self._Models[i]):
                     local_reward -= PHASE_SWITCH_PENALTY
 
                 if emergency_present and np.any(states[i][:, 2] > 0):
@@ -322,14 +280,15 @@ class Simulation:
                 final_reward = (1 - lambda_coef) * local_rewards[i] + lambda_coef * global_component
                 final_rewards.append(final_reward)
 
-            # Compute global state (for CTDE).
-            global_state = self._get_global_state(states)
+            # Compute the next global state using the newly observed states.
+            next_global_state = self._get_global_state(states)
 
             actions = []
             for i in range(self.num_agents):
                 if self._step != 0 and old_states[i] is not None:
-                    # Store experience: (agent_id, old_state, old_action, reward, new_state, global_state)
-                    self._Memory.add_sample((i, old_states[i], old_actions[i], final_rewards[i], states[i], global_state))
+                    # Store experience: (agent_id, old_state, old_action, reward, current state, next_global_state)
+                    self._Memory.add_sample(
+                        (i, old_states[i], old_actions[i], final_rewards[i], states[i], next_global_state))
                 action = self._choose_action(states[i], epsilon, model=self._Models[i])
                 actions.append(action)
                 log_file.write(f"[Step {self._step}] Agent {i} Action: {action}, Reward: {final_rewards[i]:.4f}\n")
@@ -409,7 +368,8 @@ class Simulation:
                         traci.trafficlight.setProgram(tlid, "0")
                         traci.trafficlight.setPhase(tlid, yellow_phase)
                         if log_file:
-                            log_file.write(f"[SetYellow] TL {tlid}: Set yellow phase {yellow_phase} out of {num_phases} phases.\n")
+                            log_file.write(
+                                f"[SetYellow] TL {tlid}: Set yellow phase {yellow_phase} out of {num_phases} phases.\n")
                     else:
                         message = f"⚠️ Invalid yellow phase {yellow_phase} for TL {tlid} (only {num_phases} phases)"
                         print(message)
@@ -611,7 +571,7 @@ class Simulation:
     def _write_summary_log(self, episode, epsilon, sim_time):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
-            with open(f"logs23/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
+            with open(f"logs19/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
                 f.write(f"Timestamp: {timestamp}\n")
                 f.write(f"Intersection Type: {self.intersection_type}\n")
                 f.write(f"Total reward: {self._sum_neg_reward:.2f}\n")
@@ -631,19 +591,16 @@ class Simulation:
         except Exception as e:
             print(f"Error writing summary log: {e}")
 
-    def train_ctde(self):
+    def train_ctde(self, lambda_coef=0.5):
         """
-        Centralized Training with Decentralized Execution (CTDE).
+        Improved Centralized Training with Decentralized Execution (CTDE):
 
-        In this implementation:
-          1. A joint batch is sampled from the shared memory.
-          2. The centralized critic is trained on (global_state, reward) pairs.
-             (For simplicity, we use the immediate reward as the target.)
-          3. For each agent, an auxiliary loss term is computed as the mean-squared error
-             between the agent's Q value (for the taken action) and the centralized critic's
-             prediction on the corresponding global state.
-          4. In a full implementation, you would combine the DQN loss with this auxiliary term
-             and update the agent's network. Here, we simply print the alignment loss.
+          1. Sample joint experiences from the shared memory.
+          2. Train the centralized critic with a bootstrapped target:
+             target = reward + gamma * critic(next_global_state)
+          3. For each agent, compute the auxiliary alignment loss between its Q-value (for the taken action)
+             and the centralized critic’s prediction (on the corresponding next global state).
+          4. Backpropagate this alignment loss (using GradientTape) so that the agent's network is updated.
         """
         # 1. Sample joint experiences (without filtering by agent).
         joint_batch = self._Memory.get_samples(self._Models[0].batch_size)
@@ -653,48 +610,63 @@ class Simulation:
 
         global_states = []
         rewards = []
+        next_global_states = []
         for sample in joint_batch:
             # sample: (agent_id, state, action, reward, next_state, global_state)
-            _, _, _, rew, _, g_st = sample
-            global_states.append(g_st)
+            _, _, _, rew, _, next_g_st = sample  # next_g_st now represents the next global state
+            global_states.append(next_g_st)  # treat the stored next global state as current for critic training
             rewards.append(rew)
+            next_global_states.append(next_g_st)
+
         global_states = np.array(global_states)
         rewards = np.array(rewards).reshape(-1, 1)
+        next_global_states = np.array(next_global_states)
 
-        # 2. Train the centralized critic.
-        target = rewards  # For simplicity, we set target = reward (no bootstrapping).
-        critic_loss = self.centralized_critic.train_on_batch(global_states, target)
+        # 2. Bootstrapped target for the centralized critic:
+        # target = r + gamma * critic(next_global_state)
+        critic_next = self.centralized_critic(next_global_states)
+        targets = rewards + self._gamma * critic_next.numpy()
+
+        # Train the centralized critic.
+        critic_loss = self.centralized_critic.train_on_batch(global_states, targets)
         # print(f"[CTDE] Centralized critic loss: {critic_loss}")
 
-        # 3. For each agent, compute the auxiliary critic alignment loss.
+        # 3. For each agent, compute and backpropagate the alignment (auxiliary) loss.
         for agent_index in range(self.num_agents):
             batch_size = self._Models[agent_index].batch_size
             agent_batch = self._Memory.get_samples_by_agent(agent_index, batch_size)
             if not agent_batch:
                 continue
+
             state_list = []
             actions = []
             global_states_agent = []
             for sample in agent_batch:
                 # sample: (agent_id, state, action, reward, next_state, global_state)
-                _, st, act, _, _, g_st = sample
+                _, st, act, _, _, next_g_st = sample
                 state_list.append(st)
                 actions.append(act)
-                global_states_agent.append(g_st)
+                global_states_agent.append(next_g_st)
             states = self._pad_states(state_list)
             actions = np.array(actions, dtype=np.int32)
             global_states_agent = np.array(global_states_agent)
-            # Get Q-values from the agent's network.
-            q_vals = self._Models[agent_index].predict_batch(states)
-            # Extract Q value for each taken action.
-            q_taken = q_vals[np.arange(len(actions)), actions].reshape(-1, 1)
-            # Get centralized critic prediction.
-            critic_preds = self.centralized_critic(global_states_agent)
-            # Compute auxiliary loss.
-            alignment_loss = np.mean((q_taken - critic_preds.numpy()) ** 2)
-            # print(f"[CTDE] Agent {agent_index} critic alignment loss: {alignment_loss}")
-            # In practice, you would combine this loss with the standard DQN loss
-            # and perform a joint gradient update on the agent's network.
+
+            # Use GradientTape to compute auxiliary alignment loss.
+            agent_model = self._Models[agent_index].model  # access the Keras model
+            with tf.GradientTape() as tape:
+                # Obtain Q-values for the current states.
+                q_vals = agent_model(states, training=True)
+                # Extract Q-values corresponding to taken actions using one-hot encoding.
+                q_taken = tf.reduce_sum(q_vals * tf.one_hot(actions, depth=q_vals.shape[-1]), axis=1, keepdims=True)
+                # Get centralized critic predictions for the corresponding next global states.
+                critic_preds = self.centralized_critic(global_states_agent, training=False)
+                # Compute the auxiliary alignment loss (MSE).
+                alignment_loss = tf.reduce_mean(tf.square(q_taken - critic_preds))
+
+            # Backpropagate the alignment loss.
+            grads = tape.gradient(alignment_loss, agent_model.trainable_variables)
+            agent_model.optimizer.apply_gradients(zip(grads, agent_model.trainable_variables))
+            # print(f"[CTDE] Agent {agent_index} alignment loss: {alignment_loss.numpy()}")
 
     def analyze_results(self):
         plt.figure(figsize=(15, 5))
@@ -739,3 +711,4 @@ class Simulation:
     @property
     def q_loss_log(self):
         return self._q_loss_log
+

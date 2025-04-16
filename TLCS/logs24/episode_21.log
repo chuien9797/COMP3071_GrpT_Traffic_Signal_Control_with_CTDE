@@ -1,0 +1,114 @@
+[Step 0] Agent 0 Action: 1, Reward: 0.0000
+[Step 0] Agent 1 Action: 1, Reward: 0.0000
+[Step 0] Agent 2 Action: 2, Reward: 0.0000
+[Step 0] Agent 3 Action: 2, Reward: 0.0000
+[Step 0] Adaptive green duration: 40
+[Simulate] Step 1: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 2: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 3: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 4: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 6: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 7: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 8: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 9: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 10: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 11: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 12: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 13: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 14: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 15: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 16: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 17: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 18: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 19: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 20: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 21: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 22: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 23: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 24: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 25: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 26: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 27: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 28: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 29: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 30: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 31: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 32: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 33: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 34: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 35: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 36: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 37: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 38: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 39: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 40: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 40] Agent 0 Action: 0, Reward: -0.1000
+[Step 40] Agent 1 Action: 3, Reward: -0.1000
+[Step 40] Agent 2 Action: 1, Reward: -0.1000
+[Step 40] Agent 3 Action: 3, Reward: -0.1000
+[SetYellow] TL TL1: Set yellow phase 2 out of 4 phases.
+[Simulate] Step 41: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 42: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 43: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 44: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[SetYellow] TL TL2: Set yellow phase 2 out of 4 phases.
+[Simulate] Step 45: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 46: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 47: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 48: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[SetYellow] TL TL3: Set yellow phase 3 out of 4 phases.
+[Simulate] Step 49: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 50: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 51: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 52: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[SetYellow] TL TL4: Set yellow phase 3 out of 4 phases.
+[Simulate] Step 53: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 54: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 55: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 56: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 56] Adaptive green duration: 40
+[Simulate] Step 57: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 58: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 59: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 60: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 61: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 62: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 63: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 64: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 65: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 66: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 67: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 68: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 69: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 70: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 71: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 72: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 73: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 74: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 75: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 76: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 77: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 78: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 79: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 80: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 81: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 82: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 83: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 84: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 85: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 86: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 87: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 88: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 89: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 90: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 91: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 92: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 93: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 94: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 95: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 96: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 96] Agent 0 Action: 2, Reward: -0.1000
+[Step 96] Agent 1 Action: 0, Reward: -0.1000
+[Step 96] Agent 2 Action: 3, Reward: -0.1000
+[Step 96] Agent 3 Action: 3, Reward: -0.1000

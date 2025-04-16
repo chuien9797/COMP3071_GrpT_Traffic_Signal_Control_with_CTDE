@@ -1,0 +1,13 @@
+Timestamp: 2025-04-16 23:20:22
+Intersection Type: 1x2_grid
+Total reward: -80.28
+Epsilon: 0.68
+Simulation duration: 57.6s
+Avg queue length: 75.44
+Cumulative wait time: 26214431.00
+Fault injected: No
+Total Emergency Delay: 69431.00
+
+Action Distribution:
+Agent 1
+Agent 2

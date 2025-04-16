@@ -258,8 +258,8 @@ class Simulation:
           - Stores experiences in memory along with a computed global state.
           - After simulation, calls replay() and train_ctde() to update networks.
         """
-        os.makedirs("logs23", exist_ok=True)
-        log_file = open(f"logs23/episode_{episode}.log", "w")
+        os.makedirs("logs24", exist_ok=True)
+        log_file = open(f"logs24/episode_{episode}.log", "w")
 
         self._TrafficGen.generate_routefile(seed=episode)
         traci.start(self._sumo_cmd)
@@ -480,8 +480,16 @@ class Simulation:
             q_len = self._get_queue_length()
             self._sum_queue_length += q_len
             current_wait = self._collect_waiting_times()
+            self._sum_waiting_time += current_wait
+
+            emergency_delay = 0.0
+            for veh in traci.vehicle.getIDList():
+                if traci.vehicle.getTypeID(veh) == "emergency":
+                    emergency_delay += traci.vehicle.getAccumulatedWaitingTime(veh)
+            self._emergency_total_delay += emergency_delay
+        
             if log_file:
-                log_file.write(f"[Simulate] Step {self._step}: Queue length {q_len}, Waiting time {current_wait}\n")
+                log_file.write(f"[Simulate] Step {self._step}: Queue length {q_len}, Waiting time {current_wait}, Emergency Delay: {emergency_delay}\n")
 
     def _inject_signal_faults(self, log_file=None):
         self.manual_override = False
@@ -617,7 +625,7 @@ class Simulation:
     def _write_summary_log(self, episode, epsilon, sim_time):
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
-            with open(f"logs23/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
+            with open(f"logs24/episode_{episode}_summary.log", "w", encoding="utf-8") as f:
                 f.write(f"Timestamp: {timestamp}\n")
                 f.write(f"Intersection Type: {self.intersection_type}\n")
                 f.write(f"Total reward: {self._sum_neg_reward:.2f}\n")

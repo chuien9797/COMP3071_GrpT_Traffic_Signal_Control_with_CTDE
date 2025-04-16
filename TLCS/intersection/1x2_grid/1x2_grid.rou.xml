@@ -10,13 +10,13 @@
             <route id="E_N" edges="2_E2TL 2_TL2N" />
             <route id="W_S" edges="W2TL TL2E 2_TL2S" />
     <vehicle id="S_N_0" type="standard_car" route="S_N" depart="35" departLane="random" departSpeed="10" />
-    <vehicle id="E_W_1" type="standard_car" route="E_W" depart="42" departLane="random" departSpeed="10" />
-    <vehicle id="N_W_2" type="standard_car" route="N_W" depart="46" departLane="random" departSpeed="10" />
-    <vehicle id="W_E_3" type="standard_car" route="W_E" depart="67" departLane="random" departSpeed="10" />
-    <vehicle id="S_E_4" type="standard_car" route="S_E" depart="82" departLane="random" departSpeed="10" />
-    <vehicle id="W_S_5" type="standard_car" route="W_S" depart="94" departLane="random" departSpeed="10" />
-    <vehicle id="N_S_6" type="standard_car" route="N_S" depart="110" departLane="random" departSpeed="10" />
-    <vehicle id="E_N_7" type="standard_car" route="E_N" depart="112" departLane="random" departSpeed="10" />
+    <vehicle id="N_W_1" type="standard_car" route="N_W" depart="42" departLane="random" departSpeed="10" />
+    <vehicle id="N_S_2" type="standard_car" route="N_S" depart="46" departLane="random" departSpeed="10" />
+    <vehicle id="S_E_3" type="standard_car" route="S_E" depart="67" departLane="random" departSpeed="10" />
+    <vehicle id="E_N_4" type="standard_car" route="E_N" depart="82" departLane="random" departSpeed="10" />
+    <vehicle id="E_W_5" type="standard_car" route="E_W" depart="94" departLane="random" departSpeed="10" />
+    <vehicle id="W_E_6" type="standard_car" route="W_E" depart="110" departLane="random" departSpeed="10" />
+    <vehicle id="W_S_7" type="standard_car" route="W_S" depart="112" departLane="random" departSpeed="10" />
     <vehicle id="W_S_8" type="standard_car" route="W_S" depart="123" departLane="random" departSpeed="10" />
     <vehicle id="N_W_9" type="standard_car" route="N_W" depart="123" departLane="random" departSpeed="10" />
     <vehicle id="E_W_10" type="standard_car" route="E_W" depart="125" departLane="random" departSpeed="10" />

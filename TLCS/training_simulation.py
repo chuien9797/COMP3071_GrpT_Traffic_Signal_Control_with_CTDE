@@ -207,11 +207,11 @@ class Simulation:
                         pass
                 group_state[i, 5] = controlled_by_faulty
                 intersection_encoding = {
-                    "cross": [1.0, 0.0, 0.0],
-                    "roundabout": [0.0, 1.0, 0.0],
-                    "t_intersection": [0.0, 0.0, 1.0],
+                    "cross": [0.33, 0.33, 0.34],
+                    "roundabout": [0.33, 0.33, 0.34],
+                    "t_intersection": [0.33, 0.33, 0.34],
                     "1x2_grid": [0.33, 0.33, 0.34]
-                }
+                                    }
                 type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
                 group_state[i, 6:9] = np.array(type_vector)
             states.append(group_state)
@@ -384,9 +384,15 @@ class Simulation:
 
     def _choose_action(self, state, epsilon, model):
         valid_action_indices = list(self.int_conf["phase_mapping"].keys())
+
         if random.random() < epsilon:
             return random.choice(valid_action_indices)
+
         q_vals = model.predict_one(state)[0]
+
+        # Convert to integer type explicitly
+        valid_action_indices = np.array(valid_action_indices, dtype=int)
+
         valid_q_vals = q_vals[valid_action_indices]
         best_valid_action = valid_action_indices[int(np.argmax(valid_q_vals))]
         return best_valid_action

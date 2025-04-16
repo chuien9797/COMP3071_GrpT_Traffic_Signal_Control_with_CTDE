@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nodes>
+    <!-- Approaches and intersection nodes from the SUMO net -->
+    <node id="2_DN" x="375.00" y="750.00" type="dead_end"/>
+    <node id="2_DS" x="375.00" y="-750.00" type="dead_end"/>
+    <node id="2_TL" x="375.00" y="0.00" type="traffic_light"/>
+    <node id="DE"   x="1125.00" y="0.00" type="dead_end"/>
+    <node id="DN"   x="-375.00" y="750.00" type="dead_end"/>
+    <node id="DS"   x="-375.00" y="-750.00" type="dead_end"/>
+    <node id="DW"   x="-1125.00" y="0.00" type="dead_end"/>
+    <node id="TL"   x="-375.00" y="0.00" type="traffic_light"/>
+</nodes>

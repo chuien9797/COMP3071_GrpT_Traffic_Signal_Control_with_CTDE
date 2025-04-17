@@ -1,13 +1,15 @@
-Timestamp: 2025-04-16 20:44:56
-Intersection Type: 1x2_grid
-Total reward: -83.72
-Epsilon: 0.94
-Simulation duration: 141.9s
-Avg queue length: 46.99
-Cumulative wait time: 17306580.00
+Timestamp: 2025-04-17 13:41:00
+Intersection Type: roundabout
+Total reward: -54.51
+Epsilon: 0.98
+Simulation duration: 33.6s
+Avg queue length: 43.79
+Cumulative wait time: 17890016.00
 Fault injected: No
-Total Emergency Delay: 46455.00
+Total Emergency Delay: 58063.00
 
 Action Distribution:
 Agent 1
 Agent 2
+Agent 3
+Agent 4

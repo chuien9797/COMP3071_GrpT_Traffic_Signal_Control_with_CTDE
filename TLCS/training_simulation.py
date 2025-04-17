@@ -9,13 +9,15 @@ import traci
 from emergency_handler import check_emergency, handle_emergency_vehicle
 import intersection_config as int_config
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras import layers
+from keras import layers
+import tensorflow as tf
+
 import tensorflow as tf
 
 # Global constants for faults, etc.
 RECOVERY_DELAY = 15
 FAULT_REWARD_SCALE = 0.5
-EPISODE_FAULT_START = 25
+EPISODE_FAULT_START = int(150 * 0.3)
 
 
 ###############################################################################

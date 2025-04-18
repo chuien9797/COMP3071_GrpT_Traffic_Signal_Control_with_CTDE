@@ -253,7 +253,12 @@ class TrafficGenerator:
                 # Roundabout default → all route IDs
                 routes_list = ["route1","route2","route3","route4","route5","route6","route7","route8"]
             elif self.intersection_type == "1x2_grid":
-                routes_list = ["W_E", "E_W", "N_S", "S_N", "N_W", "S_E", "E_N", "W_S"]
+                routes_list = [
+                "W_E", "E_W",
+                "N_S_1", "N_S_2",
+                "S_N_1", "S_N_2",
+                "N_W", "S_E", "E_N", "W_S"
+            ]
             else:
                 # Cross or fallback
                 routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]

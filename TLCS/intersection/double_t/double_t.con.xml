@@ -1,0 +1,15 @@
+<connections>
+
+    <!-- LEFT T-JUNCTION (N2) -->
+    <connection from="top" to="mid1"/>        <!-- Top → Right -->
+    <connection from="top" to="left2"/>       <!-- Top → Left -->
+    <connection from="left1" to="mid1"/>      <!-- Left → Right -->
+    <connection from="left1" to="top_r"/>       <!-- Left → Top -->
+
+    <!-- RIGHT T-JUNCTION (N5) -->
+    <connection from="bottom" to="right1"/>   <!-- Bottom → Right -->
+    <connection from="bottom" to="mid2"/>     <!-- Bottom → Left -->
+    <connection from="right2" to="mid2"/>     <!-- Right → Left -->
+    <connection from="right2" to="bottom_r"/>   <!-- Right → Bottom -->
+
+</connections>

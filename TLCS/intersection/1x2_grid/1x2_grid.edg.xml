@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edges>
+    <!-- External connection edges extracted from the SUMO net -->
+    <edge id="2_E2TL" from="DE"   to="2_TL" numLanes="4" speed="13.89"/>
+    <edge id="2_N2TL" from="2_DN" to="2_TL" numLanes="4" speed="13.89"/>
+    <edge id="2_S2TL" from="2_DS" to="2_TL" numLanes="4" speed="13.89"/>
+    <edge id="2_TL2E" from="2_TL" to="DE"   numLanes="4" speed="13.89"/>
+    <edge id="2_TL2N" from="2_TL" to="2_DN" numLanes="4" speed="13.89"/>
+    <edge id="2_TL2S" from="2_TL" to="2_DS" numLanes="4" speed="13.89"/>
+    <edge id="2_TL2W" from="2_TL" to="TL"   numLanes="4" speed="13.89"/>
+    <edge id="N2TL"   from="DN"   to="TL"   numLanes="4" speed="13.89"/>
+    <edge id="S2TL"   from="DS"   to="TL"   numLanes="4" speed="13.89"/>
+    <edge id="TL2E"   from="TL"   to="2_TL" numLanes="4" speed="13.89"/>
+    <edge id="TL2N"   from="TL"   to="DN"   numLanes="4" speed="13.89"/>
+    <edge id="TL2S"   from="TL"   to="DS"   numLanes="4" speed="13.89"/>
+    <edge id="TL2W"   from="TL"   to="DW"   numLanes="4" speed="13.89"/>
+    <edge id="W2TL"   from="DW"   to="TL"   numLanes="4" speed="13.89"/>
+</edges>

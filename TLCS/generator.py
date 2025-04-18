@@ -43,6 +43,8 @@ class TrafficGenerator:
             vehicle_entries = self._generate_roundabout_routes(car_gen_steps)
         elif self.intersection_type == "T_intersection":
             vehicle_entries = self._generate_T_intersection_routes(car_gen_steps)
+        elif self.intersection_type == "1x2_grid":
+            vehicle_entries = self._generate_1x2_grid_routes(car_gen_steps)
         else:
             # If it's something like "Y_intersection" or others, fallback:
             vehicle_entries = self._generate_default_routes(car_gen_steps)
@@ -61,11 +63,13 @@ class TrafficGenerator:
 
         # Decide on filename based on intersection type
         if self.intersection_type == "T_intersection":
-            output_file = os.path.join(output_folder, "t_routes.rou.xml")
+            output_file = os.path.join(output_folder, "2x2_grid.rou.xml")
         elif self.intersection_type == "roundabout":
             output_file = os.path.join(output_folder, "roundabout.rou.xml")
         elif self.intersection_type == "cross_intersection":
             output_file = os.path.join(output_folder, "cross_routes.rou.xml")
+        elif self.intersection_type == "1x2_grid":
+            output_file = os.path.join(output_folder, "1x2_grid.rou.xml")
 
         else:
             # For "Y_intersection", etc. we can reuse "cross_routes.rou.xml as template"
@@ -162,6 +166,62 @@ class TrafficGenerator:
                 chosen_route + "_" + str(car_counter), chosen_route, depart_time)
             vehicle_entries.append((depart_time, entry))
         return vehicle_entries
+    
+    def _generate_1x2_grid_routes(self, car_gen_steps):
+        """
+        Generate routes for the environment_intersect map with two connected intersections.
+        Ensures all lanes get vehicles, then uses probabilistic generation.
+        """
+        vehicle_entries = []
+        route_conf = self.int_conf.get("route_config", {})
+        
+        main_conf = route_conf.get("main", {
+            "routes": ["W_E", "E_W", "N_S", "S_N"],
+            "probability": 0.7
+        })
+        side_conf = route_conf.get("side", {
+            "routes": ["W_E", "E_W", "N_S_1", "N_S_2", "S_N_1", "S_N_2"],
+            "probability": 0.3
+        })
+
+        all_routes = main_conf.get("routes", []) + side_conf.get("routes", [])
+        all_routes = list(set(all_routes))  # remove duplicates
+        main_prob = main_conf.get("probability", 0.7)
+
+        # First, guarantee one vehicle per route (to cover all lanes)
+        car_counter = 0
+        step_iter = iter(car_gen_steps)
+        for route in all_routes:
+            try:
+                depart_time = next(step_iter)
+            except StopIteration:
+                break  # Not enough steps
+            entry = (
+                f'    <vehicle id="{route}_{car_counter}" '
+                f'type="standard_car" route="{route}" '
+                f'depart="{depart_time}" departLane="random" departSpeed="10" />'
+            )
+            vehicle_entries.append((depart_time, entry))
+            car_counter += 1
+
+        # Continue random generation for remaining steps
+        for step in step_iter:
+            depart_time = step
+            if np.random.uniform() < main_prob:
+                chosen_route = np.random.choice(main_conf.get("routes", []))
+            else:
+                chosen_route = np.random.choice(side_conf.get("routes", []))
+            
+            entry = (
+                f'    <vehicle id="{chosen_route}_{car_counter}" '
+                f'type="standard_car" route="{chosen_route}" '
+                f'depart="{depart_time}" departLane="random" departSpeed="10" />'
+            )
+            vehicle_entries.append((depart_time, entry))
+            car_counter += 1
+
+        return vehicle_entries
+
 
     def _generate_default_routes(self, car_gen_steps):
         """
@@ -192,6 +252,13 @@ class TrafficGenerator:
             elif self.intersection_type == "roundabout":
                 # Roundabout default → all route IDs
                 routes_list = ["route1","route2","route3","route4","route5","route6","route7","route8"]
+            elif self.intersection_type == "1x2_grid":
+                routes_list = [
+                "W_E", "E_W",
+                "N_S_1", "N_S_2",
+                "S_N_1", "S_N_2",
+                "N_W", "S_E", "E_N", "W_S"
+            ]
             else:
                 # Cross or fallback
                 routes_list = ["W_N", "W_E", "W_S", "N_W", "N_E", "N_S", "E_W", "E_N", "S_W", "S_N", "S_E"]

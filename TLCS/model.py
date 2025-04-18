@@ -11,8 +11,8 @@ import tensorflow as tf
 from keras.src.saving.saving_lib import load_model
 from keras.src.utils import plot_model
 from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras import losses
+from keras import layers
+from keras import losses
 from tensorflow.keras.optimizers import Adam
 
 
@@ -83,9 +83,9 @@ class DQNSetModel(tf.keras.Model):
 ##############################################################################
 class TrainModelAggregator:
     def __init__(self,
-                 lane_feature_dim=5,
-                 embedding_dim=32,
-                 final_hidden=64,
+                 lane_feature_dim= 6+3,
+                 embedding_dim=64,
+                 final_hidden=128,
                  num_actions=4,
                  batch_size=64,
                  learning_rate=1e-3,
@@ -114,6 +114,12 @@ class TrainModelAggregator:
             optimizer=Adam(learning_rate=self._learning_rate)
         )
         return dqn_model
+
+    def get_weights(self):
+        return self._model.get_weights()
+
+    def set_weights(self, weights):
+        self._model.set_weights(weights)
 
     def predict_one(self, state):
         """

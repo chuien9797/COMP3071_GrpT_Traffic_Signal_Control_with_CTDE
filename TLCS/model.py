@@ -154,12 +154,23 @@ class TrainModelAggregator:
         self.set_weights(new_w)
 
     # ---------------- misc ----------------------------------------------------
+    # model.py  ── inside class TrainModelAggregator
+    # model.py  – inside TrainModelAggregator.save_model()
     def save_model(self, path):
         os.makedirs(path, exist_ok=True)
-        self._model.save(os.path.join(path, 'trained_model.h5'))
-        plot_model(self._model,
-                   to_file=os.path.join(path, 'model_structure.png'),
-                   show_shapes=True, show_layer_names=True)
+        h5_path = os.path.join(path, "trained_model.h5")
+        self._model.save(h5_path)
+        print(f"[Model] ➜ saved HDF5 weights to: {h5_path}")
+
+        # --- OPTIONAL diagram -------------------------------------------------
+        try:
+            from keras.utils import plot_model  # < will raise ImportError if pydot absent
+            png_path = os.path.join(path, "model_structure.png")
+            plot_model(self._model, to_file=png_path,
+                       show_shapes=True, show_layer_names=True)
+            print(f"[Model] ➜ architecture PNG saved to: {png_path}")
+        except ImportError:
+            print("[Model] (skipped architecture PNG – install `pydot` & GraphViz to enable)")
 
     def load_from_disk(self, filepath):
         self._model = tf.keras.models.load_model(filepath)

@@ -31,7 +31,7 @@ def main():
         raise ValueError(f"This script is for DQN. Found algorithm={algorithm}")
 
     # 2. Determine maximum action space across all environments.
-    possible_envs = ["cross", "roundabout", "2x2_grid", "1x2_grid"]
+    possible_envs = ["cross", "roundabout", "1x2_grid"]
     max_num_actions = max(len(INTERSECTION_CONFIGS[env]["phase_mapping"]) for env in possible_envs)
     config['num_actions'] = max_num_actions
 

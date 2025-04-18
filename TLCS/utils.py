@@ -117,38 +117,24 @@ def set_sumo(gui, sumocfg_file_name, max_steps):
     return sumo_cmd
 
 
-import os
-import re
-
 def set_train_path(models_path_name):
     """
-    Create a new model path with an incremental integer,
-    considering only folders named 'model_<N>'.
+    Create a new model path with an incremental integer, also
+    considering previously created model paths.
     """
-    # build the absolute path to your models directory
-    models_path = os.path.join(os.getcwd(), models_path_name)
-    # ensure it exists
-    os.makedirs(models_path, exist_ok=True)
+    models_path = os.path.join(os.getcwd(), models_path_name, '')
+    os.makedirs(os.path.dirname(models_path), exist_ok=True)
 
-    # list only the immediate children
     dir_content = os.listdir(models_path)
-
-    # extract all existing version numbers from names like "model_3"
-    previous_versions = []
-    for name in dir_content:
-        m = re.fullmatch(r"model_(\d+)", name)
-        if m:
-            previous_versions.append(int(m.group(1)))
-
-    # decide the next version
-    if previous_versions:
+    if dir_content:
+        # we expect folder names like "model_1", "model_2", ...
+        previous_versions = [int(name.split("_")[1]) for name in dir_content]
         new_version = str(max(previous_versions) + 1)
     else:
-        new_version = "1"
+        new_version = '1'
 
-    # create the new model_<new_version> folder
-    data_path = os.path.join(models_path, f"model_{new_version}")
-    os.makedirs(data_path, exist_ok=True)
+    data_path = os.path.join(models_path, 'model_' + new_version, '')
+    os.makedirs(os.path.dirname(data_path), exist_ok=True)
     return data_path
 
 
@@ -164,3 +150,4 @@ def set_test_path(models_path_name, model_n):
         return model_folder_path, plot_path
     else:
         sys.exit('The model number specified does not exist in the models folder')
+

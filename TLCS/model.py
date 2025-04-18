@@ -1,24 +1,22 @@
 ##############################################################################
 # Filename: model.py
-# Purpose:  Demonstration of Per-Lane Embedding + Aggregation for DQN
+# Purpose:  Per‑Lane Embedding + Aggregation DQN (single shared policy ready)
 ##############################################################################
 
 import os
-import sys
 import numpy as np
 import tensorflow as tf
-
-from keras.src.saving.saving_lib import load_model
 from keras.src.utils import plot_model
-from tensorflow import keras
-from keras import layers
-from keras import losses
+from keras import layers, losses
 from tensorflow.keras.optimizers import Adam
 
 
+# --------------------------------------------------------------------------- #
+#  Basic building blocks
+# --------------------------------------------------------------------------- #
 class LaneEmbeddingNetwork(tf.keras.Model):
     """
-    A small MLP that processes a single lane's feature vector into an embedding.
+    A small MLP that embeds one lane’s feature vector.
     """
     def __init__(self, lane_feature_dim, embedding_dim=32, hidden_units=64):
         super().__init__()
@@ -26,64 +24,54 @@ class LaneEmbeddingNetwork(tf.keras.Model):
         self.dense2 = layers.Dense(embedding_dim, activation='relu')
 
     def call(self, lane_input):
-        # lane_input shape: (batch_size, lane_feature_dim)
+        # lane_input: (batch, lane_feature_dim)
         x = self.dense1(lane_input)
-        x = self.dense2(x)
-        return x  # shape: (batch_size, embedding_dim)
+        return self.dense2(x)           # (batch, embedding_dim)
 
 
 class AggregatorDQN(tf.keras.Model):
     """
-    Aggregator that takes variable number of lane embeddings, does mean pooling,
-    then outputs Q-values using a final MLP.
+    Mean‑pool lane embeddings ▶ two‑layer MLP ▶ Q‑values.
     """
     def __init__(self, embedding_dim=32, final_hidden=64, num_actions=4):
         super().__init__()
-        self.final_fc1 = layers.Dense(final_hidden, activation='relu')
-        self.final_fc2 = layers.Dense(num_actions, activation='linear')
+        self.fc1 = layers.Dense(final_hidden, activation='relu')
+        self.fc2 = layers.Dense(num_actions, activation='linear')
 
     def call(self, lane_embeddings):
-        # lane_embeddings shape: (batch_size, num_lanes, embedding_dim)
-        x = tf.reduce_mean(lane_embeddings, axis=1)  # shape: (batch_size, embedding_dim)
-        x = self.final_fc1(x)
-        q_values = self.final_fc2(x)
-        return q_values  # shape: (batch_size, num_actions)
+        # lane_embeddings: (batch, num_lanes, embedding_dim)
+        pooled = tf.reduce_mean(lane_embeddings, axis=1)  # (batch, embedding_dim)
+        x      = self.fc1(pooled)
+        return self.fc2(x)                                # (batch, num_actions)
 
 
 class DQNSetModel(tf.keras.Model):
     """
-    The full pipeline that:
-     1) Embeds each lane with LaneEmbeddingNetwork
-     2) Aggregates the embeddings via mean pooling
-     3) Outputs Q-values with a final MLP (AggregatorDQN)
+    Full pipeline: lane‑wise embed ➜ mean pool ➜ Q‑network.
     """
     def __init__(self, lane_feature_dim, embedding_dim, final_hidden, num_actions):
         super().__init__()
-        self.lane_embed = LaneEmbeddingNetwork(lane_feature_dim, embedding_dim)
+        self.embedder  = LaneEmbeddingNetwork(lane_feature_dim, embedding_dim)
         self.aggregator = AggregatorDQN(embedding_dim, final_hidden, num_actions)
 
-    def call(self, list_of_lanes):
-        """
-        list_of_lanes shape: (batch_size, num_lanes, lane_feature_dim)
-        """
-        batch_size = tf.shape(list_of_lanes)[0]
-        num_lanes  = tf.shape(list_of_lanes)[1]
-        x = tf.reshape(list_of_lanes, [-1, list_of_lanes.shape[-1]])
-        # x shape: (batch_size * num_lanes, lane_feature_dim)
-        embeddings = self.lane_embed(x)
-        # embeddings shape: (batch_size * num_lanes, embedding_dim)
-        embeddings = tf.reshape(embeddings, [batch_size, num_lanes, -1])
-        q_values = self.aggregator(embeddings)
-        return q_values
+    def call(self, lanes):
+        # lanes: (batch, num_lanes, lane_feature_dim)
+        b, n = tf.shape(lanes)[0], tf.shape(lanes)[1]
+        flat = tf.reshape(lanes, [-1, lanes.shape[-1]])          # (batch*num_lanes, feat)
+        emb  = self.embedder(flat)                               # (batch*num_lanes, emb)
+        emb  = tf.reshape(emb, [b, n, -1])                       # (batch, num_lanes, emb)
+        return self.aggregator(emb)                              # (batch, num_actions)
 
 
-##############################################################################
-# TrainModelAggregator: a wrapper class similar to your old TrainModel,
-# but using the set-based aggregator approach.
-##############################################################################
+# --------------------------------------------------------------------------- #
+#  Convenience wrapper: TrainModelAggregator
+# --------------------------------------------------------------------------- #
 class TrainModelAggregator:
+    """
+    Thin wrapper that matches the interface used in your training loop.
+    """
     def __init__(self,
-                 lane_feature_dim= 6+3,
+                 lane_feature_dim=9,      # 6 raw + 3 one‑hot intersection type
                  embedding_dim=64,
                  final_hidden=128,
                  num_actions=4,
@@ -91,72 +79,93 @@ class TrainModelAggregator:
                  learning_rate=1e-3,
                  model=None):
         self._lane_feature_dim = lane_feature_dim
-        self._embedding_dim = embedding_dim
-        self._final_hidden = final_hidden
-        self._num_actions = num_actions
-        self._batch_size = batch_size
-        self._learning_rate = learning_rate
+        self._embedding_dim    = embedding_dim
+        self._final_hidden     = final_hidden
+        self._num_actions      = num_actions
+        self._batch_size       = batch_size
+        self._learning_rate    = learning_rate
 
-        if model is not None:
-            self._model = model
-        else:
-            self._model = self._build_model()
+        self._model = model if model is not None else self._build_model()
 
+    # ---------------- internal ------------------------------------------------
     def _build_model(self):
-        dqn_model = DQNSetModel(
+        net = DQNSetModel(
             lane_feature_dim=self._lane_feature_dim,
             embedding_dim=self._embedding_dim,
             final_hidden=self._final_hidden,
             num_actions=self._num_actions
         )
-        dqn_model.compile(
+        net.compile(
             loss=losses.MeanSquaredError(),
-            optimizer=Adam(learning_rate=self._learning_rate)
+            optimizer=Adam(self._learning_rate)
         )
-        return dqn_model
+        return net
 
-    def get_weights(self):
-        return self._model.get_weights()
-
-    def set_weights(self, weights):
-        self._model.set_weights(weights)
-
+    # ---------------- public API ---------------------------------------------
     def predict_one(self, state):
         """
-        state shape: (num_lanes, lane_feature_dim).
-        Expand dims to (1, num_lanes, lane_feature_dim) and predict.
+        state: (num_lanes, lane_feature_dim) → returns (1, num_actions)
         """
-        state = np.expand_dims(state, axis=0)
-        q_values = self._model(state)
-        return q_values.numpy()
+        return self._model(np.expand_dims(state, 0)).numpy()
 
     def predict_batch(self, states):
         """
-        states shape: (batch_size, num_lanes, lane_feature_dim)
+        states: (batch, num_lanes, lane_feature_dim)
         """
         return self._model(states).numpy()
 
-    def train_batch(self, states, q_sa):
+    def train_batch(self, states, q_targets):
         """
-        states: (batch_size, num_lanes, lane_feature_dim)
-        q_sa: (batch_size, num_actions)
+        One SGD step (silent).
         """
-        self._model.fit(states, q_sa, epochs=1, verbose=0)
+        self._model.fit(states, q_targets, epochs=1, verbose=0)
 
+    # ---------------- weight utils -------------------------------------------
+    def get_weights(self):            return self._model.get_weights()
+    def set_weights(self, weights):   self._model.set_weights(weights)
+
+    # >>> NEW – helper to create a target net quickly <<<
+    @classmethod
+    def clone_from(cls, src, tau=1.0):
+        """
+        Build a *copy* (full or soft) from an existing TrainModelAggregator
+        instance `src`.  `tau=1` ⇒ hard copy; 0<tau<1 ⇒ soft update.
+        """
+        cloned_keras = tf.keras.models.clone_model(src._model)
+        cloned_keras.set_weights(src.get_weights())
+        tgt = cls(lane_feature_dim=src._lane_feature_dim,
+                  embedding_dim=src._embedding_dim,
+                  final_hidden=src._final_hidden,
+                  num_actions=src._num_actions,
+                  batch_size=src._batch_size,
+                  learning_rate=src._learning_rate,
+                  model=cloned_keras)
+        if tau < 1.0:
+            tgt.soft_update_from(src, tau)
+        return tgt
+
+    def soft_update_from(self, src, tau=0.005):
+        """
+        Polyak averaging: θ_target ← τ θ_src + (1‑τ) θ_target.
+        """
+        new_w = []
+        for w_tgt, w_src in zip(self.get_weights(), src.get_weights()):
+            new_w.append((1. - tau) * w_tgt + tau * w_src)
+        self.set_weights(new_w)
+
+    # ---------------- misc ----------------------------------------------------
     def save_model(self, path):
+        os.makedirs(path, exist_ok=True)
         self._model.save(os.path.join(path, 'trained_model.h5'))
-        plot_model(self._model, to_file=os.path.join(path, 'model_structure.png'),
+        plot_model(self._model,
+                   to_file=os.path.join(path, 'model_structure.png'),
                    show_shapes=True, show_layer_names=True)
 
-    @property
-    def batch_size(self):
-        return self._batch_size
+    def load_from_disk(self, filepath):
+        self._model = tf.keras.models.load_model(filepath)
 
+    # ---------------- properties ---------------------------------------------
     @property
-    def model(self):
-        return self._model
-
-    def load_from_disk(self, model_path):
-        from keras.src.saving.saving_lib import load_model
-        loaded = load_model(model_path)
-        self._model = loaded
+    def batch_size(self): return self._batch_size
+    @property
+    def model(self):      return self._model

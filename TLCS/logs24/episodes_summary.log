@@ -1,0 +1,2082 @@
+Timestamp: 2025-04-17 13:14:31
+Intersection Type: 2x2_grid
+Total reward: -101.84
+Epsilon: 1.0
+Simulation duration: 74.9s
+Avg queue length: 55.89
+Cumulative wait time: 60860402.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 13:24:47
+Intersection Type: roundabout
+Total reward: -54.14
+Epsilon: 0.99
+Simulation duration: 52.5s
+Avg queue length: 13.29
+Cumulative wait time: 4721617.00
+Fault injected: No
+Total Emergency Delay: 15888.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 13:34:15
+Intersection Type: roundabout
+Total reward: -60.45
+Epsilon: 0.99
+Simulation duration: 120.9s
+Avg queue length: 29.63
+Cumulative wait time: 12719041.00
+Fault injected: No
+Total Emergency Delay: 51032.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 13:41:00
+Intersection Type: roundabout
+Total reward: -54.51
+Epsilon: 0.98
+Simulation duration: 33.6s
+Avg queue length: 43.79
+Cumulative wait time: 17890016.00
+Fault injected: No
+Total Emergency Delay: 58063.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 13:47:13
+Intersection Type: 1x2_grid
+Total reward: -82.17
+Epsilon: 0.97
+Simulation duration: 62.2s
+Avg queue length: 10.82
+Cumulative wait time: 3827437.00
+Fault injected: No
+Total Emergency Delay: 9285.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 13:51:59
+Intersection Type: 2x2_grid
+Total reward: -110.03
+Epsilon: 0.97
+Simulation duration: 77.7s
+Avg queue length: 112.31
+Cumulative wait time: 122082486.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 13:59:35
+Intersection Type: cross
+Total reward: -8.57
+Epsilon: 0.96
+Simulation duration: 17.2s
+Avg queue length: 4.68
+Cumulative wait time: 4248011.00
+Fault injected: No
+Total Emergency Delay: 254916.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 14:02:14
+Intersection Type: 2x2_grid
+Total reward: -96.50
+Epsilon: 0.95
+Simulation duration: 65.0s
+Avg queue length: 158.87
+Cumulative wait time: 159167261.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 14:09:23
+Intersection Type: roundabout
+Total reward: -60.63
+Epsilon: 0.95
+Simulation duration: 34.8s
+Avg queue length: 56.88
+Cumulative wait time: 23936137.00
+Fault injected: No
+Total Emergency Delay: 66076.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 14:18:15
+Intersection Type: 1x2_grid
+Total reward: -95.30
+Epsilon: 0.94
+Simulation duration: 63.2s
+Avg queue length: 22.20
+Cumulative wait time: 7829661.00
+Fault injected: No
+Total Emergency Delay: 18137.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 14:24:19
+Intersection Type: 1x2_grid
+Total reward: -81.60
+Epsilon: 0.93
+Simulation duration: 63.3s
+Avg queue length: 31.93
+Cumulative wait time: 11048504.00
+Fault injected: No
+Total Emergency Delay: 43898.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 14:31:37
+Intersection Type: 2x2_grid
+Total reward: -101.38
+Epsilon: 0.93
+Simulation duration: 152.6s
+Avg queue length: 226.41
+Cumulative wait time: 255470964.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 14:40:08
+Intersection Type: 1x2_grid
+Total reward: -87.42
+Epsilon: 0.92
+Simulation duration: 91.1s
+Avg queue length: 43.19
+Cumulative wait time: 15037170.00
+Fault injected: No
+Total Emergency Delay: 66210.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 14:45:25
+Intersection Type: roundabout
+Total reward: -57.36
+Epsilon: 0.91
+Simulation duration: 106.4s
+Avg queue length: 70.10
+Cumulative wait time: 29098010.00
+Fault injected: No
+Total Emergency Delay: 102818.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 14:53:03
+Intersection Type: 1x2_grid
+Total reward: -88.37
+Epsilon: 0.91
+Simulation duration: 68.4s
+Avg queue length: 53.26
+Cumulative wait time: 18463227.00
+Fault injected: No
+Total Emergency Delay: 82256.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 14:57:57
+Intersection Type: 2x2_grid
+Total reward: -121.64
+Epsilon: 0.9
+Simulation duration: 86.2s
+Avg queue length: 277.61
+Cumulative wait time: 312201314.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 15:04:44
+Intersection Type: cross
+Total reward: -11.45
+Epsilon: 0.89
+Simulation duration: 18.0s
+Avg queue length: 11.05
+Cumulative wait time: 10281760.00
+Fault injected: No
+Total Emergency Delay: 439338.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 15:10:47
+Intersection Type: 2x2_grid
+Total reward: -94.79
+Epsilon: 0.89
+Simulation duration: 190.8s
+Avg queue length: 322.82
+Cumulative wait time: 349668359.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 15:19:34
+Intersection Type: 1x2_grid
+Total reward: -101.28
+Epsilon: 0.88
+Simulation duration: 75.8s
+Avg queue length: 66.08
+Cumulative wait time: 23621069.00
+Fault injected: No
+Total Emergency Delay: 94608.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 15:25:54
+Intersection Type: 2x2_grid
+Total reward: -95.84
+Epsilon: 0.87
+Simulation duration: 86.3s
+Avg queue length: 368.40
+Cumulative wait time: 384472730.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 15:34:51
+Intersection Type: roundabout
+Total reward: -57.11
+Epsilon: 0.87
+Simulation duration: 30.7s
+Avg queue length: 83.28
+Cumulative wait time: 33949581.00
+Fault injected: No
+Total Emergency Delay: 131848.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 15:40:47
+Intersection Type: roundabout
+Total reward: -58.24
+Epsilon: 0.86
+Simulation duration: 31.1s
+Avg queue length: 94.71
+Cumulative wait time: 38655225.00
+Fault injected: No
+Total Emergency Delay: 178982.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 15:47:03
+Intersection Type: 1x2_grid
+Total reward: -80.41
+Epsilon: 0.85
+Simulation duration: 56.0s
+Avg queue length: 75.08
+Cumulative wait time: 26605940.00
+Fault injected: No
+Total Emergency Delay: 106821.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 15:51:55
+Intersection Type: cross
+Total reward: -6.61
+Epsilon: 0.85
+Simulation duration: 16.0s
+Avg queue length: 14.60
+Cumulative wait time: 12938122.00
+Fault injected: No
+Total Emergency Delay: 439338.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 15:54:09
+Intersection Type: 1x2_grid
+Total reward: -70.03
+Epsilon: 0.84
+Simulation duration: 55.2s
+Avg queue length: 86.31
+Cumulative wait time: 30751113.00
+Fault injected: No
+Total Emergency Delay: 117826.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 15:58:09
+Intersection Type: cross
+Total reward: -6.45
+Epsilon: 0.83
+Simulation duration: 11.5s
+Avg queue length: 19.96
+Cumulative wait time: 19063190.00
+Fault injected: No
+Total Emergency Delay: 451449.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 15:59:43
+Intersection Type: cross
+Total reward: -9.35
+Epsilon: 0.83
+Simulation duration: 16.2s
+Avg queue length: 24.60
+Cumulative wait time: 22917573.00
+Fault injected: No
+Total Emergency Delay: 526798.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 16:02:40
+Intersection Type: 2x2_grid
+Total reward: -103.00
+Epsilon: 0.82
+Simulation duration: 73.4s
+Avg queue length: 418.17
+Cumulative wait time: 435253792.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 16:11:00
+Intersection Type: 2x2_grid
+Total reward: -113.47
+Epsilon: 0.81
+Simulation duration: 90.0s
+Avg queue length: 477.50
+Cumulative wait time: 502022291.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 16:20:50
+Intersection Type: roundabout
+Total reward: -60.33
+Epsilon: 0.81
+Simulation duration: 45.8s
+Avg queue length: 107.15
+Cumulative wait time: 43291368.00
+Fault injected: No
+Total Emergency Delay: 190911.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 16:30:10
+Intersection Type: cross
+Total reward: -7.78
+Epsilon: 0.8
+Simulation duration: 14.4s
+Avg queue length: 28.66
+Cumulative wait time: 25962984.00
+Fault injected: No
+Total Emergency Delay: 618736.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 16:33:46
+Intersection Type: 2x2_grid
+Total reward: -84.50
+Epsilon: 0.79
+Simulation duration: 81.6s
+Avg queue length: 522.57
+Cumulative wait time: 543684679.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 16:45:08
+Intersection Type: 2x2_grid
+Total reward: -113.88
+Epsilon: 0.79
+Simulation duration: 87.3s
+Avg queue length: 577.83
+Cumulative wait time: 617228261.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 17:31:56
+Intersection Type: 2x2_grid
+Total reward: -111.63
+Epsilon: 0.78
+Simulation duration: 217.0s
+Avg queue length: 636.68
+Cumulative wait time: 678872761.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 17:46:17
+Intersection Type: 1x2_grid
+Total reward: -74.23
+Epsilon: 0.77
+Simulation duration: 148.1s
+Avg queue length: 94.95
+Cumulative wait time: 33298060.00
+Fault injected: No
+Total Emergency Delay: 127705.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 17:53:02
+Intersection Type: cross
+Total reward: -7.30
+Epsilon: 0.77
+Simulation duration: 35.6s
+Avg queue length: 33.27
+Cumulative wait time: 29848096.00
+Fault injected: No
+Total Emergency Delay: 636292.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 18:05:18
+Intersection Type: roundabout
+Total reward: -51.31
+Epsilon: 0.76
+Simulation duration: 37.2s
+Avg queue length: 119.59
+Cumulative wait time: 50085160.00
+Fault injected: No
+Total Emergency Delay: 222328.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:10:20
+Intersection Type: 2x2_grid
+Total reward: -89.43
+Epsilon: 0.75
+Simulation duration: 50.9s
+Avg queue length: 685.67
+Cumulative wait time: 725557840.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:14:43
+Intersection Type: cross
+Total reward: -6.64
+Epsilon: 0.75
+Simulation duration: 9.8s
+Avg queue length: 37.40
+Cumulative wait time: 32337876.00
+Fault injected: No
+Total Emergency Delay: 768624.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 18:16:29
+Intersection Type: 1x2_grid
+Total reward: -75.02
+Epsilon: 0.74
+Simulation duration: 41.3s
+Avg queue length: 103.44
+Cumulative wait time: 35948189.00
+Fault injected: No
+Total Emergency Delay: 134814.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 18:19:27
+Intersection Type: 1x2_grid
+Total reward: -67.45
+Epsilon: 0.73
+Simulation duration: 41.7s
+Avg queue length: 112.54
+Cumulative wait time: 39177028.00
+Fault injected: No
+Total Emergency Delay: 136550.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 18:22:13
+Intersection Type: roundabout
+Total reward: -57.29
+Epsilon: 0.73
+Simulation duration: 26.3s
+Avg queue length: 131.47
+Cumulative wait time: 54396788.00
+Fault injected: No
+Total Emergency Delay: 251484.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:26:48
+Intersection Type: roundabout
+Total reward: -69.18
+Epsilon: 0.72
+Simulation duration: 26.9s
+Avg queue length: 145.18
+Cumulative wait time: 59790833.00
+Fault injected: No
+Total Emergency Delay: 261084.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:31:36
+Intersection Type: 1x2_grid
+Total reward: -76.16
+Epsilon: 0.71
+Simulation duration: 41.8s
+Avg queue length: 122.39
+Cumulative wait time: 42391478.00
+Fault injected: No
+Total Emergency Delay: 143279.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 18:34:42
+Intersection Type: 2x2_grid
+Total reward: -83.37
+Epsilon: 0.71
+Simulation duration: 48.2s
+Avg queue length: 730.46
+Cumulative wait time: 764836602.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:39:19
+Intersection Type: roundabout
+Total reward: -53.67
+Epsilon: 0.7
+Simulation duration: 26.9s
+Avg queue length: 159.57
+Cumulative wait time: 65131643.00
+Fault injected: No
+Total Emergency Delay: 270368.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:44:02
+Intersection Type: roundabout
+Total reward: -68.99
+Epsilon: 0.69
+Simulation duration: 33.5s
+Avg queue length: 176.30
+Cumulative wait time: 75155588.00
+Fault injected: Yes
+Total Emergency Delay: 300380.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:48:23
+Intersection Type: cross
+Total reward: -6.55
+Epsilon: 0.69
+Simulation duration: 9.6s
+Avg queue length: 41.70
+Cumulative wait time: 35746214.00
+Fault injected: Yes
+Total Emergency Delay: 818358.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 18:49:57
+Intersection Type: roundabout
+Total reward: -57.84
+Epsilon: 0.68
+Simulation duration: 29.9s
+Avg queue length: 190.19
+Cumulative wait time: 80965732.00
+Fault injected: Yes
+Total Emergency Delay: 427097.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 18:54:37
+Intersection Type: roundabout
+Total reward: -58.64
+Epsilon: 0.67
+Simulation duration: 30.8s
+Avg queue length: 205.13
+Cumulative wait time: 88287065.00
+Fault injected: No
+Total Emergency Delay: 487780.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 19:01:10
+Intersection Type: 2x2_grid
+Total reward: -86.44
+Epsilon: 0.67
+Simulation duration: 76.9s
+Avg queue length: 770.84
+Cumulative wait time: 791825445.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 19:06:43
+Intersection Type: cross
+Total reward: -4.05
+Epsilon: 0.66
+Simulation duration: 17.5s
+Avg queue length: 52.12
+Cumulative wait time: 60082637.00
+Fault injected: No
+Total Emergency Delay: 2052235.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 19:09:03
+Intersection Type: 2x2_grid
+Total reward: -77.93
+Epsilon: 0.65
+Simulation duration: 57.9s
+Avg queue length: 810.77
+Cumulative wait time: 824902535.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 19:18:23
+Intersection Type: roundabout
+Total reward: -53.34
+Epsilon: 0.65
+Simulation duration: 38.2s
+Avg queue length: 217.55
+Cumulative wait time: 92610006.00
+Fault injected: Yes
+Total Emergency Delay: 490170.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 19:23:58
+Intersection Type: 1x2_grid
+Total reward: -81.22
+Epsilon: 0.64
+Simulation duration: 53.4s
+Avg queue length: 131.68
+Cumulative wait time: 45527425.00
+Fault injected: Yes
+Total Emergency Delay: 151201.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 19:27:16
+Intersection Type: cross
+Total reward: -6.46
+Epsilon: 0.63
+Simulation duration: 13.2s
+Avg queue length: 56.09
+Cumulative wait time: 62575507.00
+Fault injected: Yes
+Total Emergency Delay: 2098077.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 19:29:54
+Intersection Type: 2x2_grid
+Total reward: -79.36
+Epsilon: 0.63
+Simulation duration: 48.1s
+Avg queue length: 844.25
+Cumulative wait time: 846361795.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 19:35:21
+Intersection Type: cross
+Total reward: -7.33
+Epsilon: 0.62
+Simulation duration: 11.6s
+Avg queue length: 59.47
+Cumulative wait time: 64753764.00
+Fault injected: Yes
+Total Emergency Delay: 2102081.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 19:37:36
+Intersection Type: 2x2_grid
+Total reward: -88.58
+Epsilon: 0.61
+Simulation duration: 57.1s
+Avg queue length: 889.79
+Cumulative wait time: 892381304.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 19:43:24
+Intersection Type: 2x2_grid
+Total reward: -95.78
+Epsilon: 0.61
+Simulation duration: 52.6s
+Avg queue length: 928.76
+Cumulative wait time: 920969618.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 19:48:56
+Intersection Type: 1x2_grid
+Total reward: -76.77
+Epsilon: 0.6
+Simulation duration: 53.6s
+Avg queue length: 142.81
+Cumulative wait time: 49832894.00
+Fault injected: No
+Total Emergency Delay: 161705.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 19:52:23
+Intersection Type: 1x2_grid
+Total reward: -83.19
+Epsilon: 0.59
+Simulation duration: 45.2s
+Avg queue length: 151.21
+Cumulative wait time: 52221262.00
+Fault injected: No
+Total Emergency Delay: 166437.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 19:55:17
+Intersection Type: roundabout
+Total reward: -56.63
+Epsilon: 0.59
+Simulation duration: 25.6s
+Avg queue length: 229.13
+Cumulative wait time: 96634587.00
+Fault injected: No
+Total Emergency Delay: 533748.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 20:06:10
+Intersection Type: 1x2_grid
+Total reward: -74.87
+Epsilon: 0.58
+Simulation duration: 166.0s
+Avg queue length: 159.26
+Cumulative wait time: 54650872.00
+Fault injected: Yes
+Total Emergency Delay: 168726.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 20:14:18
+Intersection Type: cross
+Total reward: -4.67
+Epsilon: 0.57
+Simulation duration: 45.7s
+Avg queue length: 65.92
+Cumulative wait time: 74294739.00
+Fault injected: Yes
+Total Emergency Delay: 2681860.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 20:18:37
+Intersection Type: cross
+Total reward: -4.19
+Epsilon: 0.57
+Simulation duration: 37.8s
+Avg queue length: 71.12
+Cumulative wait time: 80560810.00
+Fault injected: No
+Total Emergency Delay: 2849071.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 20:25:23
+Intersection Type: 2x2_grid
+Total reward: -82.64
+Epsilon: 0.56
+Simulation duration: 186.6s
+Avg queue length: 966.64
+Cumulative wait time: 947935703.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 20:35:32
+Intersection Type: roundabout
+Total reward: -54.86
+Epsilon: 0.55
+Simulation duration: 55.4s
+Avg queue length: 240.58
+Cumulative wait time: 100304456.00
+Fault injected: Yes
+Total Emergency Delay: 537384.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 20:42:49
+Intersection Type: 1x2_grid
+Total reward: -91.28
+Epsilon: 0.55
+Simulation duration: 55.7s
+Avg queue length: 167.95
+Cumulative wait time: 57191139.00
+Fault injected: No
+Total Emergency Delay: 179253.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 20:46:27
+Intersection Type: 2x2_grid
+Total reward: -72.18
+Epsilon: 0.54
+Simulation duration: 54.6s
+Avg queue length: 993.56
+Cumulative wait time: 959212008.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 20:52:46
+Intersection Type: 2x2_grid
+Total reward: -76.24
+Epsilon: 0.53
+Simulation duration: 62.8s
+Avg queue length: 1026.12
+Cumulative wait time: 979837996.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 20:58:16
+Intersection Type: 2x2_grid
+Total reward: -67.64
+Epsilon: 0.53
+Simulation duration: 48.9s
+Avg queue length: 1055.71
+Cumulative wait time: 995632730.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 21:04:10
+Intersection Type: 1x2_grid
+Total reward: -65.58
+Epsilon: 0.52
+Simulation duration: 55.9s
+Avg queue length: 176.45
+Cumulative wait time: 59686911.00
+Fault injected: No
+Total Emergency Delay: 184188.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 21:08:01
+Intersection Type: 2x2_grid
+Total reward: -82.18
+Epsilon: 0.51
+Simulation duration: 62.1s
+Avg queue length: 1090.03
+Cumulative wait time: 1017205253.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 21:13:46
+Intersection Type: cross
+Total reward: -5.07
+Epsilon: 0.51
+Simulation duration: 14.5s
+Avg queue length: 76.93
+Cumulative wait time: 87287380.00
+Fault injected: No
+Total Emergency Delay: 3229860.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 21:15:47
+Intersection Type: 2x2_grid
+Total reward: -79.79
+Epsilon: 0.5
+Simulation duration: 49.4s
+Avg queue length: 1123.33
+Cumulative wait time: 1038946924.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 21:21:29
+Intersection Type: 2x2_grid
+Total reward: -99.18
+Epsilon: 0.49
+Simulation duration: 67.5s
+Avg queue length: 1173.29
+Cumulative wait time: 1101006611.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 22:23:23
+Intersection Type: roundabout
+Total reward: -56.54
+Epsilon: 0.49
+Simulation duration: 63.6s
+Avg queue length: 255.77
+Cumulative wait time: 110508595.00
+Fault injected: No
+Total Emergency Delay: 539353.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 22:31:03
+Intersection Type: 1x2_grid
+Total reward: -67.85
+Epsilon: 0.48
+Simulation duration: 75.5s
+Avg queue length: 183.91
+Cumulative wait time: 61715075.00
+Fault injected: Yes
+Total Emergency Delay: 190575.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 22:35:38
+Intersection Type: 2x2_grid
+Total reward: -69.99
+Epsilon: 0.47
+Simulation duration: 71.7s
+Avg queue length: 1201.37
+Cumulative wait time: 1113130058.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 22:43:20
+Intersection Type: 2x2_grid
+Total reward: -72.58
+Epsilon: 0.47
+Simulation duration: 71.7s
+Avg queue length: 1230.10
+Cumulative wait time: 1127030354.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 22:48:08
+Intersection Type: cross
+Total reward: -4.07
+Epsilon: 0.46
+Simulation duration: 13.1s
+Avg queue length: 80.29
+Cumulative wait time: 89729290.00
+Fault injected: No
+Total Emergency Delay: 3357299.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 22:49:30
+Intersection Type: cross
+Total reward: -3.20
+Epsilon: 0.45
+Simulation duration: 12.2s
+Avg queue length: 84.09
+Cumulative wait time: 93120271.00
+Fault injected: Yes
+Total Emergency Delay: 3460708.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 22:51:28
+Intersection Type: 1x2_grid
+Total reward: -58.56
+Epsilon: 0.45
+Simulation duration: 49.4s
+Avg queue length: 190.85
+Cumulative wait time: 63512118.00
+Fault injected: Yes
+Total Emergency Delay: 192946.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 22:54:44
+Intersection Type: 2x2_grid
+Total reward: -82.40
+Epsilon: 0.44
+Simulation duration: 48.1s
+Avg queue length: 1263.33
+Cumulative wait time: 1149166009.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:00:08
+Intersection Type: 1x2_grid
+Total reward: -54.23
+Epsilon: 0.43
+Simulation duration: 47.1s
+Avg queue length: 198.44
+Cumulative wait time: 65646045.00
+Fault injected: No
+Total Emergency Delay: 203193.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 23:03:11
+Intersection Type: roundabout
+Total reward: -51.40
+Epsilon: 0.43
+Simulation duration: 31.4s
+Avg queue length: 267.86
+Cumulative wait time: 115182590.00
+Fault injected: No
+Total Emergency Delay: 553869.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:07:51
+Intersection Type: cross
+Total reward: -3.61
+Epsilon: 0.42
+Simulation duration: 10.5s
+Avg queue length: 90.09
+Cumulative wait time: 101063078.00
+Fault injected: Yes
+Total Emergency Delay: 3754453.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 23:09:25
+Intersection Type: roundabout
+Total reward: -60.37
+Epsilon: 0.41
+Simulation duration: 27.3s
+Avg queue length: 280.82
+Cumulative wait time: 120786171.00
+Fault injected: No
+Total Emergency Delay: 564525.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:14:21
+Intersection Type: 2x2_grid
+Total reward: -70.95
+Epsilon: 0.41
+Simulation duration: 38.5s
+Avg queue length: 1293.66
+Cumulative wait time: 1166254739.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:19:16
+Intersection Type: cross
+Total reward: -4.35
+Epsilon: 0.4
+Simulation duration: 11.5s
+Avg queue length: 96.87
+Cumulative wait time: 110115392.00
+Fault injected: Yes
+Total Emergency Delay: 4168588.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 23:21:10
+Intersection Type: 2x2_grid
+Total reward: -72.98
+Epsilon: 0.39
+Simulation duration: 40.5s
+Avg queue length: 1324.99
+Cumulative wait time: 1182723615.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:26:04
+Intersection Type: cross
+Total reward: -6.15
+Epsilon: 0.39
+Simulation duration: 10.6s
+Avg queue length: 102.63
+Cumulative wait time: 116626248.00
+Fault injected: Yes
+Total Emergency Delay: 4353245.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-17 23:27:46
+Intersection Type: roundabout
+Total reward: -52.08
+Epsilon: 0.38
+Simulation duration: 33.3s
+Avg queue length: 294.83
+Cumulative wait time: 127448515.00
+Fault injected: No
+Total Emergency Delay: 565933.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:33:04
+Intersection Type: 2x2_grid
+Total reward: -83.10
+Epsilon: 0.37
+Simulation duration: 43.8s
+Avg queue length: 1362.31
+Cumulative wait time: 1210559145.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:38:30
+Intersection Type: 1x2_grid
+Total reward: -51.74
+Epsilon: 0.37
+Simulation duration: 40.9s
+Avg queue length: 205.45
+Cumulative wait time: 67388094.00
+Fault injected: No
+Total Emergency Delay: 206892.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-17 23:41:43
+Intersection Type: 2x2_grid
+Total reward: -73.46
+Epsilon: 0.36
+Simulation duration: 40.3s
+Avg queue length: 1393.09
+Cumulative wait time: 1225938776.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:47:14
+Intersection Type: 2x2_grid
+Total reward: -66.36
+Epsilon: 0.35
+Simulation duration: 35.9s
+Avg queue length: 1418.97
+Cumulative wait time: 1238725687.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:52:28
+Intersection Type: roundabout
+Total reward: -48.80
+Epsilon: 0.35
+Simulation duration: 30.4s
+Avg queue length: 306.77
+Cumulative wait time: 134261144.00
+Fault injected: No
+Total Emergency Delay: 631938.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-17 23:57:43
+Intersection Type: 1x2_grid
+Total reward: -58.47
+Epsilon: 0.34
+Simulation duration: 42.1s
+Avg queue length: 215.45
+Cumulative wait time: 71241982.00
+Fault injected: No
+Total Emergency Delay: 215912.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 00:00:57
+Intersection Type: 2x2_grid
+Total reward: -75.42
+Epsilon: 0.33
+Simulation duration: 43.7s
+Avg queue length: 1455.73
+Cumulative wait time: 1266798133.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:06:05
+Intersection Type: cross
+Total reward: -3.23
+Epsilon: 0.33
+Simulation duration: 14.8s
+Avg queue length: 114.37
+Cumulative wait time: 150181526.00
+Fault injected: Yes
+Total Emergency Delay: 6555504.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 00:07:51
+Intersection Type: roundabout
+Total reward: -52.70
+Epsilon: 0.32
+Simulation duration: 33.6s
+Avg queue length: 318.22
+Cumulative wait time: 139570071.00
+Fault injected: Yes
+Total Emergency Delay: 637375.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:12:38
+Intersection Type: cross
+Total reward: -2.98
+Epsilon: 0.31
+Simulation duration: 10.9s
+Avg queue length: 118.39
+Cumulative wait time: 154440718.00
+Fault injected: Yes
+Total Emergency Delay: 6624339.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 00:14:02
+Intersection Type: cross
+Total reward: -1.56
+Epsilon: 0.31
+Simulation duration: 13.2s
+Avg queue length: 127.91
+Cumulative wait time: 175505803.00
+Fault injected: Yes
+Total Emergency Delay: 6838230.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 00:15:56
+Intersection Type: 1x2_grid
+Total reward: -47.29
+Epsilon: 0.3
+Simulation duration: 40.1s
+Avg queue length: 222.54
+Cumulative wait time: 73156299.00
+Fault injected: Yes
+Total Emergency Delay: 221523.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 00:18:57
+Intersection Type: cross
+Total reward: -2.40
+Epsilon: 0.29
+Simulation duration: 16.3s
+Avg queue length: 139.01
+Cumulative wait time: 204724898.00
+Fault injected: Yes
+Total Emergency Delay: 7611445.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 00:20:46
+Intersection Type: roundabout
+Total reward: -50.85
+Epsilon: 0.29
+Simulation duration: 27.9s
+Avg queue length: 330.88
+Cumulative wait time: 144466844.00
+Fault injected: Yes
+Total Emergency Delay: 670724.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:26:05
+Intersection Type: 1x2_grid
+Total reward: -53.12
+Epsilon: 0.28
+Simulation duration: 39.1s
+Avg queue length: 229.31
+Cumulative wait time: 74792946.00
+Fault injected: No
+Total Emergency Delay: 225502.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 00:28:54
+Intersection Type: cross
+Total reward: -2.29
+Epsilon: 0.27
+Simulation duration: 13.9s
+Avg queue length: 150.63
+Cumulative wait time: 230575040.00
+Fault injected: No
+Total Emergency Delay: 8940454.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 00:30:29
+Intersection Type: roundabout
+Total reward: -58.82
+Epsilon: 0.27
+Simulation duration: 29.2s
+Avg queue length: 343.53
+Cumulative wait time: 150308810.00
+Fault injected: Yes
+Total Emergency Delay: 687367.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:35:35
+Intersection Type: 1x2_grid
+Total reward: -58.22
+Epsilon: 0.26
+Simulation duration: 40.2s
+Avg queue length: 236.93
+Cumulative wait time: 76741945.00
+Fault injected: No
+Total Emergency Delay: 227245.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 00:38:45
+Intersection Type: 2x2_grid
+Total reward: -79.86
+Epsilon: 0.25
+Simulation duration: 39.5s
+Avg queue length: 1488.18
+Cumulative wait time: 1289181966.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:43:54
+Intersection Type: 2x2_grid
+Total reward: -76.46
+Epsilon: 0.25
+Simulation duration: 41.0s
+Avg queue length: 1523.01
+Cumulative wait time: 1312970620.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:48:33
+Intersection Type: cross
+Total reward: -3.27
+Epsilon: 0.24
+Simulation duration: 11.0s
+Avg queue length: 156.01
+Cumulative wait time: 237771200.00
+Fault injected: No
+Total Emergency Delay: 9127900.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 00:50:08
+Intersection Type: roundabout
+Total reward: -51.06
+Epsilon: 0.23
+Simulation duration: 27.4s
+Avg queue length: 356.08
+Cumulative wait time: 156276803.00
+Fault injected: No
+Total Emergency Delay: 689789.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:55:16
+Intersection Type: 2x2_grid
+Total reward: -76.43
+Epsilon: 0.23
+Simulation duration: 41.5s
+Avg queue length: 1557.82
+Cumulative wait time: 1334457864.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 00:59:56
+Intersection Type: cross
+Total reward: -1.83
+Epsilon: 0.22
+Simulation duration: 11.8s
+Avg queue length: 163.39
+Cumulative wait time: 250607193.00
+Fault injected: No
+Total Emergency Delay: 9271350.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 01:01:21
+Intersection Type: cross
+Total reward: -2.32
+Epsilon: 0.21
+Simulation duration: 12.9s
+Avg queue length: 172.27
+Cumulative wait time: 277065627.00
+Fault injected: No
+Total Emergency Delay: 9946124.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 01:03:10
+Intersection Type: 1x2_grid
+Total reward: -32.73
+Epsilon: 0.21
+Simulation duration: 39.9s
+Avg queue length: 243.13
+Cumulative wait time: 78242608.00
+Fault injected: Yes
+Total Emergency Delay: 239155.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 01:06:18
+Intersection Type: 2x2_grid
+Total reward: -58.29
+Epsilon: 0.2
+Simulation duration: 34.4s
+Avg queue length: 1581.19
+Cumulative wait time: 1343537871.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 01:11:34
+Intersection Type: 1x2_grid
+Total reward: -46.11
+Epsilon: 0.19
+Simulation duration: 40.3s
+Avg queue length: 250.33
+Cumulative wait time: 80089721.00
+Fault injected: Yes
+Total Emergency Delay: 242593.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 01:16:16
+Intersection Type: roundabout
+Total reward: -51.02
+Epsilon: 0.19
+Simulation duration: 89.6s
+Avg queue length: 366.92
+Cumulative wait time: 161065657.00
+Fault injected: No
+Total Emergency Delay: 699020.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 01:26:19
+Intersection Type: roundabout
+Total reward: -47.70
+Epsilon: 0.18
+Simulation duration: 57.0s
+Avg queue length: 378.08
+Cumulative wait time: 164967049.00
+Fault injected: No
+Total Emergency Delay: 699705.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 01:34:28
+Intersection Type: cross
+Total reward: -1.51
+Epsilon: 0.17
+Simulation duration: 22.3s
+Avg queue length: 180.21
+Cumulative wait time: 293802352.00
+Fault injected: Yes
+Total Emergency Delay: 11045997.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 01:36:34
+Intersection Type: cross
+Total reward: -1.66
+Epsilon: 0.17
+Simulation duration: 27.9s
+Avg queue length: 194.41
+Cumulative wait time: 369384154.00
+Fault injected: Yes
+Total Emergency Delay: 11664062.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 01:38:35
+Intersection Type: cross
+Total reward: -1.41
+Epsilon: 0.16
+Simulation duration: 21.7s
+Avg queue length: 201.76
+Cumulative wait time: 381105998.00
+Fault injected: Yes
+Total Emergency Delay: 12107642.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 01:41:16
+Intersection Type: roundabout
+Total reward: -44.60
+Epsilon: 0.15
+Simulation duration: 61.9s
+Avg queue length: 391.47
+Cumulative wait time: 173292840.00
+Fault injected: No
+Total Emergency Delay: 766895.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 01:48:50
+Intersection Type: roundabout
+Total reward: -52.28
+Epsilon: 0.15
+Simulation duration: 66.5s
+Avg queue length: 405.75
+Cumulative wait time: 181140022.00
+Fault injected: Yes
+Total Emergency Delay: 773949.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 01:56:43
+Intersection Type: 2x2_grid
+Total reward: -72.15
+Epsilon: 0.14
+Simulation duration: 84.2s
+Avg queue length: 1610.00
+Cumulative wait time: 1358763398.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 02:03:39
+Intersection Type: roundabout
+Total reward: -45.57
+Epsilon: 0.13
+Simulation duration: 31.2s
+Avg queue length: 415.77
+Cumulative wait time: 184164892.00
+Fault injected: No
+Total Emergency Delay: 787815.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 02:11:20
+Intersection Type: cross
+Total reward: -1.12
+Epsilon: 0.13
+Simulation duration: 31.8s
+Avg queue length: 219.19
+Cumulative wait time: 440380241.00
+Fault injected: No
+Total Emergency Delay: 12772476.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 02:13:55
+Intersection Type: roundabout
+Total reward: -48.48
+Epsilon: 0.12
+Simulation duration: 31.8s
+Avg queue length: 426.06
+Cumulative wait time: 188383721.00
+Fault injected: Yes
+Total Emergency Delay: 796752.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 02:20:27
+Intersection Type: 1x2_grid
+Total reward: -52.01
+Epsilon: 0.11
+Simulation duration: 78.0s
+Avg queue length: 257.64
+Cumulative wait time: 82334047.00
+Fault injected: Yes
+Total Emergency Delay: 247930.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 02:25:18
+Intersection Type: 2x2_grid
+Total reward: -61.64
+Epsilon: 0.11
+Simulation duration: 51.2s
+Avg queue length: 1634.16
+Cumulative wait time: 1368533512.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 02:34:30
+Intersection Type: 1x2_grid
+Total reward: -30.77
+Epsilon: 0.1
+Simulation duration: 67.3s
+Avg queue length: 263.47
+Cumulative wait time: 83659795.00
+Fault injected: No
+Total Emergency Delay: 247930.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 02:39:01
+Intersection Type: roundabout
+Total reward: -47.43
+Epsilon: 0.09
+Simulation duration: 39.7s
+Avg queue length: 437.28
+Cumulative wait time: 192714258.00
+Fault injected: Yes
+Total Emergency Delay: 829733.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 02:45:40
+Intersection Type: roundabout
+Total reward: -50.24
+Epsilon: 0.09
+Simulation duration: 42.4s
+Avg queue length: 448.87
+Cumulative wait time: 197647252.00
+Fault injected: No
+Total Emergency Delay: 842019.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 02:53:59
+Intersection Type: 2x2_grid
+Total reward: -56.10
+Epsilon: 0.08
+Simulation duration: 68.8s
+Avg queue length: 1657.05
+Cumulative wait time: 1376955031.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 03:00:55
+Intersection Type: cross
+Total reward: -0.91
+Epsilon: 0.07
+Simulation duration: 30.0s
+Avg queue length: 231.01
+Cumulative wait time: 469897557.00
+Fault injected: Yes
+Total Emergency Delay: 13567843.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 03:04:37
+Intersection Type: roundabout
+Total reward: -75.71
+Epsilon: 0.07
+Simulation duration: 87.2s
+Avg queue length: 470.52
+Cumulative wait time: 220090257.00
+Fault injected: No
+Total Emergency Delay: 845408.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 03:10:58
+Intersection Type: 2x2_grid
+Total reward: -65.42
+Epsilon: 0.06
+Simulation duration: 38.8s
+Avg queue length: 1680.86
+Cumulative wait time: 1385902515.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 03:16:29
+Intersection Type: 1x2_grid
+Total reward: -86.52
+Epsilon: 0.05
+Simulation duration: 45.2s
+Avg queue length: 277.24
+Cumulative wait time: 96156344.00
+Fault injected: Yes
+Total Emergency Delay: 261784.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 03:19:41
+Intersection Type: 2x2_grid
+Total reward: -64.39
+Epsilon: 0.05
+Simulation duration: 36.5s
+Avg queue length: 1705.22
+Cumulative wait time: 1397406860.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 03:24:38
+Intersection Type: cross
+Total reward: -1.13
+Epsilon: 0.04
+Simulation duration: 32.2s
+Avg queue length: 264.11
+Cumulative wait time: 654640836.00
+Fault injected: No
+Total Emergency Delay: 16383790.00
+
+Action Distribution:
+Agent 1
+Timestamp: 2025-04-18 03:26:28
+Intersection Type: 2x2_grid
+Total reward: -60.64
+Epsilon: 0.03
+Simulation duration: 41.1s
+Avg queue length: 1731.16
+Cumulative wait time: 1412172405.00
+Fault injected: Yes
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 03:32:58
+Intersection Type: 1x2_grid
+Total reward: -708.28
+Epsilon: 0.03
+Simulation duration: 123.3s
+Avg queue length: 407.73
+Cumulative wait time: 600570080.00
+Fault injected: Yes
+Total Emergency Delay: 261988.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Timestamp: 2025-04-18 03:36:07
+Intersection Type: roundabout
+Total reward: -45.57
+Epsilon: 0.02
+Simulation duration: 34.8s
+Avg queue length: 481.96
+Cumulative wait time: 225859354.00
+Fault injected: No
+Total Emergency Delay: 887179.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 03:41:25
+Intersection Type: 2x2_grid
+Total reward: -62.19
+Epsilon: 0.01
+Simulation duration: 37.2s
+Avg queue length: 1757.91
+Cumulative wait time: 1424854510.00
+Fault injected: No
+Total Emergency Delay: 0.00
+
+Action Distribution:
+Agent 1
+Agent 2
+Agent 3
+Agent 4
+Timestamp: 2025-04-18 03:50:35
+Intersection Type: 1x2_grid
+Total reward: -1299.31
+Epsilon: 0.01
+Simulation duration: 270.0s
+Avg queue length: 724.72
+Cumulative wait time: 2927567988.00
+Fault injected: Yes
+Total Emergency Delay: 262415.00
+
+Action Distribution:
+Agent 1
+Agent 2

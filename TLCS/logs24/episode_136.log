@@ -5977,3 +5977,194 @@
 [Simulate] Step 5230: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 5231: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 5232: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 5232] Agent 0 Action: 1, Reward: -0.0500
+[Step 5232] Agent 1 Action: 0, Reward: -0.0167
+[Step 5232] Agent 2 Action: 0, Reward: -0.0167
+[Step 5232] Agent 3 Action: 2, Reward: -0.0167
+[SetYellow] TL TL1: Set yellow phase 0 out of 4 phases.
+[Simulate] Step 5233: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5234: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5235: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5236: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[SetYellow] TL TL2: Set yellow phase 3 out of 4 phases.
+[Simulate] Step 5237: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5238: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5239: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5240: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 5240] Adaptive green duration: 40
+[Simulate] Step 5241: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5242: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5243: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5244: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5245: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5246: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5247: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5248: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5249: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5250: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5251: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5252: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5253: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5254: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5255: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5256: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5257: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5258: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5259: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5260: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5261: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5262: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5263: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5264: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5265: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5266: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5267: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5268: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5269: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5270: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5271: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5272: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5273: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5274: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5275: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5276: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5277: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5278: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5279: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5280: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 5280] Agent 0 Action: 2, Reward: -0.0500
+[Step 5280] Agent 1 Action: 0, Reward: -0.0167
+[Step 5280] Agent 2 Action: 0, Reward: -0.0167
+[Step 5280] Agent 3 Action: 2, Reward: -0.0167
+[SetYellow] TL TL1: Set yellow phase 2 out of 4 phases.
+[Simulate] Step 5281: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5282: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5283: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5284: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 5284] Adaptive green duration: 40
+[Simulate] Step 5285: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5286: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5287: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5288: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5289: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5290: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5291: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5292: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5293: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5294: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5295: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5296: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5297: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5298: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5299: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5300: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5301: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5302: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5303: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5304: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5305: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5306: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5307: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5308: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5309: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5310: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5311: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5312: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5313: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5314: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5315: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5316: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5317: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5318: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5319: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5320: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5321: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5322: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5323: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5324: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 5324] Agent 0 Action: 2, Reward: 0.0000
+[Step 5324] Agent 1 Action: 0, Reward: 0.0000
+[Step 5324] Agent 2 Action: 0, Reward: 0.0000
+[Step 5324] Agent 3 Action: 2, Reward: 0.0000
+[Step 5324] Adaptive green duration: 40
+[Simulate] Step 5325: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5326: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5327: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5328: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5329: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5330: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5331: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5332: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5333: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5334: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5335: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5336: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5337: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5338: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5339: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5340: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5341: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5342: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5343: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5344: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5345: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5346: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5347: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5348: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5349: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5350: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5351: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5352: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5353: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5354: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5355: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5356: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5357: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5358: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5359: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5360: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5361: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5362: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5363: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5364: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 5364] Agent 0 Action: 2, Reward: 0.0000
+[Step 5364] Agent 1 Action: 0, Reward: 0.0000
+[Step 5364] Agent 2 Action: 0, Reward: 0.0000
+[Step 5364] Agent 3 Action: 2, Reward: 0.0000
+[Step 5364] Adaptive green duration: 40
+[Simulate] Step 5365: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5366: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5367: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5368: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5369: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5370: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5371: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5372: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5373: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5374: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5375: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5376: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5377: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5378: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5379: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5380: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5381: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5382: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5383: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5384: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5385: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5386: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5387: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5388: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5389: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5390: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5391: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5392: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5393: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5394: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5395: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5396: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5397: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5398: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5399: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Simulate] Step 5400: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0

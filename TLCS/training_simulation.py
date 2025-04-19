@@ -9,7 +9,7 @@ import traci
 from emergency_handler import check_emergency, handle_emergency_vehicle
 import intersection_config as int_config
 from tensorflow.keras.optimizers import Adam
-from tensorflow.keras import layers
+from keras import layers
 import tensorflow as tf
 
 
@@ -54,7 +54,7 @@ class Simulation:
     """
     # ------------------------------------------------------------------ #
     # Construction
-    # ------------------------------------------------------------------ #
+    # ------------------------------------------------------------------ #Z
     def __init__(self,
                  Models,                  # list[TrainModelAggregator] – all refs to ONE model
                  TargetModels,            # target‑network refs (can be the same list)

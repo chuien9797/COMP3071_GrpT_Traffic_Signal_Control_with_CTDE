@@ -1,0 +1,8 @@
+{
+    "python.analysis.extraPaths": [
+      "./.venv/Lib/site-packages"
+    ],
+    "python.analysis.typeCheckingMode": "off",
+    "python.pythonPath": "./.venv/Scripts/python.exe"
+  }
+  

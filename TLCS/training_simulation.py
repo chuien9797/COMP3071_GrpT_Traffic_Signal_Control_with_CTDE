@@ -12,41 +12,52 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import layers
 import tensorflow as tf
 
-# Global constants for faults, etc.
-RECOVERY_DELAY = 15
-FAULT_REWARD_SCALE = 0.5
+
+# --------------------------------------------------------------------------- #
+# Global constants
+# --------------------------------------------------------------------------- #
+RECOVERY_DELAY      = 15
+FAULT_REWARD_SCALE  = 0.5
 EPISODE_FAULT_START = int(150 * 0.3)
 
 
-###############################################################################
-# Centralized Critic Network for CTDE
-###############################################################################
+# --------------------------------------------------------------------------- #
+# Centralised Critic
+# --------------------------------------------------------------------------- #
 class CentralizedCritic(tf.keras.Model):
-    """
-    A centralized critic network that maps the global state to a joint Q value.
-    In this discrete-action setting, we assume a scalar value representing the joint
-    evaluation of the current global state. This network is trained with an MSE loss.
-    """
-    def __init__(self, global_state_dim, hidden_units=64):
+    """Simple two‑hidden‑layer value network for CTDE."""
+    def __init__(self, global_state_dim: int, hidden_units: int = 64):
         super().__init__()
-        self.dense1 = layers.Dense(hidden_units, activation='relu')
-        self.dense2 = layers.Dense(hidden_units, activation='relu')
+        self.d1  = layers.Dense(hidden_units, activation='relu')
+        self.d2  = layers.Dense(hidden_units, activation='relu')
         self.out = layers.Dense(1, activation='linear')
+        # Explicitly build so Keras knows all shapes, avoiding warnings.
+        self.build((None, global_state_dim))
 
-    def call(self, global_state):
-        x = self.dense1(global_state)
-        x = self.dense2(x)
-        q_joint = self.out(x)
-        return q_joint  # shape: (batch_size, 1)
+    # A no‑op build keeps Keras happy when we call self.build() above.
+    def build(self, input_shape):
+        super().build(input_shape)
+
+    def call(self, s):
+        x = self.d1(s)
+        x = self.d2(x)
+        return self.out(x)                              # (batch, 1)
 
 
-###############################################################################
-# Simulation Class with Flexible Reward Sharing, Per-Agent Replay, and CTDE
-###############################################################################
+# --------------------------------------------------------------------------- #
+# Simulation
+# --------------------------------------------------------------------------- #
 class Simulation:
+    """
+    One SUMO environment wrapper capable of training **multiple agents that all
+    share the same policy network**.  A centralised critic is used for CTDE.
+    """
+    # ------------------------------------------------------------------ #
+    # Construction
+    # ------------------------------------------------------------------ #
     def __init__(self,
-                 Models,  # List of agent models
-                 TargetModels,  # List of target models (can be same as Models for shared params)
+                 Models,                  # list[TrainModelAggregator] – all refs to ONE model
+                 TargetModels,            # target‑network refs (can be the same list)
                  Memory,
                  TrafficGen,
                  sumo_cmd,
@@ -54,50 +65,67 @@ class Simulation:
                  max_steps,
                  green_duration,
                  yellow_duration,
-                 num_states,  # Not used by aggregator but preserved for compatibility
+                 num_states,              # kept for compatibility (unused)
                  training_epochs,
                  intersection_type="cross",
-                 signal_fault_prob=0.1):
-        # Store multi-agent models and other parameters.
-        self._Models = Models
-        self._TargetModels = TargetModels
-        self._Memory = Memory
-        self._TrafficGen = TrafficGen
-        self._gamma = gamma
-        self._step = 0
-        self._sumo_cmd = sumo_cmd
-        self._max_steps = max_steps
-        self._green_duration = green_duration
+                 signal_fault_prob=0.1,
+                 centralized_critic=None  # optional – if None build locally
+                 ):
+        # ------------ generic parameters -------------------------------- #
+        self._Models          = Models
+        self._TargetModels    = TargetModels
+        self._Memory          = Memory
+        self._TrafficGen      = TrafficGen
+        self._gamma           = gamma
+        self._step            = 0
+        self._sumo_cmd        = sumo_cmd
+        self._max_steps       = max_steps
+        self._green_duration  = green_duration
         self._yellow_duration = yellow_duration
-        self._num_states = num_states
+        self._num_states      = num_states          # not used with set‑based model
         self._training_epochs = training_epochs
 
-        # Logging and statistics.
-        self._reward_store = []
-        self._cumulative_wait_store = []
-        self._avg_queue_length_store = []
-        self._q_loss_log = []
-        self._green_durations_log = []
-        self.fault_details = []
-        self.faulty_lights = set()
-        self._emergency_crossed = 0
-        self._emergency_total_delay = 0.0
-        self._teleport_count = 0
-
-        self._sum_queue_length = 0
-        self._sum_waiting_time = 0
-
-        self.signal_fault_prob = signal_fault_prob
-        self.manual_override = False
-        self.recovery_queue = {}
-
+        # ------------ intersection‑specific setup ----------------------- #
         self.intersection_type = intersection_type
         if self.intersection_type not in int_config.INTERSECTION_CONFIGS:
-            raise ValueError(f"Intersection type '{intersection_type}' not found in config.")
-        self.int_conf = int_config.INTERSECTION_CONFIGS[self.intersection_type]
+            raise ValueError(f"Unknown intersection type '{intersection_type}'")
+        self.int_conf     = int_config.INTERSECTION_CONFIGS[self.intersection_type]
         self._num_actions = len(self.int_conf["phase_mapping"])
-        tl_ids = self.int_conf.get("traffic_light_ids", [])
-        self.num_agents = len(tl_ids) if isinstance(tl_ids, list) else 1
+        tl_ids            = self.int_conf.get("traffic_light_ids", [])
+        self.num_agents   = len(tl_ids) if isinstance(tl_ids, list) else 1
+
+        # ------------ stats tracking  ----------------------------------- #
+        self._reward_store           = []
+        self._cumulative_wait_store  = []
+        self._avg_queue_length_store = []
+        self._q_loss_log             = []
+        self._green_durations_log    = []
+        self.fault_details           = []
+        self.faulty_lights           = set()
+        self._emergency_crossed      = 0
+        self._emergency_total_delay  = 0.0
+        self._teleport_count         = 0
+        self._sum_queue_length       = 0
+        self._sum_waiting_time       = 0
+
+        # ------------ misc ---------------------------------------------- #
+        self.signal_fault_prob = signal_fault_prob
+        self.manual_override   = False
+        self.recovery_queue    = {}
+
+        # ------------ centralised critic -------------------------------- #
+        lane_feature_dim = 9
+        total_lanes      = sum(len(lanes)
+                               for lanes in self.int_conf["incoming_lanes"].values())
+        global_state_dim = total_lanes * lane_feature_dim
+        self._critic_input_dim = global_state_dim
+
+        if centralized_critic is None:
+            self.centralized_critic = CentralizedCritic(global_state_dim, hidden_units=64)
+            self.centralized_critic.compile(loss='mse',
+                                            optimizer=Adam(learning_rate=1e-3))
+        else:
+            self.centralized_critic = centralized_critic
 
         # Instantiate the centralized critic.
         # Compute global state dimension as (total number of lanes across all groups * lane_feature_dim).
@@ -109,67 +137,50 @@ class Simulation:
 
     def _get_state(self):
         """
-        Returns a list of state matrices—one per agent.
-        Each state is a matrix of shape [num_lanes, lane_feature_dim].
+        Returns a list of state matrices—one per agent.  Each state has
+        shape [num_lanes, 9].
         """
         groups = sorted(self.int_conf["incoming_lanes"].keys())
         states = []
         tl_ids = self.int_conf.get("traffic_light_ids", [])
-        lane_feature_dim = 9
-        for agent_index, group in enumerate(groups):
-            lanes = self.int_conf["incoming_lanes"][group]
-            num_lanes = len(lanes)
-            group_state = np.zeros((num_lanes, lane_feature_dim), dtype=np.float32)
+        for a_idx, group in enumerate(groups):
+            lanes      = self.int_conf["incoming_lanes"][group]
+            Ln         = len(lanes)
+            st         = np.zeros((Ln, 9), dtype=np.float32)
             for i, lane_id in enumerate(lanes):
-                group_state[i, 0] = traci.lane.getLastStepVehicleNumber(lane_id)
-                group_state[i, 1] = traci.lane.getWaitingTime(lane_id)
-                flag = 0
-                for car_id in traci.lane.getLastStepVehicleIDs(lane_id):
-                    if traci.vehicle.getTypeID(car_id) == "emergency":
-                        flag = 1
-                        break
-                group_state[i, 2] = float(flag)
-                group_state[i, 3] = traci.lane.getLastStepHaltingNumber(lane_id)
-                if agent_index < len(tl_ids):
-                    phase_val = float(traci.trafficlight.getPhase(tl_ids[agent_index]))
-                else:
-                    phase_val = 0.0
-                group_state[i, 4] = phase_val
-                controlled_by_faulty = 0.0
-                if agent_index < len(tl_ids):
-                    tlid = tl_ids[agent_index]
+                st[i, 0] = traci.lane.getLastStepVehicleNumber(lane_id)
+                st[i, 1] = traci.lane.getWaitingTime(lane_id)
+                st[i, 2] = float(any(traci.vehicle.getTypeID(v) == "emergency"
+                                     for v in traci.lane.getLastStepVehicleIDs(lane_id)))
+                st[i, 3] = traci.lane.getLastStepHaltingNumber(lane_id)
+                st[i, 4] = float(traci.trafficlight.getPhase(tl_ids[a_idx])) if a_idx < len(tl_ids) else 0.0
+                # fault flag
+                f = 0.0
+                if a_idx < len(tl_ids):
+                    tlid = tl_ids[a_idx]
                     try:
-                        logics = traci.trafficlight.getAllProgramLogics(tlid)
-                        if logics:
-                            current_phase = traci.trafficlight.getPhase(tlid)
-                            phase_state = logics[0].phases[current_phase].state
-                            connections = traci.trafficlight.getControlledLanes(tlid)
-                            if lane_id in connections:
-                                conn_idx = connections.index(lane_id)
-                                if phase_state[conn_idx] == 'r':
-                                    controlled_by_faulty = 1.0
-                    except Exception as e:
+                        lg   = traci.trafficlight.getAllProgramLogics(tlid)
+                        if lg:
+                            cp  = traci.trafficlight.getPhase(tlid)
+                            pst = lg[0].phases[cp].state
+                            con = traci.trafficlight.getControlledLanes(tlid)
+                            if lane_id in con and pst[con.index(lane_id)] == 'r':
+                                f = 1.0
+                    except Exception:
                         pass
-                group_state[i, 5] = controlled_by_faulty
-                intersection_encoding = {
-                    "cross": [0.33, 0.33, 0.34],
-                    "roundabout": [0.33, 0.33, 0.34],
-                    "t_intersection": [0.33, 0.33, 0.34],
-                    "1x2_grid": [0.33, 0.33, 0.34]
-                                    }
-                type_vector = intersection_encoding.get(self.intersection_type.lower(), [0.0, 0.0, 0.0])
-                group_state[i, 6:9] = np.array(type_vector)
-            states.append(group_state)
+                st[i, 5] = f
+                st[i, 6:9] = np.array([0.33, 0.33, 0.34])  # simple one‑hot placeholder
+            states.append(st)
         return states
 
     def _get_global_state(self, states):
-        """
-        Combine local states into one global state vector.
-        Here we flatten each agent’s state and concatenate them.
-        """
-        flat_list = [s.flatten() for s in states]
-        global_state = np.concatenate(flat_list)
-        return global_state
+        flat = np.concatenate([s.flatten() for s in states])
+        tgt  = self._critic_input_dim
+        if flat.size < tgt:
+            flat = np.pad(flat, (0, tgt - flat.size))
+        else:
+            flat = flat[:tgt]
+        return flat
 
     def _collect_waiting_times_per_agent(self, agent_index):
         groups = sorted(self.int_conf["incoming_lanes"].keys())
@@ -523,43 +534,36 @@ class Simulation:
 
     def _replay(self):
         """
-        Update each agent's network by sampling its own experiences from memory.
+        Sample across *all* agents and perform **one** SGD update on the shared
+        policy network.  (Redundant updates on the same model are avoided.)
         """
-        for agent_index in range(self.num_agents):
-            batch_size = self._Models[agent_index].batch_size
-            batch = self._Memory.get_samples_by_agent(agent_index, batch_size)
-            if len(batch) == 0:
-                print(f"[Replay] Not enough samples for agent {agent_index}. Skipping training update.")
-                continue
+        batch_size = self._Models[0].batch_size
+        merged     = []
+        for aid in range(self.num_agents):
+            merged.extend(self._Memory.get_samples_by_agent(aid, batch_size))
+        if len(merged) < self._Memory._size_min:
+            print("[Replay] Not enough samples for shared update.")
+            return
 
-            state_list = []
-            next_state_list = []
-            actions = []
-            rewards = []
-            for sample in batch:
-                # Each sample: (agent_id, state, action, reward, next_state, global_state)
-                _, st, act, rew, nst, _ = sample
-                state_list.append(st)
-                next_state_list.append(nst)
-                actions.append(act)
-                rewards.append(rew)
+        # Build tensors
+        states      = self._pad_states([s[1] for s in merged])
+        next_states = self._pad_states([s[4] for s in merged])
+        actions     = np.array([s[2] for s in merged], dtype=np.int32)
+        rewards     = np.array([s[3] for s in merged], dtype=np.float32)
 
-            states = self._pad_states(state_list)
-            next_states = self._pad_states(next_state_list)
-            actions = np.array(actions, dtype=np.int32)
-            rewards = np.array(rewards, dtype=np.float32)
+        shared      = self._Models[0]                 # TrainModelAggregator
+        q_s         = shared.predict_batch(states)
+        q_next_main = shared.predict_batch(next_states)
+        best_next   = np.argmax(q_next_main, axis=1)
+        q_next_tgt  = self._TargetModels[0].predict_batch(next_states)
+        target_q    = q_next_tgt[np.arange(len(merged)), best_next]
 
-            q_s_a = self._Models[agent_index].predict_batch(states)
-            best_next_actions = np.argmax(self._Models[agent_index].predict_batch(next_states), axis=1)
-            target_q_next = self._TargetModels[agent_index].predict_batch(next_states)
-            target_q_vals = target_q_next[np.arange(len(batch)), best_next_actions]
+        y           = np.copy(q_s)
+        y[np.arange(len(merged)), actions] = rewards + self._gamma * target_q
 
-            y = np.copy(q_s_a)
-            y[np.arange(len(batch)), actions] = rewards + self._gamma * target_q_vals
-
-            loss = np.mean(np.square(y - q_s_a))
-            self._q_loss_log.append(loss)
-            self._Models[agent_index].train_batch(states, y)
+        loss        = np.mean((y - q_s) ** 2)
+        self._q_loss_log.append(loss)
+        shared.train_batch(states, y)
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]
@@ -602,110 +606,74 @@ class Simulation:
         except Exception as e:
             print(f"Error writing summary log: {e}")
 
-    def train_ctde(self, lambda_coef=0.5):
+    # ------------------------------------------------------------------ #
+    # Centralized Training with ONE shared‑policy update
+    # ------------------------------------------------------------------ #
+    def train_ctde(self, lambda_coef: float = 0.5):
         """
-        Improved Centralized Training with Decentralized Execution (CTDE):
-
-          1. Sample joint experiences from the shared memory.
-          2. Train the centralized critic with a bootstrapped target:
-             target = reward + gamma * critic(next_global_state)
-          3. For each agent, compute the auxiliary alignment loss between its Q-value (for the taken action)
-             and the centralized critic’s prediction (on the corresponding next global state).
-          4. Backpropagate this alignment loss (using GradientTape) so that the agent's network is updated.
+        Centralized Training ➜ Decentralized Execution (CTDE) for a *shared*
+        policy network.
         """
-        # 1. Sample joint experiences (without filtering by agent).
-        joint_batch = self._Memory.get_samples(self._Models[0].batch_size)
-        if len(joint_batch) < self._Memory._size_min:
-            print("[CTDE] Not enough samples for centralized training.")
+        # ---------- 1) critic update --------------------------------------- #
+        critic_batch = self._Memory.get_samples(self._Models[0].batch_size)
+        if len(critic_batch) < self._Memory._size_min:
+            print("[CTDE] Not enough samples for centralized critic.")
             return
 
-        global_states = []
-        rewards = []
-        next_global_states = []
-        for sample in joint_batch:
-            # sample: (agent_id, state, action, reward, next_state, global_state)
-            _, _, _, rew, _, next_g_st = sample  # next_g_st now represents the next global state
-            global_states.append(next_g_st)  # treat the stored next global state as current for critic training
-            rewards.append(rew)
-            next_global_states.append(next_g_st)
+        g_states = np.array([s[-1] for s in critic_batch])
+        rewards  = np.array([s[3]  for s in critic_batch]).reshape(-1, 1)
 
-        global_states = np.array(global_states)
-        rewards = np.array(rewards).reshape(-1, 1)
-        next_global_states = np.array(next_global_states)
+        critic_next = self.centralized_critic(g_states)
+        targets     = rewards + self._gamma * critic_next.numpy()
+        self.centralized_critic.train_on_batch(g_states, targets)
 
-        # 2. Bootstrapped target for the centralized critic:
-        # target = r + gamma * critic(next_global_state)
-        critic_next = self.centralized_critic(next_global_states)
-        targets = rewards + self._gamma * critic_next.numpy()
+        # ---------- 2) policy alignment update ----------------------------- #
+        merged = []
+        batch_size = self._Models[0].batch_size
+        for aid in range(self.num_agents):
+            merged.extend(self._Memory.get_samples_by_agent(aid, batch_size))
+        if not merged:
+            print("[CTDE] No samples available for shared‑policy alignment.")
+            return
 
-        # Train the centralized critic.
-        critic_loss = self.centralized_critic.train_on_batch(global_states, targets)
-        # print(f"[CTDE] Centralized critic loss: {critic_loss}")
+        states  = self._pad_states([s[1] for s in merged])
+        actions = np.array([s[2] for s in merged], dtype=np.int32)
+        next_g  = np.array([s[-1] for s in merged])
 
-        # 3. For each agent, compute and backpropagate the alignment (auxiliary) loss.
-        for agent_index in range(self.num_agents):
-            batch_size = self._Models[agent_index].batch_size
-            agent_batch = self._Memory.get_samples_by_agent(agent_index, batch_size)
-            if not agent_batch:
-                continue
+        shared_model = self._Models[0].model
+        with tf.GradientTape() as tape:
+            q_vals  = shared_model(states, training=True)
+            q_taken = tf.reduce_sum(q_vals * tf.one_hot(actions, q_vals.shape[-1]), axis=1, keepdims=True)
+            critic_p = self.centralized_critic(next_g, training=False)
+            align_loss = tf.reduce_mean(tf.square(q_taken - critic_p))
 
-            state_list = []
-            actions = []
-            global_states_agent = []
-            for sample in agent_batch:
-                # sample: (agent_id, state, action, reward, next_state, global_state)
-                _, st, act, _, _, next_g_st = sample
-                state_list.append(st)
-                actions.append(act)
-                global_states_agent.append(next_g_st)
-            states = self._pad_states(state_list)
-            actions = np.array(actions, dtype=np.int32)
-            global_states_agent = np.array(global_states_agent)
-
-            # Use GradientTape to compute auxiliary alignment loss.
-            agent_model = self._Models[agent_index].model  # access the Keras model
-            with tf.GradientTape() as tape:
-                # Obtain Q-values for the current states.
-                q_vals = agent_model(states, training=True)
-                # Extract Q-values corresponding to taken actions using one-hot encoding.
-                q_taken = tf.reduce_sum(q_vals * tf.one_hot(actions, depth=q_vals.shape[-1]), axis=1, keepdims=True)
-                # Get centralized critic predictions for the corresponding next global states.
-                critic_preds = self.centralized_critic(global_states_agent, training=False)
-                # Compute the auxiliary alignment loss (MSE).
-                alignment_loss = tf.reduce_mean(tf.square(q_taken - critic_preds))
-
-            # Backpropagate the alignment loss.
-            grads = tape.gradient(alignment_loss, agent_model.trainable_variables)
-            agent_model.optimizer.apply_gradients(zip(grads, agent_model.trainable_variables))
-            # print(f"[CTDE] Agent {agent_index} alignment loss: {alignment_loss.numpy()}")
+        grads = tape.gradient(align_loss, shared_model.trainable_variables)
+        shared_model.optimizer.apply_gradients(zip(grads, shared_model.trainable_variables))
+        # print(f"[CTDE] Alignment loss: {align_loss.numpy():.4f}")
 
     def analyze_results(self):
         plt.figure(figsize=(15, 5))
         plt.subplot(1, 3, 1)
         plt.plot(self._reward_store)
         plt.title("Reward per Episode")
-        plt.xlabel("Episode")
-        plt.ylabel("Reward")
+        plt.xlabel("Episode"); plt.ylabel("Reward")
         plt.subplot(1, 3, 2)
         plt.plot(self._avg_queue_length_store)
         plt.title("Avg Queue Length per Episode")
-        plt.xlabel("Episode")
-        plt.ylabel("Avg Queue Length")
+        plt.xlabel("Episode"); plt.ylabel("Avg Queue Length")
         plt.subplot(1, 3, 3)
         plt.plot(self._cumulative_wait_store)
         plt.title("Cumulative Wait Time per Episode")
-        plt.xlabel("Episode")
-        plt.ylabel("Cumulative Wait Time")
+        plt.xlabel("Episode"); plt.ylabel("Cumulative Wait Time")
         plt.show()
+
         print("Final Faulty Lights:", self.faulty_lights)
         if self._green_durations_log:
             plt.figure(figsize=(10, 4))
             plt.plot(self._green_durations_log)
             plt.title("Adaptive Green Duration Over Time")
-            plt.xlabel("Step")
-            plt.ylabel("Green Duration")
-            plt.grid(True)
-            plt.show()
+            plt.xlabel("Step"); plt.ylabel("Green Duration")
+            plt.grid(True); plt.show()
 
     @property
     def reward_store(self):

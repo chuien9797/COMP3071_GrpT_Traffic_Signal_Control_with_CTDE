@@ -1,49 +1,59 @@
 # communication.py
-
 """
-A simple communication module for multiagent coordination in traffic simulation.
+Simple message‑passing utilities for multi‑agent coordination.
 
-This module implements a basic message passing interface so that agents can explicitly share
-information (e.g., their chosen actions, Q-values, or local observations) with one another.
-It uses a global dictionary to store messages for each agent.
+Agents can explicitly share information (chosen actions, Q‑values, local
+observations, etc.) by writing and reading dictionaries from an in‑memory
+mailbox. Each agent has its own FIFO inbox keyed by its integer ID.
 """
 
-# Global dictionary to hold messages for each agent.
-agent_messages = {}
+from typing import Any, Dict, List
 
-def send_message(agent_id, message):
+# --------------------------------------------------------------------------- #
+# Internal state
+# --------------------------------------------------------------------------- #
+
+#: Global dictionary mapping agent_id -> list[message]
+agent_messages: Dict[int, List[Dict[str, Any]]] = {}
+
+
+# --------------------------------------------------------------------------- #
+# Public API
+# --------------------------------------------------------------------------- #
+
+def init_agents(agent_ids: List[int]) -> None:
     """
-    Send a message to a specific agent.
+    (Optional) Pre‑register a list of agent IDs with empty inboxes.
 
-    Parameters:
-        agent_id (int): The identifier of the receiving agent.
-        message (dict): The message (as a dictionary) to be sent.
+    This is useful if you plan to call ``broadcast()`` before any agent
+    has sent its first message.
     """
-    if agent_id not in agent_messages:
-        agent_messages[agent_id] = []
-    agent_messages[agent_id].append(message)
+    for aid in agent_ids:
+        agent_messages.setdefault(aid, [])
 
-def get_messages(agent_id):
+
+def send_message(agent_id: int, message: Dict[str, Any]) -> None:
     """
-    Retrieve and clear all messages for a given agent.
+    Append *message* to *agent_id*'s inbox.
+    """
+    agent_messages.setdefault(agent_id, []).append(message)
 
-    Parameters:
-        agent_id (int): The identifier for the agent.
 
-    Returns:
-        list: A list of messages that were stored for the agent.
+def get_messages(agent_id: int) -> List[Dict[str, Any]]:
+    """
+    Retrieve **and clear** all pending messages for *agent_id*.
     """
     msgs = agent_messages.get(agent_id, [])
     agent_messages[agent_id] = []
     print(f"[Communication] Agent {agent_id} retrieved {len(msgs)} messages.")
     return msgs
 
-def broadcast(message):
-    """
-    Broadcast a message to all agents that have messages waiting in the system.
 
-    Parameters:
-        message (dict): The message to broadcast.
+def broadcast(message: Dict[str, Any]) -> None:
     """
-    for agent_id in list(agent_messages.keys()):
-        send_message(agent_id, message)
+    Send *message* to every agent currently known to the mailbox.
+    Agents that haven’t been registered yet (no inbox) will be skipped,
+    unless you call ``init_agents()`` first.
+    """
+    for aid in list(agent_messages.keys()):
+        send_message(aid, message)

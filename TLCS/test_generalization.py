@@ -96,7 +96,7 @@ def test_generalization():
         sys.exit(1)
 
     # 6. Evaluate on unseen layouts
-    unseen_envs = ["double_t", "t_with_u_turn"]
+    unseen_envs = ["double_t", "1x2_grid"]
     episodes_per_env = 30
 
     for env in unseen_envs:

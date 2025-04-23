@@ -690,4 +690,3 @@ class Simulation:
     @property
     def q_loss_log(self):
         return self._q_loss_log
-

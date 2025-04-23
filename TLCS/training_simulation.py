@@ -127,6 +127,13 @@ class Simulation:
         else:
             self.centralized_critic = centralized_critic
 
+        # Instantiate the centralized critic.
+        # Compute global state dimension as (total number of lanes across all groups * lane_feature_dim).
+        lane_feature_dim = 9
+        total_lanes = sum(len(lanes) for lanes in self.int_conf["incoming_lanes"].values())
+        global_state_dim = total_lanes * lane_feature_dim
+        self.centralized_critic = CentralizedCritic(global_state_dim, hidden_units=64)
+        self.centralized_critic.compile(loss='mse', optimizer=Adam(learning_rate=0.001))
 
     def _get_state(self):
         """
@@ -557,7 +564,7 @@ class Simulation:
         loss        = np.mean((y - q_s) ** 2)
         self._q_loss_log.append(loss)
         shared.train_batch(states, y)
-        self._TargetModels[0].soft_update_from(self._Models[0], tau=0.005)
+
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]

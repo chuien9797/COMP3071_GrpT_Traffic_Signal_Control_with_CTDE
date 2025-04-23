@@ -73,11 +73,10 @@ def main():
             num_intersections = 1
         print(f"Environment '{env_name}' has {num_intersections} intersection(s).")
 
-        # after building shared_model…
-        target_model = TrainModelAggregator.clone_from(shared_model, tau=1.0)
-        # now every agent uses the same *object* for online vs. the same-but‐separate object for target
+        # all agents share the same policy model
         agents = [shared_model] * num_intersections
-        target_agents = [target_model] * num_intersections
+        # target models (for DQN target network) also shared
+        target_agents = [shared_model] * num_intersections
 
         memory_instance = Memory(
             config['memory_size_max'],
@@ -116,11 +115,6 @@ def main():
         sim_time, train_time = sim.run(episode=ep, epsilon=epsilon)
         print(f"Episode {ep+1} done | sim_time={sim_time}s | train_time={train_time}s\n")
         combined_rewards.append(sim.reward_store[-1])
-
-        if (ep + 1) % 10 == 0:
-            # M is your hard‐update interval (e.g. 10 or 20 episodes)
-            print(f"Hard‐updating target network at episode {ep + 1}")
-            target_model.set_weights(shared_model.get_weights())
 
     end_time = datetime.datetime.now()
     print(f"\n----- Start: {start_time}  End: {end_time}")

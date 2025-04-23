@@ -204,7 +204,7 @@ class Simulation:
             total_halt += traci.lane.getLastStepHaltingNumber(lane)
         return total_halt
 
-    def run(self, episode, epsilon):
+    def run(self, episode, epsilon, train=True):
         """
         Main simulation loop:
           - Generates route files and steps through the simulation.
@@ -345,9 +345,18 @@ class Simulation:
             self._replay()
             # Perform centralized training with CTDE.
             self.train_ctde()
-        training_time = round(timeit.default_timer() - start_train_time, 1)
+            if train:
+                print("Training...")
+                start_train = timeit.default_timer()
+                for _ in range(self._training_epochs):
+                    self._replay()
+                    self.train_ctde()
+                training_time = round(timeit.default_timer() - start_train, 1)
+                return simulation_time, training_time
+            else:
+                return simulation_time, None
 
-        return simulation_time, training_time
+
 
     def _choose_action(self, state, epsilon, model):
         valid_action_indices = list(self.int_conf["phase_mapping"].keys())

@@ -1,12 +1,15 @@
-Timestamp: 2025-04-22 15:41:42
-Intersection Type: cross
-Total reward: -6.93
+Timestamp: 2025-04-23 08:46:43
+Intersection Type: roundabout
+Total reward: -65.37
 Epsilon: 0.61
-Simulation duration: 10.5s
-Avg queue length: 94.92
-Cumulative wait time: 108228578.00
+Simulation duration: 37.3s
+Avg queue length: 179.01
+Cumulative wait time: 93758283.00
 Fault injected: No
-Total Emergency Delay: 1391693.00
+Total Emergency Delay: 462500.00
 
 Action Distribution:
 Agent 1
+Agent 2
+Agent 3
+Agent 4

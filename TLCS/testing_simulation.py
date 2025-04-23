@@ -109,6 +109,8 @@ class TestingSimulation:
         self._sum_waiting_time       = 0
         self.fault_injection_events = []  # list of (tlid, step)
         self.fault_recovery_times = []  # list of (recovery_step - inject_step)
+        self._emergency_total_delay = 0.0
+        self._emergency_crossed = 0
 
         # ------------ misc ---------------------------------------------- #
         self.signal_fault_prob = signal_fault_prob
@@ -129,13 +131,6 @@ class TestingSimulation:
         else:
             self.centralized_critic = centralized_critic
 
-        # Instantiate the centralized critic.
-        # Compute global state dimension as (total number of lanes across all groups * lane_feature_dim).
-        lane_feature_dim = 9
-        total_lanes = sum(len(lanes) for lanes in self.int_conf["incoming_lanes"].values())
-        global_state_dim = total_lanes * lane_feature_dim
-        self.centralized_critic = CentralizedCritic(global_state_dim, hidden_units=64)
-        self.centralized_critic.compile(loss='mse', optimizer=Adam(learning_rate=0.001))
 
     def _get_state(self):
         """
@@ -446,6 +441,14 @@ class TestingSimulation:
             self._recover_faults_if_due(log_file)
             traci.simulationStep()
             self._step += 1
+
+            # get list of vehicles that just arrived at their destination
+            arrived = traci.simulation.getArrivedIDList()
+            for veh_id in arrived:
+                if traci.vehicle.getTypeID(veh_id) == "emergency":
+                    # count one more cleared emergency vehicle
+                    self._emergency_crossed += 1
+
             steps_todo -= 1
             q_len = self._get_queue_length()
             self._sum_queue_length += q_len
@@ -576,6 +579,7 @@ class TestingSimulation:
         loss        = np.mean((y - q_s) ** 2)
         self._q_loss_log.append(loss)
         shared.train_batch(states, y)
+        self._TargetModels[0].soft_update_from(self._Models[0], tau=0.005)
 
     def _pad_states(self, state_list):
         lane_feature_dim = state_list[0].shape[1]

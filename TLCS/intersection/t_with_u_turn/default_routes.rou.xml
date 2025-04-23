@@ -1,23 +1,15 @@
 <routes>
-    <!-- Define emergency vehicle type -->
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
-           maxSpeed="20" sigma="0.5" emergency="true" />
-    <!-- Define standard vehicle type -->
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
-           minGap="2.5" maxSpeed="25" sigma="0.5" />
-
-    <route id="W_N" edges="W2TL TL2N"/>
-    <route id="W_E" edges="W2TL TL2E"/>
-    <route id="W_S" edges="W2TL TL2S"/>
-    <route id="N_W" edges="N2TL TL2W"/>
-    <route id="N_E" edges="N2TL TL2E"/>
-    <route id="N_S" edges="N2TL TL2S"/>
-    <route id="E_W" edges="E2TL TL2W"/>
-    <route id="E_N" edges="E2TL TL2N"/>
-    <route id="E_S" edges="E2TL TL2S"/>
-    <route id="S_W" edges="S2TL TL2W"/>
-    <route id="S_N" edges="S2TL TL2N"/>
-    <route id="S_E" edges="S2TL TL2E"/>
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true"/>
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5"/>
+    
+    <route id="left_to_right" edges="left_to_center center_to_right"/>
+    <route id="right_to_left" edges="right_to_center center_to_left"/>
+    <route id="down_to_left" edges="down_to_center center_to_left"/>
+    <route id="down_to_right" edges="down_to_center center_to_right"/>
+    
+    <route id="left_uturn" edges="left_to_center center_to_left"/>
+    <route id="right_uturn" edges="right_to_center center_to_right"/>
+    <route id="down_uturn" edges="down_to_center center_to_down"/>
     <vehicle id="E_W_0" type="standard_car" route="E_W" depart="27" departLane="random" departSpeed="10" />
     <vehicle id="E_W_1" type="standard_car" route="E_W" depart="57" departLane="random" departSpeed="10" />
     <vehicle id="S_N_2" type="standard_car" route="S_N" depart="62" departLane="random" departSpeed="10" />
@@ -1437,6 +1429,7 @@
     <vehicle id="W_E_1416" type="standard_car" route="W_E" depart="1482" departLane="random" departSpeed="10" />
     <vehicle id="E_W_1417" type="standard_car" route="E_W" depart="1483" departLane="random" departSpeed="10" />
     <vehicle id="W_E_1418" type="standard_car" route="W_E" depart="1484" departLane="random" departSpeed="10" />
+    <vehicle id="emergency_0" type="emergency" route="left_to_right" depart="1484" departLane="random" departSpeed="10" />
     <vehicle id="W_N_1419" type="standard_car" route="W_N" depart="1485" departLane="random" departSpeed="10" />
     <vehicle id="S_N_1420" type="standard_car" route="S_N" depart="1486" departLane="random" departSpeed="10" />
     <vehicle id="N_S_1421" type="standard_car" route="N_S" depart="1489" departLane="random" departSpeed="10" />
@@ -1996,6 +1989,7 @@
     <vehicle id="N_E_1975" type="standard_car" route="N_E" depart="2811" departLane="random" departSpeed="10" />
     <vehicle id="E_N_1976" type="standard_car" route="E_N" depart="2826" departLane="random" departSpeed="10" />
     <vehicle id="E_W_1977" type="standard_car" route="E_W" depart="2829" departLane="random" departSpeed="10" />
+    <vehicle id="emergency_1" type="emergency" route="left_to_right" depart="2840" departLane="random" departSpeed="10" />
     <vehicle id="W_E_1978" type="standard_car" route="W_E" depart="2851" departLane="random" departSpeed="10" />
     <vehicle id="S_N_1979" type="standard_car" route="S_N" depart="2888" departLane="random" departSpeed="10" />
     <vehicle id="N_S_1980" type="standard_car" route="N_S" depart="2935" departLane="random" departSpeed="10" />
@@ -2018,4 +2012,5 @@
     <vehicle id="W_E_1997" type="standard_car" route="W_E" depart="3713" departLane="random" departSpeed="10" />
     <vehicle id="S_N_1998" type="standard_car" route="S_N" depart="3725" departLane="random" departSpeed="10" />
     <vehicle id="N_S_1999" type="standard_car" route="N_S" depart="4128" departLane="random" departSpeed="10" />
+    <vehicle id="emergency_2" type="emergency" route="down_to_left" depart="4288" departLane="random" departSpeed="10" />
 </routes>

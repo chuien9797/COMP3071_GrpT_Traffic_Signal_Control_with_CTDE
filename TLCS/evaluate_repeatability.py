@@ -51,7 +51,7 @@ _ = model.model(dummy_in)
 model_h5 = os.path.join(
     os.getcwd(),
     config["models_path_name"],   # e.g., "models"
-    "model_338",                  # adjust as needed
+    "model_339",                  # adjust as needed
     "shared_policy",
     "trained_model.h5"
 )

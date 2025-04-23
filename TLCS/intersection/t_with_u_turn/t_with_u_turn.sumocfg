@@ -12,11 +12,9 @@
 
     <time>
         <begin value="0"/>
+        <end value="100000"/>
     </time>
 
-    <processing>
-        <time-to-teleport value="-1"/>
-    </processing>
 
 
 </sumoConfiguration>

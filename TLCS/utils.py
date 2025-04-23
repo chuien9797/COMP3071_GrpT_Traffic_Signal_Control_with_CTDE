@@ -83,7 +83,7 @@ def import_test_configuration(config_file):
     config['num_actions'] = content['agent'].getint('num_actions')
     config['sumocfg_file_name'] = content['dir']['sumocfg_file_name']  # Keep for single-env test
     config['models_path_name'] = content['dir']['models_path_name']
-    config['model_to_test'] = content['dir'].getint('model_to_test')
+    config['model_to_test'] = content['dir'].get('model_to_test')
 
     return config
 
@@ -138,15 +138,12 @@ def set_train_path(models_path_name):
     return data_path
 
 
-def set_test_path(models_path_name, model_n):
-    """
-    Returns a model path for the tested model number, plus a 'test' subdir
-    """
-    model_folder_path = os.path.join(os.getcwd(), models_path_name, 'model_' + str(model_n), '')
+def set_test_path(models_path_name, model_to_test):
+    model_dir = os.path.join("models", models_path_name, model_to_test)
+    if not os.path.exists(model_dir):
+        raise FileNotFoundError(f"Model folder not found at: {model_dir}")
+    
+    plot_path = os.path.join("plots", models_path_name, model_to_test)
+    os.makedirs(plot_path, exist_ok=True)
+    return os.path.join("models", models_path_name), plot_path
 
-    if os.path.isdir(model_folder_path):
-        plot_path = os.path.join(model_folder_path, 'test', '')
-        os.makedirs(os.path.dirname(plot_path), exist_ok=True)
-        return model_folder_path, plot_path
-    else:
-        sys.exit('The model number specified does not exist in the models folder')

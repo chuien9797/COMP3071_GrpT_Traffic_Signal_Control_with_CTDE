@@ -6,7 +6,12 @@
 <sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
 
     <input>
-        <net-file value="../../../../../../Cyborg 15/Desktop/diaCW/TLCS/intersection/double_T/double_t.net.xml"/>
+        <net-file value="double_t.net.xml"/>
+        <route-files value="double_t.rou.xml"/>
     </input>
+    <time>
+        <begin value="0"/>
+        <end value="100000"/>
+    </time>
 
 </sumoConfiguration>

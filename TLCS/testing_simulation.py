@@ -1,241 +1,176 @@
 import traci
 import numpy as np
-import random
 import timeit
 import os
 
-# phase codes based on cross_environment.net.xml
-PHASE_NS_GREEN = 0  # action 0 code 00
-PHASE_NS_YELLOW = 1
-PHASE_NSL_GREEN = 2  # action 1 code 01
-PHASE_NSL_YELLOW = 3
-PHASE_EW_GREEN = 4  # action 2 code 10
-PHASE_EW_YELLOW = 5
-PHASE_EWL_GREEN = 6  # action 3 code 11
-PHASE_EWL_YELLOW = 7
+from intersection_config import INTERSECTION_CONFIGS
 
-
-class Simulation:
-    def __init__(self, Model, TrafficGen, sumo_cmd, max_steps, green_duration, yellow_duration, num_states, num_actions):
-        self._Model = Model
+class TestingSimulation:
+    def __init__(self, Models, TrafficGen, sumo_cmd, max_steps, green_duration,
+                 yellow_duration, num_states, intersection_type, inject_faults=False):
+        self._Models = Models
         self._TrafficGen = TrafficGen
-        self._step = 0
         self._sumo_cmd = sumo_cmd
         self._max_steps = max_steps
         self._green_duration = green_duration
         self._yellow_duration = yellow_duration
-        self._num_states = num_states
-        self._num_actions = num_actions
-        self._reward_episode = []
-        self._queue_length_episode = []
+        self._intersection_type = intersection_type
+        self._num_agents = len(Models)
+        self.inject_faults = inject_faults
+        self.signal_fault_prob = 0.1
+        self.enable_emergency_handling = True
 
+        self._tls_ids = INTERSECTION_CONFIGS[intersection_type]["traffic_light_ids"]
 
-    def run(self, episode):
-        """
-        Runs the testing simulation
-        """
+        # Metric stores
+        self.reward_store = []
+        self.cumulative_wait_store = []
+        self.avg_queue_length_store = []
+        self.emergency_clearance_time = 0
+        self._emergency_entry_exit = {}  # vehicle_id → (entry, exit)
+        self._num_faults_injected = 0
+        self._num_faults_recovered = 0
+        self.avg_vehicle_delay = 0
+        self.total_vehicles_set = set()
+
+    def _get_state(self, tls_id):
+        lanes = traci.trafficlight.getControlledLanes(tls_id)
+        state = []
+
+        for lane_id in lanes:
+            num_veh = traci.lane.getLastStepVehicleNumber(lane_id)
+            mean_speed = traci.lane.getLastStepMeanSpeed(lane_id)
+            occupancy = traci.lane.getLastStepOccupancy(lane_id)
+            state.append([0, 0, 0, 0, 0, 0, num_veh, mean_speed, occupancy])
+
+        while len(state) < 9:
+            state.append([0] * 9)
+
+        return np.array(state[:9], dtype=np.float32)
+
+    def _set_phase(self, tls_id, action_idx):
+        try:
+            # First try integer key (preferred)
+            phase_dict = INTERSECTION_CONFIGS[self._intersection_type]["phase_mapping"][action_idx]
+        except KeyError:
+            # Fall back to string key if needed
+            phase_dict = INTERSECTION_CONFIGS[self._intersection_type]["phase_mapping"][str(action_idx)]
+        green_phase = phase_dict["green"]
+        traci.trafficlight.setPhase(tls_id, green_phase)
+
+    def run(self, scenario_name="default", env_index=0):
+        print(f"Starting SUMO for scenario '{scenario_name}'...")
+        seed = 1000 + env_index * 10
+        self._TrafficGen.generate_routefile(seed=seed)
+
+        traci.start(self._sumo_cmd)
+
+        step = 0
+        queue_lengths = []
+        total_wait_time = []
+
+        action_duration = self._green_duration
+        tls_ids = self._tls_ids
+
         start_time = timeit.default_timer()
 
-        # first, generate the route file for this simulation and set up sumo
-        self._TrafficGen.generate_routefile(seed=episode)
-        traci.start(self._sumo_cmd)
-        print("Simulating...")
+        while step < self._max_steps:
+            for i, tls_id in enumerate(tls_ids):
+                state = self._get_state(tls_id)
+                state = np.expand_dims(state, axis=0)
 
-        # inits
-        self._step = 0
-        self._waiting_times = {}
-        old_total_wait = 0
-        old_action = -1 # dummy init
+                # Debug: print state shape and content
+                print(f"[{tls_id}] State shape: {state.shape}")
+                print(f"[{tls_id}] State sample:\n{state[0][:3]}")  # first 3 lanes
 
-        while self._step < self._max_steps:
+                # Get the model for this traffic light agent
+                model = self._Models[i]
 
-            # get current state of the intersection
-            current_state = self._get_state()
+                # Get action probabilities
+                action_probs = model.predict_one(state).flatten()
+                print(f"[{tls_id}] Q-values: {action_probs}")
+                print(f"[{tls_id}] Chosen Action → {np.argmax(action_probs)}")
 
-            # calculate reward of previous action: (change in cumulative waiting time between actions)
-            # waiting time = seconds waited by a car since the spawn in the environment, cumulated for every car in incoming lanes
-            current_total_wait = self._collect_waiting_times()
-            reward = old_total_wait - current_total_wait
 
-            # choose the light phase to activate, based on the current state of the intersection
-            action = self._choose_action(current_state)
+                # Pick the action
+                action = int(np.argmax(action_probs))
+                print(f"[{tls_id}] MODEL Action → {action}")
 
-            # if the chosen phase is different from the last phase, activate the yellow phase
-            if self._step != 0 and old_action != action:
-                self._set_yellow_phase(old_action)
-                self._simulate(self._yellow_duration)
 
-            # execute the phase selected before
-            self._set_green_phase(action)
-            self._simulate(self._green_duration)
+                if self.inject_faults and np.random.rand() < self.signal_fault_prob:
+                    self._num_faults_injected += 1
+                    print(f"[FAULT] Injected at {tls_id} on step {step}")
+                    red_phase = INTERSECTION_CONFIGS[self._intersection_type].get("fault_phase", 0)
+                    traci.trafficlight.setPhase(tls_id, red_phase)
+                else:
+                    self._set_phase(tls_id, action)
 
-            # saving variables for later & accumulate reward
-            old_action = action
-            old_total_wait = current_total_wait
+                if getattr(self, "enable_emergency_handling", False):
+                    try:
+                        self._handle_emergency_vehicle(tls_id)
+                    except AttributeError:
+                        pass
 
-            self._reward_episode.append(reward)
+            for _ in range(action_duration):
+                traci.simulationStep()
+                step += 1
 
-        #print("Total reward:", np.sum(self._reward_episode))
+                total_wait = 0
+                total_queued = 0
+
+                for tls_id in tls_ids:
+                    lanes = traci.trafficlight.getControlledLanes(tls_id)
+                    for lane in lanes:
+                        total_wait += traci.lane.getWaitingTime(lane)
+                        total_queued += traci.lane.getLastStepVehicleNumber(lane)
+
+                total_wait_time.append(total_wait)
+                queue_lengths.append(total_queued)
+
+                for vid in traci.vehicle.getIDList():
+                    self.total_vehicles_set.add(vid)
+
+                    if vid.startswith("emergency_"):
+                        if vid not in self._emergency_entry_exit:
+                            self._emergency_entry_exit[vid] = [step, None]
+                        elif traci.vehicle.getRoadID(vid) == "":
+                            self._emergency_entry_exit[vid][1] = step
+
+        sim_time = round(timeit.default_timer() - start_time, 2)
         traci.close()
-        simulation_time = round(timeit.default_timer() - start_time, 1)
 
-        return simulation_time
+        total_vehicles = len(self.total_vehicles_set)
+        self.avg_vehicle_delay = np.sum(total_wait_time) / total_vehicles if total_vehicles > 0 else 0
 
+        for entry_exit in self._emergency_entry_exit.values():
+            entry, exit = entry_exit
+            if exit is not None:
+                self.emergency_clearance_time += (exit - entry)
 
-    def _simulate(self, steps_todo):
-        """
-        Proceed with the simulation in sumo
-        """
-        if (self._step + steps_todo) >= self._max_steps:  # do not do more steps than the maximum allowed number of steps
-            steps_todo = self._max_steps - self._step
+        self.reward_store.append(-np.mean(total_wait_time))
+        self.cumulative_wait_store.append(np.sum(total_wait_time))
+        self.avg_queue_length_store.append(np.mean(queue_lengths))
 
-        while steps_todo > 0:
-            traci.simulationStep()  # simulate 1 step in sumo
-            self._step += 1 # update the step counter
-            steps_todo -= 1
-            queue_length = self._get_queue_length() 
-            self._queue_length_episode.append(queue_length)
+        print("\n--- TESTING METRICS ---")
+        print(f"Total Sim Time: {sim_time:.2f}s")
+        print(f"Avg Vehicle Delay: {self.avg_vehicle_delay:.2f}s")
+        print(f"Avg Queue Length: {np.mean(queue_lengths):.2f}")
+        print(f"Total Reward: {-np.mean(total_wait_time):.2f}")
+        print(f"Emergency Clearance Time: {self.emergency_clearance_time:.2f}s")
+        print(f"Faults Injected: {self._num_faults_injected}")
+        print(f"Faults Recovered (tracked manually or TBD): {self._num_faults_recovered}")
 
+        # ✅ LOG TO FILE
+        os.makedirs("logs_test", exist_ok=True)
+        with open("logs/testing_metrics.txt", "a") as f:
+            f.write(f"\n--- Scenario: {scenario_name}, Env Index: {env_index} ---\n")
+            f.write(f"Sim Time: {sim_time:.2f}s\n")
+            f.write(f"Avg Vehicle Delay: {self.avg_vehicle_delay:.2f}s\n")
+            f.write(f"Avg Queue Length: {np.mean(queue_lengths):.2f}\n")
+            f.write(f"Total Reward: {-np.mean(total_wait_time):.2f}\n")
+            f.write(f"Emergency Clearance Time: {self.emergency_clearance_time:.2f}s\n")
+            f.write(f"Faults Injected: {self._num_faults_injected}\n")
+            f.write(f"Faults Recovered: {self._num_faults_recovered}\n")
+            f.write("=====================================\n")
 
-    def _collect_waiting_times(self):
-        """
-        Retrieve the waiting time of every car in the incoming roads
-        """
-        incoming_roads = ["E2TL", "N2TL", "W2TL", "S2TL"]
-        car_list = traci.vehicle.getIDList()
-        for car_id in car_list:
-            wait_time = traci.vehicle.getAccumulatedWaitingTime(car_id)
-            road_id = traci.vehicle.getRoadID(car_id)  # get the road id where the car is located
-            if road_id in incoming_roads:  # consider only the waiting times of cars in incoming roads
-                self._waiting_times[car_id] = wait_time
-            else:
-                if car_id in self._waiting_times: # a car that was tracked has cleared the intersection
-                    del self._waiting_times[car_id] 
-        total_waiting_time = sum(self._waiting_times.values())
-        return total_waiting_time
-
-
-    def _choose_action(self, state):
-        """
-        Pick the best action known based on the current state of the env
-        """
-        return np.argmax(self._Model.predict_one(state))
-
-
-    def _set_yellow_phase(self, old_action):
-        """
-        Activate the correct yellow light combination in sumo
-        """
-        yellow_phase_code = old_action * 2 + 1 # obtain the yellow phase code, based on the old action (ref on cross_environment.net.xml)
-        traci.trafficlight.setPhase("TL", yellow_phase_code)
-
-
-    def _set_green_phase(self, action_number):
-        """
-        Activate the correct green light combination in sumo
-        """
-
-
-        if action_number == 0:
-            traci.trafficlight.setPhase("TL", PHASE_NS_GREEN)
-        elif action_number == 1:
-            traci.trafficlight.setPhase("TL", PHASE_NSL_GREEN)
-        elif action_number == 2:
-            traci.trafficlight.setPhase("TL", PHASE_EW_GREEN)
-        elif action_number == 3:
-            traci.trafficlight.setPhase("TL", PHASE_EWL_GREEN)
-
-
-    def _get_queue_length(self):
-        """
-        Retrieve the number of cars with speed = 0 in every incoming lane
-        """
-        halt_N = traci.edge.getLastStepHaltingNumber("N2TL")
-        halt_S = traci.edge.getLastStepHaltingNumber("S2TL")
-        halt_E = traci.edge.getLastStepHaltingNumber("E2TL")
-        halt_W = traci.edge.getLastStepHaltingNumber("W2TL")
-        queue_length = halt_N + halt_S + halt_E + halt_W
-        return queue_length
-
-
-    def _get_state(self):
-        """
-        Retrieve the state of the intersection from sumo, in the form of cell occupancy
-        """
-        state = np.zeros(self._num_states)
-        car_list = traci.vehicle.getIDList()
-
-        for car_id in car_list:
-            lane_pos = traci.vehicle.getLanePosition(car_id)
-            lane_id = traci.vehicle.getLaneID(car_id)
-            lane_pos = 750 - lane_pos  # inversion of lane pos, so if the car is close to the traffic light -> lane_pos = 0 --- 750 = max len of a road
-
-            # distance in meters from the traffic light -> mapping into cells
-            if lane_pos < 7:
-                lane_cell = 0
-            elif lane_pos < 14:
-                lane_cell = 1
-            elif lane_pos < 21:
-                lane_cell = 2
-            elif lane_pos < 28:
-                lane_cell = 3
-            elif lane_pos < 40:
-                lane_cell = 4
-            elif lane_pos < 60:
-                lane_cell = 5
-            elif lane_pos < 100:
-                lane_cell = 6
-            elif lane_pos < 160:
-                lane_cell = 7
-            elif lane_pos < 400:
-                lane_cell = 8
-            elif lane_pos <= 750:
-                lane_cell = 9
-
-            # finding the lane where the car is located 
-            # x2TL_3 are the "turn left only" lanes
-            if lane_id == "W2TL_0" or lane_id == "W2TL_1" or lane_id == "W2TL_2":
-                lane_group = 0
-            elif lane_id == "W2TL_3":
-                lane_group = 1
-            elif lane_id == "N2TL_0" or lane_id == "N2TL_1" or lane_id == "N2TL_2":
-                lane_group = 2
-            elif lane_id == "N2TL_3":
-                lane_group = 3
-            elif lane_id == "E2TL_0" or lane_id == "E2TL_1" or lane_id == "E2TL_2":
-                lane_group = 4
-            elif lane_id == "E2TL_3":
-                lane_group = 5
-            elif lane_id == "S2TL_0" or lane_id == "S2TL_1" or lane_id == "S2TL_2":
-                lane_group = 6
-            elif lane_id == "S2TL_3":
-                lane_group = 7
-            else:
-                lane_group = -1
-
-            if lane_group >= 1 and lane_group <= 7:
-                car_position = int(str(lane_group) + str(lane_cell))  # composition of the two postion ID to create a number in interval 0-79
-                valid_car = True
-            elif lane_group == 0:
-                car_position = lane_cell
-                valid_car = True
-            else:
-                valid_car = False  # flag for not detecting cars crossing the intersection or driving away from it
-
-            if valid_car:
-                state[car_position] = 1  # write the position of the car car_id in the state array in the form of "cell occupied"
-
-        return state
-
-
-    @property
-    def queue_length_episode(self):
-        return self._queue_length_episode
-
-
-    @property
-    def reward_episode(self):
-        return self._reward_episode
-
-
-
+        return sim_time

@@ -286,19 +286,34 @@ INTERSECTION_CONFIGS = {
 
     "route_config": {
         "main": {
-            "routes": ["left1_mid1", "right2_mid2"],
+            "routes": [
+                "left1_mid1",
+                "right2_mid2",
+                "left2_left1_mid1",  # ✅ valid route via N1 → N2
+                "right1_right2_mid2" # ✅ valid route via N7 → N5
+            ],
             "probability": 0.6
         },
         "branch": {
-            "routes": ["top_mid1", "bottom_mid2", "left1_top_r", "right2_bottom_r"],
+            "routes": [
+                "top_mid1",
+                "bottom_mid2",
+                "left1_top_r",
+                "right2_bottom_r"
+            ],
             "probability": 0.4
         }
     },
 
     "emergency_routes": [
-        "left1_mid1", "right2_mid2",
-        "top_mid1", "bottom_mid2",
-        "left1_top_r", "right2_bottom_r"
+        "left1_mid1",
+        "right2_mid2",
+        "top_mid1",
+        "bottom_mid2",
+        "left1_top_r",
+        "right2_bottom_r",
+        "left2_left1_mid1",      # ✅ now used for emergency
+        "right1_right2_mid2"     # ✅ now used for emergency
     ],
 
     "header": """<routes>
@@ -310,7 +325,9 @@ INTERSECTION_CONFIGS = {
     <route id="top_mid1" edges="top mid1"/>
     <route id="bottom_mid2" edges="bottom mid2"/>
     <route id="left1_top_r" edges="left1 top_r"/>
-    <route id="right2_bottom_r" edges="right2 bottom_r"/>""",
+    <route id="right2_bottom_r" edges="right2 bottom_r"/>
+    <route id="left2_left1_mid1" edges="left2 left1 mid1"/>
+    <route id="right1_right2_mid2" edges="right1 right2 mid2"/>""",
 
     "monitor_edges": [
         "left1", "left2", "top", "top_r", "mid1", "mid2",
@@ -325,6 +342,7 @@ INTERSECTION_CONFIGS = {
         "right1_0", "right1_1", "right2_0", "right2_1"
     ]
 },
+
 
 "t_with_u_turn": {
     "sumocfg_file": "t_with_u_turn/t_with_u_turn.sumocfg",

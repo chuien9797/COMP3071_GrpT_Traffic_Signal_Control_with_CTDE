@@ -444,14 +444,22 @@ class TrafficGenerator:
     <route id="S_E" edges="S2TL TL2E"/>"""
             elif self.intersection_type == "roundabout":
                 return """<routes>
-    <!-- Define emergency vehicle type -->
-    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true" />
-    <!-- Define standard vehicle type -->
-    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5" />
+                <!-- Define emergency vehicle type -->
+                <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0"
+                    maxSpeed="20" sigma="0.5" emergency="true" />
+                <!-- Define standard vehicle type -->
+                <vType id="standard_car" accel="1.0" decel="4.5" length="5.0"
+                    minGap="2.5" maxSpeed="25" sigma="0.5" />
 
-    <!-- Example of simple in/out routes, override in config or .rou.xml if needed -->
-    <route id="roundabout_in_out" edges="in_edge out_edge"/>
-    <route id="roundabout_turn" edges="in_edge turn_edge out_edge"/>"""
+                <route id="route1" edges="e1 r1 e2_out"/>
+                <route id="route2" edges="e2 r2 e3_out"/>
+                <route id="route3" edges="e3 r3 e4_out"/>
+                <route id="route4" edges="e4 r4 e1_out"/>
+                <route id="route5" edges="e1 r1 r2 e3_out"/>
+                <route id="route6" edges="e2 r2 r3 e4_out"/>
+                <route id="route7" edges="e3 r3 r4 e1_out"/>
+                <route id="route8" edges="e4 r4 r1 e2_out"/>"""
+
             elif self.intersection_type == "T_intersection":
                 return """<routes>
     <!-- Define emergency vehicle type -->

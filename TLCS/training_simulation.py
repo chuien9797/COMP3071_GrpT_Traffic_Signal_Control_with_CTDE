@@ -339,7 +339,7 @@ class Simulation:
         self._save_episode_stats()
         self._write_summary_log(episode, epsilon, simulation_time)
 
-        print("Training...")
+        # print("Training...")
         start_train_time = timeit.default_timer()
         for _ in range(self._training_epochs):
             self._replay()

@@ -14,7 +14,7 @@ from utils import import_train_configuration, set_sumo
 # Configuration
 # ================================
 CONFIG_PATH      = "training_settings.ini"
-INTERSECTION_TYPE = "cross"
+INTERSECTION_TYPE = "t_with_u_turn"
 TEST_SEEDS       = list(range(200, 229))  # valid 0 <= seed < 2**32
 
 # ================================
@@ -82,7 +82,8 @@ for seed in TEST_SEEDS:
     tg = TrafficGenerator(
         max_steps=config["max_steps"],
         n_cars_generated=config["n_cars_generated"],
-        intersection_type=INTERSECTION_TYPE
+        intersection_type=INTERSECTION_TYPE,
+        inject_emergency = True
     )
     sim = Simulation(
         Models=agents,

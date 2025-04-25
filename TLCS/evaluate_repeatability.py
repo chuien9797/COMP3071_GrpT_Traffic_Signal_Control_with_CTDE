@@ -14,7 +14,7 @@ from utils import import_train_configuration, set_sumo
 # Configuration
 # ================================
 CONFIG_PATH      = "training_settings.ini"
-INTERSECTION_TYPE = "t_with_u_turn"
+INTERSECTION_TYPE = "cross"
 TEST_SEEDS       = list(range(200, 229))  # valid 0 <= seed < 2**32
 
 # ================================
@@ -111,12 +111,31 @@ for seed in TEST_SEEDS:
     throughput = config["n_cars_generated"]
     cum_reward = sim._sum_neg_reward
 
+    # 1) total delay suffered by all emergency vehicles
+    total_emergency_delay = sim._emergency_total_delay
+    # 2) how many emergency vehicles were injected
+    n_emergencies = sim._n_emergencies
+    # 3) average delay per emergency vehicle
+
+    if n_emergencies > 0:
+        avg_emergency_delay = total_emergency_delay / n_emergencies
+    else:
+        avg_emergency_delay = 0.0
+     # 4) (optional) what fraction of all wait-time was emergency
+    if sim._sum_waiting_time > 0:
+        emergency_delay_ratio = total_emergency_delay / sim._sum_waiting_time
+    else:
+        emergency_delay_ratio = 0.0
+
     results.append({
         "seed": seed,
         "delay_per_vehicle": avg_delay,
         "avg_queue_length": avg_queue,
         "throughput": throughput,
-        "cumulative_reward": cum_reward
+        "cumulative_reward": cum_reward,
+        "total_emergency_delay": total_emergency_delay,
+        "avg_emergency_delay": avg_emergency_delay,
+        "emergency_delay_ratio": emergency_delay_ratio
     })
 
 # ================================

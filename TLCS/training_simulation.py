@@ -218,6 +218,7 @@ class Simulation:
         log_file = open(f"logs25/episode_{episode}.log", "w")
 
         self._TrafficGen.generate_routefile(seed=episode)
+        self._n_emergencies = getattr(self._TrafficGen, "generated_emergency_count", 0)
         traci.start(self._sumo_cmd)
         print(f"Simulating Episode {episode} on {self.intersection_type}...")
 
@@ -339,7 +340,7 @@ class Simulation:
         self._save_episode_stats()
         self._write_summary_log(episode, epsilon, simulation_time)
 
-        print("Training...")
+        # print("Training...")
         start_train_time = timeit.default_timer()
         for _ in range(self._training_epochs):
             self._replay()

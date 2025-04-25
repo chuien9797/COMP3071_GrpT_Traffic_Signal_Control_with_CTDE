@@ -57,7 +57,10 @@ class TrafficGenerator:
 
         if self.inject_emergency:
             emergency_entries = self._generate_emergency_routes()
+            self.generated_emergency_count = len(emergency_entries)
             vehicle_entries.extend(emergency_entries)
+        else:
+            self.generated_emergency_count = 0
 
         # Sort all vehicle entries by departure time.
         vehicle_entries.sort(key=lambda x: x[0])

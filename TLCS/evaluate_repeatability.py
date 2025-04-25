@@ -15,7 +15,7 @@ from utils import import_train_configuration, set_sumo
 # ================================
 CONFIG_PATH      = "training_settings.ini"
 INTERSECTION_TYPE = "cross"
-TEST_SEEDS       = list(range(200, 229))  # valid 0 <= seed < 2**32
+TEST_SEEDS       = list(range(200, 230))  # valid 0 <= seed < 2**32
 
 # ================================
 # Load Config & SUMO Setup

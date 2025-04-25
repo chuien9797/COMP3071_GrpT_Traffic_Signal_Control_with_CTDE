@@ -1,5 +1,6 @@
 [Step 0] Agent 0 Action: 1, Reward: 0.0000
 [Step 0] Adaptive green duration: 40
+[InjectFault] TL TL: Fault injected. Phase 2 changed from rrrrGrrrrrrrrrGrrrrr to rrrrrrrrrrrrrrGrrrrr. Flipped indices: [4]
 [Simulate] Step 1: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 2: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 3: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
@@ -40,13 +41,12 @@
 [Simulate] Step 38: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 39: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 40: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
-[Step 40] Agent 0 Action: 2, Reward: -0.0500
-[SetYellow] TL TL: Set yellow phase 3 out of 8 phases.
+[Step 40] Agent 0 Action: 1, Reward: 0.0000
+[Step 40] Adaptive green duration: 40
 [Simulate] Step 41: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 42: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 43: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 44: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
-[Step 44] Adaptive green duration: 40
 [Simulate] Step 45: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 46: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 47: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
@@ -83,11 +83,12 @@
 [Simulate] Step 78: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 79: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 80: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
+[Step 80] Agent 0 Action: 2, Reward: -0.0500
+[SetYellow] TL TL: Set yellow phase 3 out of 8 phases.
 [Simulate] Step 81: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 82: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 83: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 84: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
-[Step 84] Agent 0 Action: 2, Reward: 0.0000
 [Step 84] Adaptive green duration: 40
 [Simulate] Step 85: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0
 [Simulate] Step 86: Queue length 0, Waiting time 0.0, Emergency Delay: 0.0

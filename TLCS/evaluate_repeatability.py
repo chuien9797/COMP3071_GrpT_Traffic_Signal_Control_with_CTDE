@@ -14,7 +14,7 @@ from utils import import_train_configuration, set_sumo
 # Configuration
 # ================================
 CONFIG_PATH      = "training_settings.ini"
-INTERSECTION_TYPE = "cross"
+INTERSECTION_TYPE = "roundabout"
 TEST_SEEDS       = list(range(200, 230))  # valid 0 <= seed < 2**32
 
 # ================================
@@ -142,6 +142,6 @@ for seed in TEST_SEEDS:
 # Save & Summarize
 # ================================
 df = pd.DataFrame(results)
-df.to_csv("holdout_seed_results.csv", index=False)
+df.to_csv("holdout_seed_results_roundabout.csv", index=False)
 
 print("\n📊 Generalization Results (Hold-Out Seeds):\n", df.describe())

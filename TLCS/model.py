@@ -1,8 +1,3 @@
-##############################################################################
-# Filename: model.py
-# Purpose:  Per‑Lane Embedding + Aggregation DQN (single shared policy ready)
-##############################################################################
-
 import os
 import numpy as np
 import tensorflow as tf
@@ -11,9 +6,6 @@ from keras import layers, losses
 from tensorflow.keras.optimizers import Adam
 
 
-# --------------------------------------------------------------------------- #
-#  Basic building blocks
-# --------------------------------------------------------------------------- #
 class LaneEmbeddingNetwork(tf.keras.Model):
     """
     A small MLP that embeds one lane’s feature vector.
@@ -30,9 +22,7 @@ class LaneEmbeddingNetwork(tf.keras.Model):
 
 
 class AggregatorDQN(tf.keras.Model):
-    """
-    Mean‑pool lane embeddings ▶ two‑layer MLP ▶ Q‑values.
-    """
+
     def __init__(self, embedding_dim=32, final_hidden=64, num_actions=4):
         super().__init__()
         self.fc1 = layers.Dense(final_hidden, activation='relu')
@@ -63,9 +53,7 @@ class DQNSetModel(tf.keras.Model):
         return self.aggregator(emb)                              # (batch, num_actions)
 
 
-# --------------------------------------------------------------------------- #
-#  Convenience wrapper: TrainModelAggregator
-# --------------------------------------------------------------------------- #
+
 class TrainModelAggregator:
     """
     Thin wrapper that matches the interface used in your training loop.
@@ -101,7 +89,7 @@ class TrainModelAggregator:
         )
         return net
 
-    # ---------------- public API ---------------------------------------------
+
     def predict_one(self, state):
         """
         state: (num_lanes, lane_feature_dim) → returns (1, num_actions)
@@ -109,28 +97,20 @@ class TrainModelAggregator:
         return self._model(np.expand_dims(state, 0)).numpy()
 
     def predict_batch(self, states):
-        """
-        states: (batch, num_lanes, lane_feature_dim)
-        """
+
         return self._model(states).numpy()
 
     def train_batch(self, states, q_targets):
-        """
-        One SGD step (silent).
-        """
+
         self._model.fit(states, q_targets, epochs=1, verbose=0)
 
-    # ---------------- weight utils -------------------------------------------
+
     def get_weights(self):            return self._model.get_weights()
     def set_weights(self, weights):   self._model.set_weights(weights)
 
-    # >>> NEW – helper to create a target net quickly <<<
     @classmethod
     def clone_from(cls, src, tau=1.0):
-        """
-        Build a *copy* (full or soft) from an existing TrainModelAggregator
-        instance `src`.  `tau=1` ⇒ hard copy; 0<tau<1 ⇒ soft update.
-        """
+
         cloned_keras = tf.keras.models.clone_model(src._model)
         cloned_keras.set_weights(src.get_weights())
         tgt = cls(lane_feature_dim=src._lane_feature_dim,
@@ -153,16 +133,14 @@ class TrainModelAggregator:
             new_w.append((1. - tau) * w_tgt + tau * w_src)
         self.set_weights(new_w)
 
-    # ---------------- misc ----------------------------------------------------
-    # model.py  ── inside class TrainModelAggregator
-    # model.py  – inside TrainModelAggregator.save_model()
+
     def save_model(self, path):
         os.makedirs(path, exist_ok=True)
         h5_path = os.path.join(path, "trained_model.h5")
         self._model.save(h5_path)
         print(f"[Model] ➜ saved HDF5 weights to: {h5_path}")
 
-        # --- OPTIONAL diagram -------------------------------------------------
+
         try:
             from keras.utils import plot_model  # < will raise ImportError if pydot absent
             png_path = os.path.join(path, "model_structure.png")
@@ -175,7 +153,6 @@ class TrainModelAggregator:
     def load_from_disk(self, filepath):
         self._model = tf.keras.models.load_model(filepath)
 
-    # ---------------- properties ---------------------------------------------
     @property
     def batch_size(self): return self._batch_size
     @property

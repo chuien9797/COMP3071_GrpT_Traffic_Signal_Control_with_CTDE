@@ -7,12 +7,10 @@ class Visualization:
         self._dpi  = dpi
 
     def save_data_and_plot(self, data, filename, xlabel, ylabel):
-        """
-        Plot `data` and save the txt + png. Silently skip if data is empty.
-        """
-        if len(data) == 0:                       # <-- NEW
+
+        if len(data) == 0:
             print(f"[Viz]  '{filename}': no data, skipping figure.")  # optional log
-            return                               # <-- NEW
+            return
 
         min_val = min(data)
         max_val = max(data)

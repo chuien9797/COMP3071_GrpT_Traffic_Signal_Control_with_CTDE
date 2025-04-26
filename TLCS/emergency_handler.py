@@ -1,5 +1,3 @@
-# emergency_handler.py
-
 import traci
 import numpy as np
 
@@ -47,14 +45,13 @@ def handle_emergency_vehicle(simulation, agent_index=None):
         if agent_index < len(tl_ids):
             tlid = tl_ids[agent_index]
             try:
-                # Immediately force the traffic light to an emergency green phase (assumed phase index 0)
+                # Immediately force the traffic light to an emergency green phase (phase 0)
                 traci.trafficlight.setProgram(tlid, "0")
                 traci.trafficlight.setPhase(tlid, 0)
                 print(f"[Emergency] Agent {agent_index} (TL {tlid}): Emergency green activated.")
             except Exception as e:
                 print(f"[Emergency] Error handling emergency for agent {agent_index} (TL {tlid}): {e}")
     else:
-        # Process all agents by checking their state for an emergency flag.
         states = simulation._get_state()
         for idx, state in enumerate(states):
             # If any lane in this agent's state has emergency flag...

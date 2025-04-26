@@ -257,6 +257,132 @@ INTERSECTION_CONFIGS = {
         ]
     },
 
+"double_t": {
+    "sumocfg_file": "double_t/double_t.sumocfg",
+    "traffic_light_ids": ["N2", "N5"],
+
+    "incoming_lanes": {
+        "N2": [
+            "left1_0", "left1_1",
+            "top_0",
+            "mid2_0", "mid2_1"
+        ],
+        "N5": [
+            "mid1_0", "mid1_1",
+            "right2_0", "right2_1",
+            "bottom_0"
+        ]
+    },
+
+    "phase_mapping": {
+        "0": { "green": 0, "yellow": 1 },
+        "1": { "green": 2, "yellow": 3 }
+    },
+
+    "occupancy_grid": {
+        "cells_per_lane": 10,
+        "max_distance": 750
+    },
+
+    "route_config": {
+        "main": {
+            "routes": ["left1_mid1", "right2_mid2"],
+            "probability": 0.6
+        },
+        "branch": {
+            "routes": ["top_mid1", "bottom_mid2", "left1_top_r", "right2_bottom_r"],
+            "probability": 0.4
+        }
+    },
+
+    "emergency_routes": [
+        "left1_mid1", "right2_mid2",
+        "top_mid1", "bottom_mid2",
+        "left1_top_r", "right2_bottom_r"
+    ],
+
+    "header": """<routes>
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true"/>
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5"/>
+
+    <route id="left1_mid1" edges="left1 mid1"/>
+    <route id="right2_mid2" edges="right2 mid2"/>
+    <route id="top_mid1" edges="top mid1"/>
+    <route id="bottom_mid2" edges="bottom mid2"/>
+    <route id="left1_top_r" edges="left1 top_r"/>
+    <route id="right2_bottom_r" edges="right2 bottom_r"/>""",
+
+    "monitor_edges": [
+        "left1", "left2", "top", "top_r", "mid1", "mid2",
+        "bottom", "bottom_r", "right1", "right2"
+    ],
+
+    "monitor_lanes": [
+        "left1_0", "left1_1", "left2_0", "left2_1",
+        "top_0", "top_r_0",
+        "mid1_0", "mid1_1", "mid2_0", "mid2_1",
+        "bottom_0", "bottom_r_0",
+        "right1_0", "right1_1", "right2_0", "right2_1"
+    ]
+},
+
+"t_with_u_turn": {
+    "sumocfg_file": "t_with_u_turn/t_with_u_turn.sumocfg",
+    "traffic_light_ids": ["center"],
+    "incoming_lanes": {
+        "center": [
+            "left_to_center_0", "left_to_center_1",
+            "right_to_center_0", "right_to_center_1",
+            "down_to_center_0"
+        ]
+    },
+    "phase_mapping": {
+        "0": {"green": 0, "yellow": 1},
+        "1": {"green": 2, "yellow": 3}
+    },
+    "occupancy_grid": {
+        "cells_per_lane": 10,
+        "max_distance": 150
+    },
+    "route_config": {
+        "main": {
+            "routes": [
+                "left_to_right",
+                "right_to_left",
+                "down_to_left",
+                "down_to_right"
+            ],
+            "probability": 0.7
+        },
+        "u_turn": {
+            "routes": [
+                "left_uturn",
+                "right_uturn",
+                "down_uturn"
+            ],
+            "probability": 0.3
+        }
+    },
+    "emergency_routes": [
+        "left_to_right", "right_to_left",
+        "down_to_left", "down_to_right",
+        "left_uturn", "right_uturn", "down_uturn"
+    ],
+    "header": """<routes>
+    <vType id="emergency" accel="3.0" decel="6.0" color="1,0,0" maxSpeed="20" sigma="0.5" emergency="true"/>
+    <vType id="standard_car" accel="1.0" decel="4.5" length="5.0" minGap="2.5" maxSpeed="25" sigma="0.5"/>
+    
+    <route id="left_to_right" edges="left_to_center center_to_right"/>
+    <route id="right_to_left" edges="right_to_center center_to_left"/>
+    <route id="down_to_left" edges="down_to_center center_to_left"/>
+    <route id="down_to_right" edges="down_to_center center_to_right"/>
+    
+    <route id="left_uturn" edges="left_to_center center_to_left"/>
+    <route id="right_uturn" edges="right_to_center center_to_right"/>
+    <route id="down_uturn" edges="down_to_center center_to_down"/>"""
+},
+
+
     "Y_intersection": {
         "sumocfg_file": "y_intersection/y_intersection.sumocfg",
         "traffic_light_ids": ["YTL1", "YTL2"],

@@ -52,23 +52,15 @@ def import_train_configuration(config_file):
         config['ppo_update_epochs'] = content['ppo'].getint('update_epochs')
         config['ppo_training_epochs'] = content['ppo'].getint('training_epochs')
 
-    # Paths
+
     config['models_path_name'] = content['dir']['models_path_name']
 
-    # COMMENT OUT (or remove) to avoid forcing a single .sumocfg:
-    # config['sumocfg_file_name'] = content['dir']['sumocfg_file_name']
 
     return config
 
 
 def import_test_configuration(config_file):
-    """
-    Read the config file regarding the testing and import its content.
 
-    If you're doing single-environment testing, you might still want
-    to use sumocfg_file_name from the .ini. Otherwise, you can also
-    comment it out here if you're testing multiple intersections.
-    """
     content = configparser.ConfigParser()
     content.read(config_file)
     config = {}

@@ -35,7 +35,6 @@
     <vehicle id="E_W_14" type="standard_car" route="E_W" depart="165" departLane="random" departSpeed="10" />
     <vehicle id="N_E_15" type="standard_car" route="N_E" depart="171" departLane="random" departSpeed="10" />
     <vehicle id="W_E_16" type="standard_car" route="W_E" depart="174" departLane="random" departSpeed="10" />
-    <vehicle id="emergency_0" type="emergency" route="E_N" depart="174" departLane="random" departSpeed="10" />
     <vehicle id="W_E_17" type="standard_car" route="W_E" depart="179" departLane="random" departSpeed="10" />
     <vehicle id="N_S_18" type="standard_car" route="N_S" depart="182" departLane="random" departSpeed="10" />
     <vehicle id="N_S_19" type="standard_car" route="N_S" depart="184" departLane="random" departSpeed="10" />
@@ -1990,7 +1989,6 @@
     <vehicle id="E_W_1968" type="standard_car" route="E_W" depart="3623" departLane="random" departSpeed="10" />
     <vehicle id="W_E_1969" type="standard_car" route="W_E" depart="3629" departLane="random" departSpeed="10" />
     <vehicle id="W_E_1970" type="standard_car" route="W_E" depart="3664" departLane="random" departSpeed="10" />
-    <vehicle id="emergency_1" type="emergency" route="W_E" depart="3665" departLane="random" departSpeed="10" />
     <vehicle id="E_N_1971" type="standard_car" route="E_N" depart="3671" departLane="random" departSpeed="10" />
     <vehicle id="S_W_1972" type="standard_car" route="S_W" depart="3702" departLane="random" departSpeed="10" />
     <vehicle id="N_W_1973" type="standard_car" route="N_W" depart="3710" departLane="random" departSpeed="10" />
@@ -2013,7 +2011,6 @@
     <vehicle id="N_W_1990" type="standard_car" route="N_W" depart="3993" departLane="random" departSpeed="10" />
     <vehicle id="E_W_1991" type="standard_car" route="E_W" depart="4037" departLane="random" departSpeed="10" />
     <vehicle id="E_W_1992" type="standard_car" route="E_W" depart="4066" departLane="random" departSpeed="10" />
-    <vehicle id="emergency_2" type="emergency" route="N_S" depart="4127" departLane="random" departSpeed="10" />
     <vehicle id="W_E_1993" type="standard_car" route="W_E" depart="4147" departLane="random" departSpeed="10" />
     <vehicle id="W_S_1994" type="standard_car" route="W_S" depart="4309" departLane="random" departSpeed="10" />
     <vehicle id="W_E_1995" type="standard_car" route="W_E" depart="4381" departLane="random" departSpeed="10" />

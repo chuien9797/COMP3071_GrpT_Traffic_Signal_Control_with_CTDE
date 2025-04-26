@@ -1,4 +1,3 @@
-# communication.py
 """
 Simple message‑passing utilities for multi‑agent coordination.
 
@@ -9,17 +8,7 @@ mailbox. Each agent has its own FIFO inbox keyed by its integer ID.
 
 from typing import Any, Dict, List
 
-# --------------------------------------------------------------------------- #
-# Internal state
-# --------------------------------------------------------------------------- #
-
-#: Global dictionary mapping agent_id -> list[message]
 agent_messages: Dict[int, List[Dict[str, Any]]] = {}
-
-
-# --------------------------------------------------------------------------- #
-# Public API
-# --------------------------------------------------------------------------- #
 
 def init_agents(agent_ids: List[int]) -> None:
     """

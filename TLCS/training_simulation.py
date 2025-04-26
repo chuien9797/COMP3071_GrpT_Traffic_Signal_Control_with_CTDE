@@ -13,51 +13,35 @@ from tensorflow.keras import layers
 import tensorflow as tf
 
 
-# --------------------------------------------------------------------------- #
-# Global constants
-# --------------------------------------------------------------------------- #
 RECOVERY_DELAY      = 15
 FAULT_REWARD_SCALE  = 0.5
 EPISODE_FAULT_START = int(150 * 0.3)
 
 
-# --------------------------------------------------------------------------- #
-# Centralised Critic
-# --------------------------------------------------------------------------- #
 class CentralizedCritic(tf.keras.Model):
-    """Simple two‑hidden‑layer value network for CTDE."""
+
     def __init__(self, global_state_dim: int, hidden_units: int = 64):
         super().__init__()
         self.d1  = layers.Dense(hidden_units, activation='relu')
         self.d2  = layers.Dense(hidden_units, activation='relu')
         self.out = layers.Dense(1, activation='linear')
-        # Explicitly build so Keras knows all shapes, avoiding warnings.
         self.build((None, global_state_dim))
 
-    # A no‑op build keeps Keras happy when we call self.build() above.
+
     def build(self, input_shape):
         super().build(input_shape)
 
     def call(self, s):
         x = self.d1(s)
         x = self.d2(x)
-        return self.out(x)                              # (batch, 1)
+        return self.out(x)
 
 
-# --------------------------------------------------------------------------- #
-# Simulation
-# --------------------------------------------------------------------------- #
 class Simulation:
-    """
-    One SUMO environment wrapper capable of training **multiple agents that all
-    share the same policy network**.  A centralised critic is used for CTDE.
-    """
-    # ------------------------------------------------------------------ #
-    # Construction
-    # ------------------------------------------------------------------ #
+
     def __init__(self,
-                 Models,                  # list[TrainModelAggregator] – all refs to ONE model
-                 TargetModels,            # target‑network refs (can be the same list)
+                 Models,
+                 TargetModels,
                  Memory,
                  TrafficGen,
                  sumo_cmd,
@@ -71,7 +55,7 @@ class Simulation:
                  signal_fault_prob=0.1,
                  centralized_critic=None  # optional – if None build locally
                  ):
-        # ------------ generic parameters -------------------------------- #
+
         self._Models          = Models
         self._TargetModels    = TargetModels
         self._Memory          = Memory
@@ -82,10 +66,10 @@ class Simulation:
         self._max_steps       = max_steps
         self._green_duration  = green_duration
         self._yellow_duration = yellow_duration
-        self._num_states      = num_states          # not used with set‑based model
+        self._num_states      = num_states
         self._training_epochs = training_epochs
 
-        # ------------ intersection‑specific setup ----------------------- #
+
         self.intersection_type = intersection_type
         if self.intersection_type not in int_config.INTERSECTION_CONFIGS:
             raise ValueError(f"Unknown intersection type '{intersection_type}'")
@@ -94,7 +78,7 @@ class Simulation:
         tl_ids            = self.int_conf.get("traffic_light_ids", [])
         self.num_agents   = len(tl_ids) if isinstance(tl_ids, list) else 1
 
-        # ------------ stats tracking  ----------------------------------- #
+
         self._reward_store           = []
         self._cumulative_wait_store  = []
         self._avg_queue_length_store = []
@@ -108,12 +92,12 @@ class Simulation:
         self._sum_queue_length       = 0
         self._sum_waiting_time       = 0
 
-        # ------------ misc ---------------------------------------------- #
+
         self.signal_fault_prob = signal_fault_prob
         self.manual_override   = False
         self.recovery_queue    = {}
 
-        # ------------ centralised critic -------------------------------- #
+
         lane_feature_dim = 9
         total_lanes      = sum(len(lanes)
                                for lanes in self.int_conf["incoming_lanes"].values())
@@ -127,8 +111,7 @@ class Simulation:
         else:
             self.centralized_critic = centralized_critic
 
-        # Instantiate the centralized critic.
-        # Compute global state dimension as (total number of lanes across all groups * lane_feature_dim).
+
         lane_feature_dim = 9
         total_lanes = sum(len(lanes) for lanes in self.int_conf["incoming_lanes"].values())
         global_state_dim = total_lanes * lane_feature_dim
@@ -136,10 +119,7 @@ class Simulation:
         self.centralized_critic.compile(loss='mse', optimizer=Adam(learning_rate=0.001))
 
     def _get_state(self):
-        """
-        Returns a list of state matrices—one per agent.  Each state has
-        shape [num_lanes, 9].
-        """
+
         groups = sorted(self.int_conf["incoming_lanes"].keys())
         states = []
         tl_ids = self.int_conf.get("traffic_light_ids", [])
@@ -205,15 +185,7 @@ class Simulation:
         return total_halt
 
     def run(self, episode, epsilon):
-        """
-        Main simulation loop:
-          - Generates route files and steps through the simulation.
-          - Computes per-agent local rewards.
-          - Uses a flexible reward-sharing scheme: each agent’s final reward is a mix of
-            its own local reward and the average of other agents' rewards.
-          - Stores experiences in memory along with a computed global state.
-          - After simulation, calls replay() and train_ctde() to update networks.
-        """
+
         os.makedirs("logs25", exist_ok=True)
         log_file = open(f"logs25/episode_{episode}.log", "w")
 
@@ -243,14 +215,11 @@ class Simulation:
             emergency_present = check_emergency(self)
             states = self._get_state()
 
-            # --- Newly Inserted Emergency Handling Code ---
-            # For each agent, if an emergency vehicle is detected and this agent has not yet been handled,
-            # force the traffic light to the emergency green phase (phase 0) and mark it as handled.
+
             for i in range(self.num_agents):
                 if i not in self.handled_emergency_ids and np.any(states[i][:, 2] > 0):
                     handle_emergency_vehicle(self, agent_index=i)
                     self.handled_emergency_ids.add(i)
-            # -----------------------------------------------------
 
             current_waits = []
             for i in range(self.num_agents):
@@ -259,7 +228,7 @@ class Simulation:
                 current_wait = ALPHA_WAIT * wt + BETA_QUEUE * ql
                 current_waits.append(current_wait)
 
-            # Compute local rewards.
+
             local_rewards = [0.0] * self.num_agents
             for i in range(self.num_agents):
                 if self._step != 0 and old_states[i] is not None:
@@ -276,7 +245,6 @@ class Simulation:
 
                 local_rewards[i] = local_reward * REWARD_SCALE
 
-            # Flexible reward sharing across agents.
             lambda_coef = 0.5
             final_rewards = []
             for i in range(self.num_agents):
@@ -288,7 +256,6 @@ class Simulation:
                 final_reward = (1 - lambda_coef) * local_rewards[i] + lambda_coef * global_component
                 final_rewards.append(final_reward)
 
-            # Compute the next global state using the newly observed states.
             next_global_state = self._get_global_state(states)
 
             actions = []
@@ -314,11 +281,9 @@ class Simulation:
                         self._set_yellow_phase(i, old_actions[i], log_file)
                         self._simulate(self._yellow_duration, log_file)
 
-            # Set green phases.
             for i, action in enumerate(actions):
                 self._set_green_phase(i, action, log_file)
 
-            # Compute adaptive green duration using first agent’s state.
             adaptive_green = self._compute_adaptive_green_duration(states[0])
             self._green_durations_log.append(adaptive_green)
             log_file.write(f"[Step {self._step}] Adaptive green duration: {adaptive_green}\n")
@@ -343,7 +308,7 @@ class Simulation:
         start_train_time = timeit.default_timer()
         for _ in range(self._training_epochs):
             self._replay()
-            # Perform centralized training with CTDE.
+
             self.train_ctde()
         training_time = round(timeit.default_timer() - start_train_time, 1)
 
@@ -357,7 +322,6 @@ class Simulation:
 
         q_vals = model.predict_one(state)[0]
 
-        # Convert to integer type explicitly
         valid_action_indices = np.array(valid_action_indices, dtype=int)
 
         valid_q_vals = q_vals[valid_action_indices]
@@ -385,7 +349,7 @@ class Simulation:
                             log_file.write(
                                 f"[SetYellow] TL {tlid}: Set yellow phase {yellow_phase} out of {num_phases} phases.\n")
                     else:
-                        message = f"⚠️ Invalid yellow phase {yellow_phase} for TL {tlid} (only {num_phases} phases)"
+                        message = f"Invalid yellow phase {yellow_phase} for TL {tlid} (only {num_phases} phases)"
                         print(message)
                         if log_file:
                             log_file.write(f"[SetYellow] {message}\n")
@@ -415,7 +379,7 @@ class Simulation:
                         traci.trafficlight.setProgram(tlid, "0")
                         traci.trafficlight.setPhase(tlid, green_phase)
                     else:
-                        message = f"⚠️ Skipping invalid green phase {green_phase} for TL {tlid} (only {num_phases} phases)."
+                        message = f"Skipping invalid green phase {green_phase} for TL {tlid} (only {num_phases} phases)."
                         print(message)
                         if log_file:
                             log_file.write(message + "\n")
@@ -606,15 +570,9 @@ class Simulation:
         except Exception as e:
             print(f"Error writing summary log: {e}")
 
-    # ------------------------------------------------------------------ #
-    # Centralized Training with ONE shared‑policy update
-    # ------------------------------------------------------------------ #
+
     def train_ctde(self, lambda_coef: float = 0.5):
-        """
-        Centralized Training ➜ Decentralized Execution (CTDE) for a *shared*
-        policy network.
-        """
-        # ---------- 1) critic update --------------------------------------- #
+
         critic_batch = self._Memory.get_samples(self._Models[0].batch_size)
         if len(critic_batch) < self._Memory._size_min:
             print("[CTDE] Not enough samples for centralized critic.")
@@ -627,7 +585,6 @@ class Simulation:
         targets     = rewards + self._gamma * critic_next.numpy()
         self.centralized_critic.train_on_batch(g_states, targets)
 
-        # ---------- 2) policy alignment update ----------------------------- #
         merged = []
         batch_size = self._Models[0].batch_size
         for aid in range(self.num_agents):
